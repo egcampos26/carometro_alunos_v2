@@ -9,13 +9,13 @@ interface OccurrenceEditProps {
   students: Student[];
   occurrences: Occurrence[];
   onUpdate: (occ: Occurrence) => void;
-  user: AuthUser | null;
+  user: AuthUser;
 }
 
 const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, onUpdate, user }) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   const occurrence = occurrences.find(o => o.id === id);
   const student = occurrence ? students.find(s => s.id === occurrence.studentId) : null;
 
@@ -32,7 +32,7 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
       setCategory(occurrence.category);
 
       // Verificação de permissão
-      const canEdit = user?.role === 'Admin' || occurrence.registeredBy === user?.name;
+      const canEdit = user.role === 'Admin' || occurrence.registeredBy === user.name;
       if (!canEdit) {
         navigate(`/occurrence/${id}`, { replace: true });
       }
@@ -118,11 +118,10 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
                   key={cat}
                   type="button"
                   onClick={() => setCategory(cat as any)}
-                  className={`py-3 px-2 rounded-xl text-xs font-black uppercase tracking-tight border-2 transition-all shadow-sm ${
-                    category === cat 
-                    ? 'bg-[#3b5998] border-[#3b5998] text-white' 
+                  className={`py-3 px-2 rounded-xl text-xs font-black uppercase tracking-tight border-2 transition-all shadow-sm ${category === cat
+                    ? 'bg-[#3b5998] border-[#3b5998] text-white'
                     : 'bg-white border-gray-100 text-gray-400 hover:border-gray-200'
-                  }`}
+                    }`}
                 >
                   {cat}
                 </button>

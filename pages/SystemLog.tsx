@@ -18,11 +18,11 @@ const SystemLog: React.FC<SystemLogProps> = ({ logs }) => {
     const logDate = log.timestamp.split('T')[0];
     const matchesStart = startDate === '' || logDate >= startDate;
     const matchesEnd = endDate === '' || logDate <= endDate;
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch = searchTerm === '' ||
       log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
       log.details.toLowerCase().includes(searchTerm.toLowerCase()) ||
       log.user.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     return matchesStart && matchesEnd && matchesSearch;
   });
 
@@ -46,7 +46,7 @@ const SystemLog: React.FC<SystemLogProps> = ({ logs }) => {
   return (
     <Layout title={headerTitle}>
       <div className="p-4 sm:p-8 max-w-6xl mx-auto w-full pb-24">
-        
+
         {/* Filtros Container */}
         <div className="bg-white p-6 rounded-[32px] border-2 border-gray-50 shadow-sm mb-8 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -89,7 +89,7 @@ const SystemLog: React.FC<SystemLogProps> = ({ logs }) => {
 
           {(startDate || endDate || searchTerm) && (
             <div className="flex justify-end">
-              <button 
+              <button
                 onClick={() => { setStartDate(''); setEndDate(''); setSearchTerm(''); }}
                 className="flex items-center gap-2 text-red-500 font-black uppercase text-[10px] tracking-widest hover:underline"
               >
@@ -103,10 +103,13 @@ const SystemLog: React.FC<SystemLogProps> = ({ logs }) => {
         <div className="space-y-4">
           {filteredLogs.length > 0 ? (
             filteredLogs.map(log => (
-              <div 
-                key={log.id} 
+              <div
+                key={log.id}
                 onClick={() => setSelectedLog(log)}
-                className="bg-white p-5 rounded-[24px] border-2 border-gray-50 shadow-sm flex flex-col sm:flex-row sm:items-center gap-4 group hover:border-[#3b5998]/20 hover:shadow-md transition-all cursor-pointer relative overflow-hidden"
+                onKeyDown={(e) => e.key === 'Enter' && setSelectedLog(log)}
+                role="button"
+                tabIndex={0}
+                className="bg-white p-5 rounded-[24px] border-2 border-gray-50 shadow-sm flex flex-col sm:flex-row sm:items-center gap-4 group hover:border-[#3b5998]/20 hover:shadow-md transition-all cursor-pointer relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#3b5998] focus:ring-offset-2"
               >
                 {/* Linha lateral de destaque no hover */}
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#3b5998] opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -163,7 +166,7 @@ const SystemLog: React.FC<SystemLogProps> = ({ logs }) => {
                   <p className="text-[10px] font-bold text-blue-200 uppercase tracking-widest">Ref: {selectedLog.id}</p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => setSelectedLog(null)}
                 className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 active:scale-90 transition-all"
               >
@@ -219,7 +222,7 @@ const SystemLog: React.FC<SystemLogProps> = ({ logs }) => {
                 </div>
               </div>
 
-              <button 
+              <button
                 onClick={() => setSelectedLog(null)}
                 className="w-full py-5 bg-[#3b5998] text-white rounded-3xl font-black uppercase text-xs tracking-widest shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all mt-4 border-b-4 border-blue-900"
               >

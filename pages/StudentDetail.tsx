@@ -17,7 +17,7 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [showMoreInfo, setShowMoreInfo] = useState(false);
-  
+
   const student = students.find(s => s.id === id);
   const studentOccurrences = occurrences
     .filter(o => o.studentId === id)
@@ -26,7 +26,7 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
   if (!student) return <div>Aluno não encontrado</div>;
 
   const isAdmin = user.role === 'Admin';
-  const displayPhoto = student.imageRightsSigned === 'Não' ? NO_IMAGE_RIGHTS_URL : student.photoUrl;
+  const displayPhoto = student.imageRightsSigned === 'Sim' ? student.photoUrl : NO_IMAGE_RIGHTS_URL;
 
   const handleEdit = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -46,26 +46,26 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
   // Componente extraído para evitar repetição (RA Box)
   const AcademicRecordBox = () => (
     <div className="w-full max-w-[320px] lg:max-w-none bg-blue-50/50 p-6 rounded-3xl border-2 border-blue-50 flex flex-col items-center justify-center text-center shadow-sm">
-       <div className="flex flex-row items-center justify-center gap-2 mb-4">
-          <CreditCard className="text-[#3b5998]" size={16} />
-          <span className="text-[#3b5998] text-[9px] font-black uppercase tracking-widest">REGISTRO ACADÊMICO</span>
-       </div>
-       <div className="space-y-3 w-full">
-         <p className="font-black text-xl text-[#3b5998] tracking-tight leading-none uppercase">RA: {student.registrationNumber}</p>
-         <p className="font-black text-lg text-[#3b5998]/60 tracking-tight uppercase leading-none">RGA: {student.rga}</p>
-       </div>
+      <div className="flex flex-row items-center justify-center gap-2 mb-4">
+        <CreditCard className="text-[#3b5998]" size={16} />
+        <span className="text-[#3b5998] text-[9px] font-black uppercase tracking-widest">REGISTRO ACADÊMICO</span>
+      </div>
+      <div className="space-y-3 w-full">
+        <p className="font-black text-xl text-[#3b5998] tracking-tight leading-none uppercase">RA: {student.registrationNumber}</p>
+        <p className="font-black text-lg text-[#3b5998]/60 tracking-tight uppercase leading-none">RGA: {student.rga}</p>
+      </div>
     </div>
   );
 
   return (
-    <Layout 
+    <Layout
       title={headerTitle}
       user={user}
       onToggleRole={onToggleRole}
       leftAction={null}
       rightAction={
         isAdmin ? (
-          <button 
+          <button
             onClick={handleEdit}
             className="w-10 h-10 flex items-center justify-center bg-white text-[#3b5998] rounded-full hover:bg-gray-100 transition-colors shadow-sm active:scale-90"
             title="Editar Aluno"
@@ -80,8 +80,8 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
           <div className="flex flex-col items-center lg:w-1/3 space-y-8">
             <div className="w-full max-w-[320px] lg:max-w-none">
               <div className="aspect-[3/4] bg-gray-50 rounded-3xl overflow-hidden shadow-2xl border-8 border-white relative">
-                <img src={displayPhoto} alt={student.name} className={`w-full h-full object-cover ${student.imageRightsSigned === 'Não' ? 'grayscale opacity-70' : ''}`} />
-                {student.imageRightsSigned === 'Não' && (
+                <img src={displayPhoto} alt={student.name} className={`w-full h-full object-cover ${student.imageRightsSigned !== 'Sim' ? 'grayscale opacity-70' : ''}`} />
+                {student.imageRightsSigned !== 'Sim' && (
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div className="bg-black/40 backdrop-blur-sm px-4 py-2 rounded-full flex items-center gap-2">
                       <ShieldAlert className="text-white" size={16} />
@@ -96,19 +96,19 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
           <div className="flex-1 space-y-6 sm:space-y-8">
             {/* Cabeçalho com Nome e N° */}
             <div className="border-b-4 border-gray-50 pb-5 sm:pb-8 flex flex-col items-center text-center">
-               <div className="w-full">
-                 <span className="text-[#3b5998] text-xs font-black uppercase block mb-3 tracking-widest">NOME COMPLETO</span>
-                 <h3 className="text-gray-900 font-black text-3xl sm:text-4xl leading-tight uppercase tracking-tight mb-2">{student.name}</h3>
-                 <div className="flex items-center justify-center gap-1 text-gray-400 font-black uppercase mb-4">
-                    <span className="text-sm tracking-widest">N° {student.roomNumber || '-'}</span>
-                 </div>
-               </div>
-               {!isAdmin && (
-                 <div className="flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-gray-400 mt-2">
-                    <ShieldAlert size={14} />
-                    <span className="text-[9px] font-bold uppercase tracking-widest">Apenas Admin</span>
-                 </div>
-               )}
+              <div className="w-full">
+                <span className="text-[#3b5998] text-xs font-black uppercase block mb-3 tracking-widest">NOME COMPLETO</span>
+                <h3 className="text-gray-900 font-black text-3xl sm:text-4xl leading-tight uppercase tracking-tight mb-2">{student.name}</h3>
+                <div className="flex items-center justify-center gap-1 text-gray-400 font-black uppercase mb-4">
+                  <span className="text-sm tracking-widest">N° {student.roomNumber || '-'}</span>
+                </div>
+              </div>
+              {!isAdmin && (
+                <div className="flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-gray-400 mt-2">
+                  <ShieldAlert size={14} />
+                  <span className="text-[9px] font-bold uppercase tracking-widest">Apenas Admin</span>
+                </div>
+              )}
             </div>
 
             {/* Informações Básicas (Sempre Visíveis) - AGORA ACIMA DO SHOW MORE INFO */}
@@ -124,7 +124,7 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
               <div className="py-3 px-1 sm:p-4 bg-white rounded-2xl border-2 border-gray-50 shadow-sm flex flex-col items-center justify-center text-center">
                 <span className="text-[#3b5998] text-[9px] sm:text-[9px] font-black uppercase block mb-1 tracking-widest leading-none">NASCIMENTO</span>
                 <p className="font-black text-gray-800 text-xs sm:text-lg leading-none">
-                  {student.birthDate ? new Date(student.birthDate).toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit', year: 'numeric'}) : '-'}
+                  {student.birthDate ? new Date(student.birthDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-'}
                 </p>
               </div>
             </div>
@@ -142,112 +142,112 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
                     <p className="text-lg sm:text-xl font-black text-white whitespace-nowrap leading-tight">{student.studentCPF || '-'}</p>
                   </div>
                 </div>
-                
+
                 <div className="flex justify-center">
-                   <AcademicRecordBox />
+                  <AcademicRecordBox />
                 </div>
               </div>
             )}
 
             <div className="space-y-4">
               <div className="bg-white rounded-3xl border-2 border-gray-50 p-4 sm:p-8">
-                 {/* Seção Responsáveis */}
-                 <div className="flex items-start gap-2 sm:gap-5">
-                    <div className="w-8 h-8 sm:w-12 sm:h-12 bg-gray-50 rounded-xl sm:rounded-2xl flex items-center justify-center text-[#3b5998] shrink-0">
-                      <User size={18} className="sm:hidden" />
-                      <User size={24} className="hidden sm:block" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[9px] sm:text-[10px] text-gray-400 font-black uppercase tracking-widest mb-3 sm:mb-4 pt-1.5 sm:pt-2">Responsáveis</p>
-                      <div className="space-y-6">
-                        {student.filiacao1 && (
-                          <div className="flex flex-col border-b border-gray-50 pb-4">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
-                              <div>
-                                <p className="text-base sm:text-lg font-bold text-gray-800 truncate">{student.filiacao1}</p>
-                                {student.obsFiliacao1 && (
-                                  <p className="text-[9px] sm:text-[10px] font-black text-blue-400 uppercase tracking-widest">{student.obsFiliacao1}</p>
+                {/* Seção Responsáveis */}
+                <div className="flex items-start gap-2 sm:gap-5">
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 bg-gray-50 rounded-xl sm:rounded-2xl flex items-center justify-center text-[#3b5998] shrink-0">
+                    <User size={18} className="sm:hidden" />
+                    <User size={24} className="hidden sm:block" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[9px] sm:text-[10px] text-gray-400 font-black uppercase tracking-widest mb-3 sm:mb-4 pt-1.5 sm:pt-2">Responsáveis</p>
+                    <div className="space-y-6">
+                      {student.filiacao1 && (
+                        <div className="flex flex-col border-b border-gray-50 pb-4">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
+                            <div>
+                              <p className="text-base sm:text-lg font-bold text-gray-800 truncate">{student.filiacao1}</p>
+                              {student.obsFiliacao1 && (
+                                <p className="text-[9px] sm:text-[10px] font-black text-blue-400 uppercase tracking-widest">{student.obsFiliacao1}</p>
+                              )}
+                            </div>
+                            <p className="text-sm sm:text-base font-black text-[#3b5998] whitespace-nowrap">{student.telefone1 || '-'}</p>
+                          </div>
+
+                          {showMoreInfo && (
+                            <div className="grid grid-cols-[1fr_1.3fr] gap-2 mt-2 pt-2 border-t border-dashed border-gray-100 animate-in fade-in slide-in-from-top-1 duration-300">
+                              <div className="bg-blue-50/50 py-1.5 px-2 sm:px-3 rounded-xl border border-blue-100 flex flex-col items-center">
+                                <span className="text-[8px] sm:text-[9px] font-black text-[#3b5998] uppercase block mb-0.5 tracking-tighter">RG RESP.</span>
+                                <p className="text-sm sm:text-lg font-black text-gray-800 leading-tight whitespace-nowrap">{student.resp1RG || '-'}</p>
+                              </div>
+                              <div className="bg-blue-50/50 py-1.5 px-2 sm:px-3 rounded-xl border border-blue-100 flex flex-col items-center">
+                                <span className="text-[8px] sm:text-[9px] font-black text-[#3b5998] uppercase block mb-0.5 tracking-tighter">CPF RESP.</span>
+                                <p className="text-sm sm:text-lg font-black text-gray-800 leading-tight whitespace-nowrap">{student.resp1CPF || '-'}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {student.filiacao2 && (
+                        <div className="flex flex-col border-b border-gray-50 pb-4">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
+                            <div>
+                              <p className="text-base sm:text-lg font-bold text-gray-800 truncate">{student.filiacao2}</p>
+                              {student.obsFiliacao2 && (
+                                <p className="text-[9px] sm:text-[10px] font-black text-blue-400 uppercase tracking-widest">{student.obsFiliacao2}</p>
+                              )}
+                            </div>
+                            <p className="text-sm sm:text-base font-black text-[#3b5998] whitespace-nowrap">{student.telefone2 || '-'}</p>
+                          </div>
+
+                          {showMoreInfo && (
+                            <div className="grid grid-cols-[1fr_1.3fr] gap-2 mt-2 pt-2 border-t border-dashed border-gray-100 animate-in fade-in slide-in-from-top-1 duration-300">
+                              <div className="bg-gray-100/50 py-1.5 px-2 sm:px-3 rounded-xl border border-gray-200 flex flex-col items-center">
+                                <span className="text-[8px] sm:text-[9px] font-black text-gray-400 uppercase block mb-0.5 tracking-tighter">RG RESP.</span>
+                                <p className="text-sm sm:text-lg font-black text-gray-800 leading-tight whitespace-nowrap">{student.resp2RG || '-'}</p>
+                              </div>
+                              <div className="bg-gray-100/50 py-1.5 px-2 sm:px-3 rounded-xl border border-gray-200 flex flex-col items-center">
+                                <span className="text-[8px] sm:text-[9px] font-black text-gray-400 uppercase block mb-0.5 tracking-tighter">CPF RESP.</span>
+                                <p className="text-sm sm:text-lg font-black text-gray-800 leading-tight whitespace-nowrap">{student.resp2CPF || '-'}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {hasAdditionalPhones && (
+                        <div className="space-y-4 pt-4 border-t border-gray-50">
+                          {student.telefone3 && (
+                            <div className="flex flex-col">
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  <Phone size={12} className="text-[#3b5998]" />
+                                  <p className="text-sm sm:text-base font-black text-[#3b5998]">{student.telefone3}</p>
+                                </div>
+                                {student.obsTelefone3 && (
+                                  <span className="text-[9px] sm:text-[10px] font-black text-blue-400 uppercase tracking-widest truncate max-w-[50%]">{student.obsTelefone3}</span>
                                 )}
                               </div>
-                              <p className="text-sm sm:text-base font-black text-[#3b5998] whitespace-nowrap">{student.telefone1 || '-'}</p>
                             </div>
-                            
-                            {showMoreInfo && (
-                              <div className="grid grid-cols-[1fr_1.3fr] gap-2 mt-2 pt-2 border-t border-dashed border-gray-100 animate-in fade-in slide-in-from-top-1 duration-300">
-                                <div className="bg-blue-50/50 py-1.5 px-2 sm:px-3 rounded-xl border border-blue-100 flex flex-col items-center">
-                                  <span className="text-[8px] sm:text-[9px] font-black text-[#3b5998] uppercase block mb-0.5 tracking-tighter">RG RESP.</span>
-                                  <p className="text-sm sm:text-lg font-black text-gray-800 leading-tight whitespace-nowrap">{student.resp1RG || '-'}</p>
+                          )}
+
+                          {student.telefone4 && (
+                            <div className="flex flex-col">
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  <Phone size={12} className="text-[#3b5998]" />
+                                  <p className="text-sm sm:text-base font-black text-[#3b5998]">{student.telefone4}</p>
                                 </div>
-                                <div className="bg-blue-50/50 py-1.5 px-2 sm:px-3 rounded-xl border border-blue-100 flex flex-col items-center">
-                                  <span className="text-[8px] sm:text-[9px] font-black text-[#3b5998] uppercase block mb-0.5 tracking-tighter">CPF RESP.</span>
-                                  <p className="text-sm sm:text-lg font-black text-gray-800 leading-tight whitespace-nowrap">{student.resp1CPF || '-'}</p>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                        
-                        {student.filiacao2 && (
-                          <div className="flex flex-col border-b border-gray-50 pb-4">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
-                              <div>
-                                <p className="text-base sm:text-lg font-bold text-gray-800 truncate">{student.filiacao2}</p>
-                                {student.obsFiliacao2 && (
-                                  <p className="text-[9px] sm:text-[10px] font-black text-blue-400 uppercase tracking-widest">{student.obsFiliacao2}</p>
+                                {student.obsTelefone4 && (
+                                  <span className="text-[9px] sm:text-[10px] font-black text-blue-400 uppercase tracking-widest truncate max-w-[50%]">{student.obsTelefone4}</span>
                                 )}
                               </div>
-                              <p className="text-sm sm:text-base font-black text-[#3b5998] whitespace-nowrap">{student.telefone2 || '-'}</p>
                             </div>
-
-                            {showMoreInfo && (
-                              <div className="grid grid-cols-[1fr_1.3fr] gap-2 mt-2 pt-2 border-t border-dashed border-gray-100 animate-in fade-in slide-in-from-top-1 duration-300">
-                                <div className="bg-gray-100/50 py-1.5 px-2 sm:px-3 rounded-xl border border-gray-200 flex flex-col items-center">
-                                  <span className="text-[8px] sm:text-[9px] font-black text-gray-400 uppercase block mb-0.5 tracking-tighter">RG RESP.</span>
-                                  <p className="text-sm sm:text-lg font-black text-gray-800 leading-tight whitespace-nowrap">{student.resp2RG || '-'}</p>
-                                </div>
-                                <div className="bg-gray-100/50 py-1.5 px-2 sm:px-3 rounded-xl border border-gray-200 flex flex-col items-center">
-                                  <span className="text-[8px] sm:text-[9px] font-black text-gray-400 uppercase block mb-0.5 tracking-tighter">CPF RESP.</span>
-                                  <p className="text-sm sm:text-lg font-black text-gray-800 leading-tight whitespace-nowrap">{student.resp2CPF || '-'}</p>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {hasAdditionalPhones && (
-                          <div className="space-y-4 pt-4 border-t border-gray-50">
-                            {student.telefone3 && (
-                              <div className="flex flex-col">
-                                <div className="flex items-center justify-between gap-2">
-                                  <div className="flex items-center gap-2">
-                                    <Phone size={12} className="text-[#3b5998]" />
-                                    <p className="text-sm sm:text-base font-black text-[#3b5998]">{student.telefone3}</p>
-                                  </div>
-                                  {student.obsTelefone3 && (
-                                    <span className="text-[9px] sm:text-[10px] font-black text-blue-400 uppercase tracking-widest truncate max-w-[50%]">{student.obsTelefone3}</span>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-
-                            {student.telefone4 && (
-                              <div className="flex flex-col">
-                                <div className="flex items-center justify-between gap-2">
-                                  <div className="flex items-center gap-2">
-                                    <Phone size={12} className="text-[#3b5998]" />
-                                    <p className="text-sm sm:text-base font-black text-[#3b5998]">{student.telefone4}</p>
-                                  </div>
-                                  {student.obsTelefone4 && (
-                                    <span className="text-[9px] sm:text-[10px] font-black text-blue-400 uppercase tracking-widest truncate max-w-[50%]">{student.obsTelefone4}</span>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
+                          )}
+                        </div>
+                      )}
                     </div>
-                 </div>
+                  </div>
+                </div>
               </div>
 
               {/* Caixa de Saída */}
@@ -264,7 +264,7 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
               </div>
 
               {/* Botão Mais Informações - Simplificado sem ícone esquerdo e com ícone de Mais no direito */}
-              <button 
+              <button
                 onClick={() => setShowMoreInfo(!showMoreInfo)}
                 className="w-full flex items-center justify-between p-4 sm:p-5 bg-white rounded-3xl border-2 border-gray-50 hover:border-gray-100 transition-all group"
               >
@@ -282,19 +282,19 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
             <div className="pt-8">
               <div className="flex flex-col items-center gap-4 mb-8 text-center">
                 <h4 className="text-[#3b5998] font-black uppercase text-sm tracking-widest">Histórico de Ocorrências</h4>
-                <button 
+                <button
                   onClick={() => navigate(`/add-occurrence/${student.id}`)}
                   className="w-full sm:w-auto bg-[#3b5998] text-white text-[11px] font-black px-12 py-3 rounded-full uppercase shadow-lg hover:bg-blue-700 active:scale-95 transition-all"
                 >
                   + Novo Registro
                 </button>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {studentOccurrences.length > 0 ? (
                   studentOccurrences.map(occ => (
-                    <div 
-                      key={occ.id} 
+                    <div
+                      key={occ.id}
                       className="bg-white p-5 rounded-2xl border-2 border-gray-50 shadow-sm flex justify-between items-center group cursor-pointer transition-all"
                       onClick={() => navigate(`/occurrence/${occ.id}`)}
                     >

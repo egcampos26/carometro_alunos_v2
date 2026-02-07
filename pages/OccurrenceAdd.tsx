@@ -8,7 +8,7 @@ import { UserCheck, Calendar, Search, Users, X, CheckCircle2 } from 'lucide-reac
 interface OccurrenceAddProps {
   students: Student[];
   onAdd: (occ: Occurrence) => void;
-  user: AuthUser | null;
+  user: AuthUser;
 }
 
 const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAdd, user }) => {
@@ -27,16 +27,16 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAdd, user }) 
 
   if (!initialStudent) return <div>Aluno não encontrado</div>;
 
-  const filteredStudents = studentSearch.trim() === '' 
-    ? [] 
-    : students.filter(s => 
-        (s.name.toLowerCase().includes(studentSearch.toLowerCase()) || 
+  const filteredStudents = studentSearch.trim() === ''
+    ? []
+    : students.filter(s =>
+      (s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
         s.registrationNumber.toLowerCase().includes(studentSearch.toLowerCase())) &&
-        !selectedIds.includes(s.id) // Não mostrar quem já foi selecionado
-      ).slice(0, 5);
+      !selectedIds.includes(s.id) // Não mostrar quem já foi selecionado
+    ).slice(0, 5);
 
   const toggleAdditionalStudent = (id: string) => {
-    setSelectedIds(prev => 
+    setSelectedIds(prev =>
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     );
     setStudentSearch('');
@@ -60,7 +60,7 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAdd, user }) 
         title,
         description,
         category,
-        registeredBy: user?.name || 'Sistema'
+        registeredBy: user.name
       };
       onAdd(newOcc);
     });
@@ -94,7 +94,7 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAdd, user }) 
           <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1 flex items-center gap-2">
             <Users size={16} /> Acrescentar mais alunos a este registro?
           </label>
-          
+
           <div className="relative">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300">
               <Search size={18} />
@@ -106,7 +106,7 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAdd, user }) 
               value={studentSearch}
               onChange={(e) => setStudentSearch(e.target.value)}
             />
-            
+
             {filteredStudents.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-40">
                 {filteredStudents.map(s => (
@@ -138,7 +138,7 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAdd, user }) 
                 return (
                   <div key={id} className="flex items-center gap-2 bg-blue-50 text-[#3b5998] pl-2 pr-1 py-1 rounded-full border border-blue-100 animate-in fade-in zoom-in duration-200">
                     <span className="text-[10px] font-black uppercase truncate max-w-[120px]">{s.name.split(' ')[0]}</span>
-                    <button 
+                    <button
                       type="button"
                       onClick={() => toggleAdditionalStudent(id)}
                       className="w-5 h-5 bg-white rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors"
@@ -172,7 +172,7 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAdd, user }) 
               <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Registrado por</label>
               <div className="flex items-center gap-3 p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-gray-500 font-bold">
                 <UserCheck size={18} className="text-[#3b5998]" />
-                <span className="text-sm">{user?.name || 'Usuário'}</span>
+                <span className="text-sm">{user.name}</span>
               </div>
             </div>
           </div>
@@ -185,11 +185,10 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAdd, user }) 
                   key={cat}
                   type="button"
                   onClick={() => setCategory(cat as any)}
-                  className={`py-3 px-2 rounded-xl text-xs font-black uppercase tracking-tight border-2 transition-all shadow-sm ${
-                    category === cat 
-                    ? 'bg-[#3b5998] border-[#3b5998] text-white' 
+                  className={`py-3 px-2 rounded-xl text-xs font-black uppercase tracking-tight border-2 transition-all shadow-sm ${category === cat
+                    ? 'bg-[#3b5998] border-[#3b5998] text-white'
                     : 'bg-white border-gray-100 text-gray-400 hover:border-gray-200'
-                  }`}
+                    }`}
                 >
                   {cat}
                 </button>

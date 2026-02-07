@@ -8,7 +8,7 @@ import { UserCheck, Calendar, Search, X, Users, CheckCircle2 } from 'lucide-reac
 interface OccurrenceAddMultiProps {
   students: Student[];
   onAdd: (occ: Occurrence) => void;
-  user: AuthUser | null;
+  user: AuthUser;
 }
 
 const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd, user }) => {
@@ -23,15 +23,15 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
   const [date, setDate] = useState(today);
   const [category, setCategory] = useState<Occurrence['category']>('Comportamental');
 
-  const filteredStudents = studentSearch.trim() === '' 
-    ? [] 
-    : students.filter(s => 
-        s.name.toLowerCase().includes(studentSearch.toLowerCase()) || 
-        s.registrationNumber.toLowerCase().includes(studentSearch.toLowerCase())
-      ).slice(0, 5); // Limit suggestions to avoid clutter
+  const filteredStudents = studentSearch.trim() === ''
+    ? []
+    : students.filter(s =>
+      s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
+      s.registrationNumber.toLowerCase().includes(studentSearch.toLowerCase())
+    ).slice(0, 5); // Limit suggestions to avoid clutter
 
   const toggleStudent = (id: string) => {
-    setSelectedIds(prev => 
+    setSelectedIds(prev =>
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     );
     setStudentSearch('');
@@ -56,7 +56,7 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
         title,
         description,
         category,
-        registeredBy: user?.name || 'Sistema'
+        registeredBy: user.name
       };
       onAdd(newOcc);
     });
@@ -73,13 +73,13 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
   return (
     <Layout title={headerTitle} showBack={false}>
       <div className="p-6 max-w-4xl mx-auto pb-20">
-        
+
         {/* Seleção de Alunos */}
         <div className="mb-10 space-y-4">
           <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1 flex items-center gap-2">
             <Users size={16} /> Selecionar Alunos
           </label>
-          
+
           <div className="relative">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300">
               <Search size={18} />
@@ -91,7 +91,7 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
               value={studentSearch}
               onChange={(e) => setStudentSearch(e.target.value)}
             />
-            
+
             {filteredStudents.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-40">
                 {filteredStudents.map(s => (
@@ -121,7 +121,7 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
                 return (
                   <div key={id} className="flex items-center gap-2 bg-blue-50 text-[#3b5998] pl-2 pr-1 py-1 rounded-full border border-blue-100 animate-in fade-in zoom-in duration-200">
                     <span className="text-[10px] font-black uppercase truncate max-w-[120px]">{s.name.split(' ')[0]}</span>
-                    <button 
+                    <button
                       onClick={() => toggleStudent(id)}
                       className="w-5 h-5 bg-white rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors"
                     >
@@ -130,7 +130,7 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
                   </div>
                 );
               })}
-              <button 
+              <button
                 onClick={() => setSelectedIds([])}
                 className="text-[9px] text-gray-400 font-black uppercase hover:text-red-500 underline pl-2"
               >
@@ -141,7 +141,7 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Data da Ocorrência</label>
@@ -161,7 +161,7 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
               <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Registrado por</label>
               <div className="flex items-center gap-3 p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-gray-500 font-bold">
                 <UserCheck size={18} className="text-[#3b5998]" />
-                <span className="text-sm">{user?.name || 'Usuário'}</span>
+                <span className="text-sm">{user.name}</span>
               </div>
             </div>
           </div>
@@ -174,11 +174,10 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
                   key={cat}
                   type="button"
                   onClick={() => setCategory(cat as any)}
-                  className={`py-3 px-2 rounded-xl text-xs font-black uppercase tracking-tight border-2 transition-all shadow-sm ${
-                    category === cat 
-                    ? 'bg-[#3b5998] border-[#3b5998] text-white' 
+                  className={`py-3 px-2 rounded-xl text-xs font-black uppercase tracking-tight border-2 transition-all shadow-sm ${category === cat
+                    ? 'bg-[#3b5998] border-[#3b5998] text-white'
                     : 'bg-white border-gray-100 text-gray-400 hover:border-gray-200'
-                  }`}
+                    }`}
                 >
                   {cat}
                 </button>
@@ -220,11 +219,10 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
             <button
               type="submit"
               disabled={selectedIds.length === 0}
-              className={`flex-[2] py-4 sm:py-5 rounded-3xl font-black uppercase shadow-xl active:scale-95 transition-all text-sm sm:text-base tracking-widest border-b-4 px-2 ${
-                selectedIds.length > 0 
-                ? 'bg-[#3b5998] border-blue-900 text-white' 
+              className={`flex-[2] py-4 sm:py-5 rounded-3xl font-black uppercase shadow-xl active:scale-95 transition-all text-sm sm:text-base tracking-widest border-b-4 px-2 ${selectedIds.length > 0
+                ? 'bg-[#3b5998] border-blue-900 text-white'
                 : 'bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed'
-              }`}
+                }`}
             >
               Confirmar Ocorrência ({selectedIds.length} {selectedIds.length === 1 ? 'ALUNO' : 'ALUNOS'})
             </button>
