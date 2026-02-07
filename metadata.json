@@ -1,0 +1,7 @@
+{
+  "name": "Carômetro dos Alunos",
+  "description": "Um aplicativo móvel para gestão escolar, permitindo a visualização de carômetros, registro de ocorrências e edição de dados de alunos com captura de fotos.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
