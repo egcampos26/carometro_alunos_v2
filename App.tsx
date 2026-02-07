@@ -13,7 +13,8 @@ import OccurrenceDetail from './pages/OccurrenceDetail';
 import OccurrenceEdit from './pages/OccurrenceEdit';
 import SystemLog from './pages/SystemLog';
 import { Student, Occurrence, AuthUser, LogEntry } from './types';
-import { MOCK_STUDENTS } from './constants';
+import { studentService } from './services/studentService';
+import { occurrenceService } from './services/occurrenceService';
 
 const TEST_USERS: AuthUser[] = [
   { id: 'admin-1', name: 'Diretora Silvia', role: 'Admin', email: 'silvia@escola.com' },
@@ -22,15 +23,10 @@ const TEST_USERS: AuthUser[] = [
 ];
 
 const App: React.FC = () => {
-  const [students, setStudents] = useState<Student[]>(() => {
-    const saved = localStorage.getItem('carometro_students');
-    return saved ? JSON.parse(saved) : MOCK_STUDENTS;
-  });
-
-  const [occurrences, setOccurrences] = useState<Occurrence[]>(() => {
-    const saved = localStorage.getItem('carometro_occurrences');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [students, setStudents] = useState<Student[]>([]);
+  const [occurrences, setOccurrences] = useState<Occurrence[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [logs, setLogs] = useState<LogEntry[]>(() => {
     const saved = localStorage.getItem('carometro_logs');
@@ -41,13 +37,27 @@ const App: React.FC = () => {
   const [currentUserIndex] = useState(0);
   const user = TEST_USERS[currentUserIndex];
 
+  // Fetch Data from Supabase
   useEffect(() => {
-    localStorage.setItem('carometro_students', JSON.stringify(students));
-  }, [students]);
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const [studentsData, occurrencesData] = await Promise.all([
+          studentService.fetchStudents(),
+          occurrenceService.fetchOccurrences()
+        ]);
+        setStudents(studentsData);
+        setOccurrences(occurrencesData);
+      } catch (err) {
+        console.error('Falha ao carregar dados:', err);
+        setError('Não foi possível conectar ao banco de dados.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  useEffect(() => {
-    localStorage.setItem('carometro_occurrences', JSON.stringify(occurrences));
-  }, [occurrences]);
+    loadData();
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('carometro_logs', JSON.stringify(logs));
@@ -64,108 +74,220 @@ const App: React.FC = () => {
     setLogs(prev => [newLog, ...prev]);
   };
 
-  const updateStudent = (updatedStudent: Student) => {
-    const oldStudent = students.find(s => s.id === updatedStudent.id);
+  const updateStudent = async (updatedStudent: Student) => {
+    try {
+      // 1. Atualizar no Supabase
+      await studentService.updateStudent(updatedStudent);
 
-    // Gerar resumo de alterações
-    let changeSummary = '';
-    if (oldStudent) {
-      const changes = [];
-      // Dados Pessoais
-      if (oldStudent.name !== updatedStudent.name) changes.push(`Nome: "${oldStudent.name}" -> "${updatedStudent.name}"`);
-      if (oldStudent.imageRightsSigned !== updatedStudent.imageRightsSigned) changes.push(`Direito de Imagem: "${oldStudent.imageRightsSigned || 'Não'}" -> "${updatedStudent.imageRightsSigned}"`);
-      if (oldStudent.photoUrl !== updatedStudent.photoUrl) changes.push('Foto de perfil atualizada');
-      if (oldStudent.birthDate !== updatedStudent.birthDate) changes.push(`Data Nasc.: "${oldStudent.birthDate}" -> "${updatedStudent.birthDate}"`);
+      // 2. Atualizar estado local
+      setStudents(prev => prev.map(s => s.id === updatedStudent.id ? updatedStudent : s));
 
-      // Documentos
-      if (oldStudent.registrationNumber !== updatedStudent.registrationNumber) changes.push(`RA: "${oldStudent.registrationNumber}" -> "${updatedStudent.registrationNumber}"`);
-      if (oldStudent.rga !== updatedStudent.rga) changes.push(`RGA: "${oldStudent.rga}" -> "${updatedStudent.rga}"`);
-      if (oldStudent.studentRG !== updatedStudent.studentRG) changes.push(`RG Aluno: "${oldStudent.studentRG}" -> "${updatedStudent.studentRG}"`);
-      if (oldStudent.studentCPF !== updatedStudent.studentCPF) changes.push(`CPF Aluno: "${oldStudent.studentCPF}" -> "${updatedStudent.studentCPF}"`);
-
-      // Escolar
-      if (oldStudent.grade !== updatedStudent.grade) changes.push(`Turma: "${oldStudent.grade}" -> "${updatedStudent.grade}"`);
-      if (oldStudent.shift !== updatedStudent.shift) changes.push(`Período: "${oldStudent.shift}" -> "${updatedStudent.shift}"`);
-      if (oldStudent.roomNumber !== updatedStudent.roomNumber) changes.push(`N° Chamada: "${oldStudent.roomNumber}" -> "${updatedStudent.roomNumber}"`);
-      if (oldStudent.studentStatus !== updatedStudent.studentStatus) changes.push(`Status: "${oldStudent.studentStatus}" -> "${updatedStudent.studentStatus}"`);
-      if (oldStudent.departureMethod !== updatedStudent.departureMethod) changes.push(`Saída: "${oldStudent.departureMethod}" -> "${updatedStudent.departureMethod}"`);
-
-      // Responsável 1
-      if (oldStudent.filiacao1 !== updatedStudent.filiacao1) changes.push(`Resp. 1: "${oldStudent.filiacao1}" -> "${updatedStudent.filiacao1}"`);
-      if (oldStudent.telefone1 !== updatedStudent.telefone1) changes.push(`Tel. 1: "${oldStudent.telefone1}" -> "${updatedStudent.telefone1}"`);
-      if (oldStudent.obsFiliacao1 !== updatedStudent.obsFiliacao1) changes.push(`Obs Resp. 1 alterada`);
-
-      // Responsável 2
-      if (oldStudent.filiacao2 !== updatedStudent.filiacao2) changes.push(`Resp. 2: "${oldStudent.filiacao2}" -> "${updatedStudent.filiacao2}"`);
-      if (oldStudent.telefone2 !== updatedStudent.telefone2) changes.push(`Tel. 2: "${oldStudent.telefone2}" -> "${updatedStudent.telefone2}"`);
-
-      // Outros Contatos
-      if (oldStudent.telefone3 !== updatedStudent.telefone3) changes.push(`Tel. 3: "${oldStudent.telefone3}" -> "${updatedStudent.telefone3}"`);
-      if (oldStudent.telefone4 !== updatedStudent.telefone4) changes.push(`Tel. 4: "${oldStudent.telefone4}" -> "${updatedStudent.telefone4}"`);
-
-      changeSummary = changes.length > 0
-        ? `\n\nAlterações realizadas:\n• ${changes.join('\n• ')}`
-        : '\n\nNenhuma alteração de conteúdo detectada.';
-    }
-
-    setStudents(prev => prev.map(s => s.id === updatedStudent.id ? updatedStudent : s));
-    addLog('Edição de Aluno', `O perfil de ${updatedStudent.name} (RA: ${updatedStudent.registrationNumber}) foi atualizado por ${user.name}.${changeSummary}`);
-  };
-
-  const addOccurrence = (occurrence: Occurrence) => {
-    const student = students.find(s => s.id === occurrence.studentId);
-    setOccurrences(prev => [...prev, occurrence]);
-    addLog('Registro de Ocorrência', `Nova ocorrência registrada para ${student?.name || 'Aluno'}.\n\nTítulo: ${occurrence.title}\nCategoria: ${occurrence.category}\nDescrição: ${occurrence.description}`);
-  };
-
-  const updateOccurrence = (updatedOcc: Occurrence) => {
-    const oldOcc = occurrences.find(o => o.id === updatedOcc.id);
-
-    let changeSummary = '';
-    if (oldOcc) {
-      const changes = [];
-      if (oldOcc.title !== updatedOcc.title) changes.push(`Título: "${oldOcc.title}" -> "${updatedOcc.title}"`);
-      if (oldOcc.category !== updatedOcc.category) changes.push(`Categoria: "${oldOcc.category}" -> "${updatedOcc.category}"`);
-      if (oldOcc.description !== updatedOcc.description) changes.push('O texto da descrição foi alterado');
-      if (oldOcc.date !== updatedOcc.date) changes.push(`Data: ${oldOcc.date} -> ${updatedOcc.date}`);
-
-      changeSummary = changes.length > 0
-        ? `\n\nAlterações na ocorrência:\n• ${changes.join('\n• ')}`
-        : '\n\nNenhuma alteração de conteúdo detectada.';
-    }
-
-    setOccurrences(prev => prev.map(o => o.id === updatedOcc.id ? updatedOcc : o));
-    addLog('Edição de Ocorrência', `A ocorrência "${updatedOcc.title}" foi editada.${changeSummary}`);
-  };
-
-  const deleteOccurrence = (id: string) => {
-    const occToDelete = occurrences.find(o => o.id === id);
-    const student = occToDelete ? students.find(s => s.id === occToDelete.studentId) : null;
-
-    setOccurrences(prev => prev.filter(occ => occ.id !== id));
-
-    if (occToDelete) {
-      addLog('Exclusão de Ocorrência', `A ocorrência "${occToDelete.title}" (ID: ${id}) do aluno ${student?.name || 'Desconhecido'} foi excluída permanentemente do sistema por ${user.name}.`);
+      // 3. Log
+      addLog('Atualização de Aluno', `Aluno ${updatedStudent.name} (ID: ${updatedStudent.id}) atualizado.`);
+    } catch (err) {
+      console.error('Erro ao atualizar aluno:', err);
+      alert('Erro ao salvar alterações no banco de dados.');
     }
   };
+
+  const handleCreateOccurrence = async (newOccurrence: Occurrence) => {
+    try {
+      await occurrenceService.createOccurrence(newOccurrence);
+      setOccurrences(prev => [newOccurrence, ...prev]);
+      addLog('Nova Ocorrência', `Ocorrência criada para aluno ID ${newOccurrence.studentId}`);
+    } catch (err) {
+      console.error('Erro ao criar ocorrência:', err);
+      alert('Erro ao salvar ocorrência.');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3b5998] mx-auto mb-4"></div>
+          <p className="text-gray-500 font-medium">Carregando dados do sistema...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-red-50">
+        <div className="text-center text-red-600 p-8">
+          <h2 className="text-2xl font-bold mb-2">Erro de Conexão</h2>
+          <p>{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+          >
+            Tentar Novamente
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <HashRouter>
       <div className="min-h-screen bg-gray-50 flex flex-col w-full overflow-x-hidden">
         <div className="flex-1 flex flex-col w-full max-w-7xl mx-auto bg-white shadow-sm md:my-4 md:rounded-xl overflow-hidden relative">
           <Routes>
-            <Route path="/" element={<ShiftSelection user={user} />} />
-            <Route path="/classes/:shift" element={<ClassSelection user={user} onToggleRole={() => { }} />} />
-            <Route path="/carometro/:shift/:grade" element={<CarometroGallery students={students} user={user} onToggleRole={() => { }} />} />
-            <Route path="/student/:id" element={<StudentDetail students={students} occurrences={occurrences} user={user} onToggleRole={() => { }} />} />
-            <Route path="/edit-student/:id" element={<StudentEdit students={students} onUpdate={updateStudent} user={user} onToggleRole={() => { }} />} />
-            <Route path="/occurrences" element={<OccurrencesList students={students} occurrences={occurrences} user={user} onToggleRole={() => { }} />} />
-            <Route path="/occurrence/:id" element={<OccurrenceDetail students={students} occurrences={occurrences} user={user} onDelete={deleteOccurrence} />} />
-            <Route path="/edit-occurrence/:id" element={<OccurrenceEdit students={students} occurrences={occurrences} onUpdate={updateOccurrence} user={user} />} />
-            <Route path="/add-occurrence/:studentId" element={<OccurrenceAdd students={students} onAdd={addOccurrence} user={user} />} />
-            <Route path="/add-multi-occurrence" element={<OccurrenceAddMulti students={students} onAdd={addOccurrence} user={user} />} />
-            <Route path="/logs" element={<SystemLog logs={logs} />} />
-            <Route path="*" element={<Navigate to="/" />} />
+            <Route path="/" element={<Navigate to="/turnos" replace />} />
+
+            {/* Fluxo Principal */}
+            <Route
+              path="/turnos"
+              element={
+                <ShiftSelection
+                  user={user}
+                  onToggleRole={() => { }}
+                />
+              }
+            />
+
+            <Route
+              path="/turnos/:shift"
+              element={
+                <ClassSelection
+                  students={students}
+                  user={user}
+                  onToggleRole={() => { }}
+                />
+              }
+            />
+
+            <Route
+              path="/carometro/:shift/:grade"
+              element={
+                <CarometroGallery
+                  students={students}
+                  occurrences={occurrences}
+                  user={user}
+                  onToggleRole={() => { }}
+                />
+              }
+            />
+
+            {/* Detalhes e Edição */}
+            <Route
+              path="/student/:id"
+              element={
+                <StudentDetail
+                  students={students}
+                  occurrences={occurrences}
+                  user={user}
+                  onToggleRole={() => { }}
+                />
+              }
+            />
+
+            <Route
+              path="/student/:id/edit"
+              element={
+                <StudentEdit
+                  students={students}
+                  onUpdate={updateStudent}
+                  user={user}
+                  onToggleRole={() => { }}
+                />
+              }
+            />
+
+            {/* Ocorrências */}
+            <Route
+              path="/occurrences"
+              element={
+                <OccurrencesList
+                  students={students}
+                  occurrences={occurrences}
+                  user={user}
+                  onToggleRole={() => { }}
+                />
+              }
+            />
+
+            <Route
+              path="/occurrences/new/:studentId"
+              element={
+                <OccurrenceAdd
+                  students={students}
+                  onAddOccurrence={handleCreateOccurrence}
+                  user={user}
+                  onToggleRole={() => { }}
+                />
+              }
+            />
+
+            <Route
+              path="/occurrences/new-multi"
+              element={
+                <OccurrenceAddMulti
+                  students={students}
+                  onAddOccurrence={handleCreateOccurrence}
+                  user={user}
+                  onToggleRole={() => { }}
+                />
+              }
+            />
+
+            <Route
+              path="/occurrences/:id"
+              element={
+                <OccurrenceDetail
+                  occurrences={occurrences}
+                  students={students}
+                  user={user}
+                  onDelete={async (idToDelete) => {
+                    try {
+                      const occToDelete = occurrences.find(o => o.id === idToDelete);
+                      await occurrenceService.deleteOccurrence(idToDelete);
+                      setOccurrences(prev => prev.filter(occ => occ.id !== idToDelete));
+                      if (occToDelete) {
+                        addLog('Exclusão de Ocorrência', `A ocorrência "${occToDelete.title}" (ID: ${idToDelete}) foi excluída.`);
+                      }
+                    } catch (err) {
+                      console.error('Erro ao excluir ocorrência:', err);
+                      alert('Erro ao excluir ocorrência.');
+                    }
+                  }}
+                />
+              }
+            />
+
+            <Route
+              path="/occurrences/:id/edit"
+              element={
+                <OccurrenceEdit
+                  occurrences={occurrences}
+                  students={students}
+                  onUpdateOccurrence={async (updated) => {
+                    try {
+                      await occurrenceService.updateOccurrence(updated);
+                      setOccurrences(prev => prev.map(o => o.id === updated.id ? updated : o));
+                      addLog('Edição de Ocorrência', `A ocorrência "${updated.title}" (ID: ${updated.id}) foi editada.`);
+                    } catch (err) {
+                      console.error('Erro ao atualizar ocorrência:', err);
+                      alert('Erro ao salvar alterações na ocorrência.');
+                    }
+                  }}
+                  user={user}
+                  onToggleRole={() => { }}
+                />
+              }
+            />
+
+            {/* Log do Sistema */}
+            <Route
+              path="/log"
+              element={
+                <SystemLog
+                  logs={logs}
+                />
+              }
+            />
+            <Route path="*" element={<Navigate to="/turnos" />} />
           </Routes>
         </div>
       </div>
