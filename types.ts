@@ -15,6 +15,7 @@ export interface Occurrence {
   description: string;
   category: 'Comportamental' | 'Acadêmica' | 'Médica' | 'Outros';
   registeredBy: string;
+  isConfidential?: boolean; // Indica se a ocorrência é sigilosa
 }
 
 export interface LogEntry {

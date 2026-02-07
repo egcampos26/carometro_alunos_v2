@@ -116,7 +116,9 @@ const App: React.FC = () => {
     try {
       await occurrenceService.createOccurrence(newOccurrence);
       setOccurrences(prev => [newOccurrence, ...prev]);
-      addLog('Nova Ocorrência', `Ocorrência criada para aluno ID ${newOccurrence.studentId}`);
+      const student = students.find(s => s.id === newOccurrence.studentId);
+      const studentName = student ? student.name : 'Aluno Desconhecido';
+      addLog('Nova Ocorrência', `Ocorrência "${newOccurrence.title}" criada para o aluno ${studentName}.`);
     } catch (err) {
       console.error('Erro ao criar ocorrência:', err);
       alert('Erro ao salvar ocorrência.');
@@ -266,8 +268,11 @@ const App: React.FC = () => {
                       const occToDelete = occurrences.find(o => o.id === idToDelete);
                       await occurrenceService.deleteOccurrence(idToDelete);
                       setOccurrences(prev => prev.filter(occ => occ.id !== idToDelete));
+                      const student = occToDelete ? students.find(s => s.id === occToDelete.studentId) : null;
+                      const studentName = student ? student.name : 'Aluno Desconhecido';
+
                       if (occToDelete) {
-                        addLog('Exclusão de Ocorrência', `A ocorrência "${occToDelete.title}" (ID: ${idToDelete}) foi excluída.`);
+                        addLog('Exclusão de Ocorrência', `A ocorrência "${occToDelete.title}" do aluno ${studentName} foi excluída.`);
                       }
                     } catch (err) {
                       console.error('Erro ao excluir ocorrência:', err);
@@ -288,7 +293,10 @@ const App: React.FC = () => {
                     try {
                       await occurrenceService.updateOccurrence(updated);
                       setOccurrences(prev => prev.map(o => o.id === updated.id ? updated : o));
-                      addLog('Edição de Ocorrência', `A ocorrência "${updated.title}" (ID: ${updated.id}) foi editada.`);
+                      const student = students.find(s => s.id === updated.studentId);
+                      const studentName = student ? student.name : 'Aluno Desconhecido';
+
+                      addLog('Edição de Ocorrência', `A ocorrência "${updated.title}" do aluno ${studentName} foi editada.`);
                     } catch (err) {
                       console.error('Erro ao atualizar ocorrência:', err);
                       alert('Erro ao salvar alterações na ocorrência.');

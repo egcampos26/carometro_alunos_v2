@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Occurrence, Student, AuthUser } from '../types';
-import { Search, User, Clock, FileText, LayoutList, Plus, Calendar, X } from 'lucide-react';
+import { Search, User, Clock, FileText, LayoutList, Plus, Calendar, X, EyeOff } from 'lucide-react';
 
 interface OccurrencesListProps {
   students: Student[];
@@ -42,7 +42,7 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
     : [];
 
   const handleAddNew = () => {
-    navigate('/add-multi-occurrence');
+    navigate('/occurrences/new-multi');
   };
 
   const clearFilters = () => {
@@ -126,7 +126,7 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
                 <div
                   key={occ.id}
                   className="bg-white p-5 rounded-2xl border-2 border-gray-50 shadow-sm hover:border-[#3b5998]/20 hover:shadow-md transition-all flex gap-5 cursor-pointer group"
-                  onClick={() => navigate(`/occurrence/${occ.id}`)}
+                  onClick={() => navigate(`/occurrences/${occ.id}`, { state: { from: 'list' } })}
                 >
                   <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 bg-gray-50 rounded-2xl overflow-hidden border-2 border-white shadow-sm">
                     {student?.photoUrl ? (
@@ -140,10 +140,15 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start mb-2">
                       <span className={`text-[10px] font-black text-white px-3 py-1 rounded-full uppercase shadow-sm ${occ.category === 'Comportamental' ? 'bg-red-500' :
-                          occ.category === 'Acadêmica' ? 'bg-blue-500' : 'bg-orange-500'
+                        occ.category === 'Acadêmica' ? 'bg-blue-500' : 'bg-orange-500'
                         }`}>
                         {occ.category}
                       </span>
+                      {occ.isConfidential && (
+                        <div className="bg-red-50 text-red-500 p-1 rounded-full border border-red-100" title="Ocorrência Sigilosa">
+                          <EyeOff size={10} />
+                        </div>
+                      )}
                       <div className="flex items-center gap-1 text-[10px] text-gray-400 font-bold">
                         <Clock size={12} />
                         {new Date(occ.date).toLocaleDateString()}

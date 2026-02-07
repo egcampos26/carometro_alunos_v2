@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Student, Occurrence, AuthUser } from '../types';
-import { User, Clock, ChevronRight, Users, Trash2, AlertCircle, Edit3, X, AlertTriangle } from 'lucide-react';
+import { User, Clock, ChevronRight, Users, Trash2, AlertCircle, Edit3, X, AlertTriangle, EyeOff } from 'lucide-react';
 
 interface OccurrenceDetailProps {
   students: Student[];
@@ -15,17 +15,18 @@ interface OccurrenceDetailProps {
 const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrences, user, onDelete }) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  
+
   const occurrence = occurrences.find(o => o.id === id);
   const student = occurrence ? students.find(s => s.id === occurrence.studentId) : null;
 
   // Encontra outros alunos se for uma ocorrência coletiva
-  const involvedStudents = occurrence?.groupId 
+  const involvedStudents = occurrence?.groupId
     ? occurrences
-        .filter(o => o.groupId === occurrence.groupId)
-        .map(o => students.find(s => s.id === o.studentId))
-        .filter((s): s is Student => !!s)
+      .filter(o => o.groupId === occurrence.groupId)
+      .map(o => students.find(s => s.id === o.studentId))
+      .filter((s): s is Student => !!s)
     : [];
 
   involvedStudents.sort((a, b) => a.name.localeCompare(b.name));
@@ -44,9 +45,12 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
   const canModify = user.role === 'Admin' || occurrence.registeredBy === user.name;
 
   const confirmDelete = () => {
-    onDelete(occurrence.id);
-    setShowDeleteModal(false);
+    const idToDelete = occurrence.id;
     navigate(-1);
+    // Pequeno timeout para garantir que a navegação iniciou antes do state update
+    setTimeout(() => {
+      onDelete(idToDelete);
+    }, 50);
   };
 
   const headerTitle = (
@@ -59,7 +63,7 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
   return (
     <Layout title={headerTitle}>
       <div className="p-6 space-y-6 max-w-4xl mx-auto pb-20">
-        <div 
+        <div
           onClick={() => navigate(`/student/${student.id}`)}
           className="flex items-center gap-4 p-4 bg-[#3b5998]/5 rounded-xl border border-[#3b5998]/10 active:bg-[#3b5998]/10 transition-colors cursor-pointer"
         >
@@ -74,19 +78,24 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
         </div>
 
         <div className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden">
-          <div className={`h-3 w-full ${
-            occurrence.category === 'Comportamental' ? 'bg-red-500' : 
+          <div className={`h-3 w-full ${occurrence.category === 'Comportamental' ? 'bg-red-500' :
             occurrence.category === 'Acadêmica' ? 'bg-blue-500' : 'bg-orange-500'
-          }`} />
-          
+            }`} />
+
           <div className="p-6 sm:p-8 space-y-8">
             <div className="flex justify-between items-center border-b border-gray-50 pb-6">
-              <span className={`text-[10px] font-black text-white px-4 py-1.5 rounded-full uppercase shadow-sm ${
-                occurrence.category === 'Comportamental' ? 'bg-red-500' : 
+              <span className={`text-[10px] font-black text-white px-4 py-1.5 rounded-full uppercase shadow-sm ${occurrence.category === 'Comportamental' ? 'bg-red-500' :
                 occurrence.category === 'Acadêmica' ? 'bg-blue-500' : 'bg-orange-500'
-              }`}>
+                }`}>
                 {occurrence.category}
               </span>
+
+              {occurrence.isConfidential && (
+                <span className="flex items-center gap-1.5 text-[10px] font-black text-red-600 bg-red-50 px-3 py-1.5 rounded-full uppercase border border-red-100 mr-auto ml-3">
+                  <EyeOff size={12} />
+                  Sigiloso
+                </span>
+              )}
               <div className="flex items-center gap-2 text-[10px] text-gray-400 font-black uppercase tracking-widest">
                 <Clock size={14} className="text-[#3b5998]" />
                 {new Date(occurrence.date).toLocaleDateString('pt-BR')}
@@ -97,7 +106,7 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
               <h2 className="text-2xl sm:text-3xl font-black text-gray-900 leading-tight uppercase tracking-tight">
                 {occurrence.title}
               </h2>
-              
+
               <div className="bg-gray-50/80 p-6 rounded-2xl border border-gray-100 min-h-[120px]">
                 <p className="text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-wrap font-medium">
                   {occurrence.description}
@@ -115,11 +124,10 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
                     <button
                       key={s.id}
                       onClick={() => navigate(`/student/${s.id}`)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all active:scale-95 ${
-                        s.id === student.id 
-                        ? 'bg-[#3b5998] border-[#3b5998] text-white shadow-md' 
+                      className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all active:scale-95 ${s.id === student.id
+                        ? 'bg-[#3b5998] border-[#3b5998] text-white shadow-md'
                         : 'bg-white border-gray-200 text-gray-600 hover:border-[#3b5998] hover:text-[#3b5998]'
-                      }`}
+                        }`}
                     >
                       <img src={s.photoUrl} className="w-6 h-6 rounded-full object-cover" alt="" />
                       <span className="text-[10px] font-black uppercase whitespace-nowrap">{s.name.split(' ')[0]}</span>
@@ -142,14 +150,14 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
 
               {canModify && (
                 <div className="flex flex-row w-full sm:w-auto gap-3">
-                  <button 
-                    onClick={() => navigate(`/edit-occurrence/${occurrence.id}`)}
+                  <button
+                    onClick={() => navigate(`/occurrences/${occurrence.id}/edit`, { state: location.state })}
                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-50 text-[#3b5998] px-6 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest shadow-sm border border-blue-100 hover:bg-blue-100 active:scale-95 transition-all"
                   >
                     <Edit3 size={16} />
                     Editar
                   </button>
-                  <button 
+                  <button
                     onClick={() => setShowDeleteModal(true)}
                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-red-50 text-red-600 px-6 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest shadow-sm border border-red-100 hover:bg-red-100 active:scale-95 transition-all"
                   >
@@ -159,12 +167,12 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
                 </div>
               )}
             </div>
-            
+
             {!canModify && (
-               <div className="flex items-center justify-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-400">
-                  <AlertCircle size={14} />
-                  <span className="text-[9px] font-black uppercase tracking-widest">Apenas Administradores ou Autor podem alterar</span>
-               </div>
+              <div className="flex items-center justify-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-400">
+                <AlertCircle size={14} />
+                <span className="text-[9px] font-black uppercase tracking-widest">Apenas Administradores ou Autor podem alterar</span>
+              </div>
             )}
           </div>
         </div>
@@ -182,15 +190,15 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
               <p className="text-gray-500 text-sm font-medium leading-relaxed">
                 Tem certeza que deseja apagar este registro de ocorrência? Esta ação não pode ser desfeita.
               </p>
-              
+
               <div className="flex flex-col w-full gap-3 pt-6">
-                <button 
+                <button
                   onClick={confirmDelete}
                   className="w-full py-5 bg-red-500 text-white rounded-3xl font-black uppercase text-xs tracking-widest shadow-lg shadow-red-200 hover:bg-red-600 active:scale-95 transition-all border-b-4 border-red-700"
                 >
                   Sim, Excluir Registro
                 </button>
-                <button 
+                <button
                   onClick={() => setShowDeleteModal(false)}
                   className="w-full py-5 bg-gray-100 text-gray-400 rounded-3xl font-black uppercase text-xs tracking-widest hover:bg-gray-200 active:scale-95 transition-all"
                 >

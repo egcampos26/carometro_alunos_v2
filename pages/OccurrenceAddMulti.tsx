@@ -3,15 +3,16 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Student, Occurrence, AuthUser } from '../types';
-import { UserCheck, Calendar, Search, X, Users, CheckCircle2 } from 'lucide-react';
+import { UserCheck, Calendar, Search, X, Users, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 
 interface OccurrenceAddMultiProps {
   students: Student[];
-  onAdd: (occ: Occurrence) => void;
+  onAddOccurrence: (occ: Occurrence) => void;
   user: AuthUser;
+  onToggleRole: () => void;
 }
 
-const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd, user }) => {
+const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAddOccurrence, user, onToggleRole }) => {
   const navigate = useNavigate();
 
   const today = new Date().toISOString().split('T')[0];
@@ -22,6 +23,7 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(today);
   const [category, setCategory] = useState<Occurrence['category']>('Comportamental');
+  const [isConfidential, setIsConfidential] = useState(false);
 
   const filteredStudents = studentSearch.trim() === ''
     ? []
@@ -31,10 +33,19 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
     ).slice(0, 5); // Limit suggestions to avoid clutter
 
   const toggleStudent = (id: string) => {
-    setSelectedIds(prev =>
-      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
-    );
+    if (selectedIds.includes(id)) {
+      // Show alert instead of removing
+      const student = getStudent(id);
+      alert(`⚠️ O aluno "${student?.name}" já foi incluído na lista!`);
+      setStudentSearch('');
+      return;
+    }
+    setSelectedIds(prev => [...prev, id]);
     setStudentSearch('');
+  };
+
+  const removeStudent = (id: string) => {
+    setSelectedIds(prev => prev.filter(i => i !== id));
   };
 
   const getStudent = (id: string) => students.find(s => s.id === id);
@@ -56,9 +67,10 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
         title,
         description,
         category,
-        registeredBy: user.name
+        registeredBy: user.name,
+        isConfidential
       };
-      onAdd(newOcc);
+      onAddOccurrence(newOcc);
     });
 
     navigate('/occurrences', { replace: true });
@@ -122,7 +134,7 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
                   <div key={id} className="flex items-center gap-2 bg-blue-50 text-[#3b5998] pl-2 pr-1 py-1 rounded-full border border-blue-100 animate-in fade-in zoom-in duration-200">
                     <span className="text-[10px] font-black uppercase truncate max-w-[120px]">{s.name.split(' ')[0]}</span>
                     <button
-                      onClick={() => toggleStudent(id)}
+                      onClick={() => removeStudent(id)}
                       className="w-5 h-5 bg-white rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors"
                     >
                       <X size={12} />
@@ -183,6 +195,38 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Toggle Sigiloso */}
+          <div className="space-y-3">
+            <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Privacidade</label>
+            <button
+              type="button"
+              onClick={() => setIsConfidential(!isConfidential)}
+              className={`w-full p-4 rounded-2xl border-2 transition-all shadow-sm flex items-center justify-between ${isConfidential
+                ? 'bg-red-50 border-red-300 text-red-700'
+                : 'bg-gray-50 border-gray-100 text-gray-500 hover:border-gray-200'
+                }`}
+            >
+              <div className="flex items-center gap-3">
+                {isConfidential ? <EyeOff size={20} /> : <Eye size={20} />}
+                <div className="text-left">
+                  <p className="text-sm font-black uppercase">
+                    {isConfidential ? 'Ocorrência Sigilosa' : 'Ocorrência Normal'}
+                  </p>
+                  <p className="text-[10px] font-bold opacity-70 mt-0.5">
+                    {isConfidential
+                      ? 'Apenas administradores podem visualizar'
+                      : 'Visível para todos os educadores'}
+                  </p>
+                </div>
+              </div>
+              <div className={`w-12 h-6 rounded-full transition-all relative ${isConfidential ? 'bg-red-500' : 'bg-gray-300'
+                }`}>
+                <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-all ${isConfidential ? 'right-0.5' : 'left-0.5'
+                  }`} />
+              </div>
+            </button>
           </div>
 
           <div className="space-y-2">

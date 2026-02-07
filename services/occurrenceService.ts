@@ -22,7 +22,8 @@ export const occurrenceService = {
             description: row.description,
             category: row.category,
             registeredBy: row.registered_by,
-            groupId: row.group_id
+            groupId: row.group_id,
+            isConfidential: row.is_confidential || false
         }));
     },
 
@@ -34,7 +35,8 @@ export const occurrenceService = {
             description: occurrence.description,
             category: occurrence.category,
             registered_by: occurrence.registeredBy,
-            group_id: occurrence.groupId || null
+            group_id: occurrence.groupId || null,
+            is_confidential: occurrence.isConfidential || false
         });
 
         if (error) throw error;
@@ -47,7 +49,8 @@ export const occurrenceService = {
             description: occurrence.description,
             category: occurrence.category,
             registered_by: occurrence.registeredBy,
-            group_id: occurrence.groupId || null
+            group_id: occurrence.groupId || null,
+            is_confidential: occurrence.isConfidential || false
         }).eq('id_ocorrencias', occurrence.id);
 
 

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Student, Occurrence, AuthUser } from '../types';
-import { UserCheck, Calendar, Search, Users, X, CheckCircle2 } from 'lucide-react';
+import { UserCheck, Calendar, Search, Users, X, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { NO_IMAGE_RIGHTS_URL } from '../constants';
 
 interface OccurrenceAddProps {
@@ -26,6 +26,7 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAddOccurrence
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(today);
   const [category, setCategory] = useState<Occurrence['category']>('Comportamental');
+  const [isConfidential, setIsConfidential] = useState(false);
 
   if (!initialStudent) return <div>Aluno não encontrado</div>;
 
@@ -62,7 +63,8 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAddOccurrence
         title,
         description,
         category,
-        registeredBy: user.name
+        registeredBy: user.name,
+        isConfidential
       };
       onAddOccurrence(newOcc);
     });
@@ -196,6 +198,38 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAddOccurrence
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Toggle Sigiloso */}
+          <div className="space-y-3">
+            <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Privacidade</label>
+            <button
+              type="button"
+              onClick={() => setIsConfidential(!isConfidential)}
+              className={`w-full p-4 rounded-2xl border-2 transition-all shadow-sm flex items-center justify-between ${isConfidential
+                  ? 'bg-red-50 border-red-300 text-red-700'
+                  : 'bg-gray-50 border-gray-100 text-gray-500 hover:border-gray-200'
+                }`}
+            >
+              <div className="flex items-center gap-3">
+                {isConfidential ? <EyeOff size={20} /> : <Eye size={20} />}
+                <div className="text-left">
+                  <p className="text-sm font-black uppercase">
+                    {isConfidential ? 'Ocorrência Sigilosa' : 'Ocorrência Normal'}
+                  </p>
+                  <p className="text-[10px] font-bold opacity-70 mt-0.5">
+                    {isConfidential
+                      ? 'Apenas administradores podem visualizar'
+                      : 'Visível para todos os educadores'}
+                  </p>
+                </div>
+              </div>
+              <div className={`w-12 h-6 rounded-full transition-all relative ${isConfidential ? 'bg-red-500' : 'bg-gray-300'
+                }`}>
+                <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-all ${isConfidential ? 'right-0.5' : 'left-0.5'
+                  }`} />
+              </div>
+            </button>
           </div>
 
           <div className="space-y-2">

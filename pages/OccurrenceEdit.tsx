@@ -1,20 +1,21 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Student, Occurrence, AuthUser } from '../types';
-import { UserCheck, Calendar, Info, Clock, Save, X } from 'lucide-react';
+import { UserCheck, Calendar, Info, Clock, Save, X, Eye, EyeOff } from 'lucide-react';
 
 interface OccurrenceEditProps {
   students: Student[];
   occurrences: Occurrence[];
-  onUpdate: (occ: Occurrence) => void;
+  onUpdateOccurrence: (occ: Occurrence) => void;
   user: AuthUser;
 }
 
-const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, onUpdate, user }) => {
+const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, onUpdateOccurrence, user }) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const occurrence = occurrences.find(o => o.id === id);
   const student = occurrence ? students.find(s => s.id === occurrence.studentId) : null;
@@ -23,6 +24,7 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [category, setCategory] = useState<Occurrence['category']>('Comportamental');
+  const [isConfidential, setIsConfidential] = useState(false);
 
   useEffect(() => {
     if (occurrence) {
@@ -30,11 +32,12 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
       setDescription(occurrence.description);
       setDate(occurrence.date);
       setCategory(occurrence.category);
+      setIsConfidential(occurrence.isConfidential || false);
 
       // Verificação de permissão
       const canEdit = user.role === 'Admin' || occurrence.registeredBy === user.name;
       if (!canEdit) {
-        navigate(`/occurrence/${id}`, { replace: true });
+        navigate(`/occurrences/${id}`, { replace: true });
       }
     }
   }, [occurrence, user, navigate, id]);
@@ -59,10 +62,11 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
       title,
       description,
       category,
+      isConfidential
     };
 
-    onUpdate(updatedOcc);
-    navigate(`/occurrence/${occurrence.id}`, { replace: true });
+    onUpdateOccurrence(updatedOcc);
+    navigate(`/occurrences/${occurrence.id}`, { replace: true, state: location.state });
   };
 
   const headerTitle = (
@@ -127,6 +131,38 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Toggle Sigiloso */}
+          <div className="space-y-3">
+            <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Privacidade</label>
+            <button
+              type="button"
+              onClick={() => setIsConfidential(!isConfidential)}
+              className={`w-full p-4 rounded-2xl border-2 transition-all shadow-sm flex items-center justify-between ${isConfidential
+                ? 'bg-red-50 border-red-300 text-red-700'
+                : 'bg-gray-50 border-gray-100 text-gray-500 hover:border-gray-200'
+                }`}
+            >
+              <div className="flex items-center gap-3">
+                {isConfidential ? <EyeOff size={20} /> : <Eye size={20} />}
+                <div className="text-left">
+                  <p className="text-sm font-black uppercase">
+                    {isConfidential ? 'Ocorrência Sigilosa' : 'Ocorrência Normal'}
+                  </p>
+                  <p className="text-[10px] font-bold opacity-70 mt-0.5">
+                    {isConfidential
+                      ? 'Apenas administradores podem visualizar'
+                      : 'Visível para todos os educadores'}
+                  </p>
+                </div>
+              </div>
+              <div className={`w-12 h-6 rounded-full transition-all relative ${isConfidential ? 'bg-red-500' : 'bg-gray-300'
+                }`}>
+                <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-all ${isConfidential ? 'right-0.5' : 'left-0.5'
+                  }`} />
+              </div>
+            </button>
           </div>
 
           <div className="space-y-2">

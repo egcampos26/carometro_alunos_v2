@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Student, Occurrence, AuthUser } from '../types';
-import { Edit2, Phone, User, ChevronRight, CreditCard, ShieldAlert, Calendar, MapPin, Plus, Minus } from 'lucide-react';
+import { Edit2, Phone, User, ChevronRight, CreditCard, ShieldAlert, Calendar, MapPin, Plus, Minus, EyeOff } from 'lucide-react';
 import { NO_IMAGE_RIGHTS_URL } from '../constants';
 
 interface StudentDetailProps {
@@ -300,11 +300,12 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
                     <div
                       key={occ.id}
                       className="bg-white p-5 rounded-2xl border-2 border-gray-50 shadow-sm flex justify-between items-center group cursor-pointer transition-all"
-                      onClick={() => navigate(`/occurrence/${occ.id}`)}
+                      onClick={() => navigate(`/occurrences/${occ.id}`, { state: { from: 'student' } })}
                     >
                       <div className="flex-1 min-w-0 pr-4">
                         <div className="flex items-center gap-2 mb-2">
                           <span className={`w-2 h-2 rounded-full ${occ.category === 'Comportamental' ? 'bg-red-500' : 'bg-blue-500'}`} />
+                          {occ.isConfidential && <EyeOff size={10} className="text-red-500" />}
                           <p className="font-black text-gray-800 text-sm uppercase tracking-tighter truncate">{occ.title}</p>
                         </div>
                         <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
