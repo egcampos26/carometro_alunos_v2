@@ -6,6 +6,9 @@ export const INSTITUTIONAL_BLUE = '#3b5998';
 // Placeholder para quando o aluno não tem direito de imagem assinado
 export const NO_IMAGE_RIGHTS_URL = 'https://img.freepik.com/premium-vector/no-photo-available-vector-icon-default-image-symbol-picture-coming-soon-for-web-site-mobile-app_87543-10615.jpg';
 
+// Foto padrão para alunos com direito de imagem mas sem foto cadastrada (ícone de anjo em tons de azul)
+export const DEFAULT_STUDENT_PHOTO_URL = '/angel-avatar.jpg';
+
 export const SHIFT_GRADES: Record<string, string[]> = {
   [Shift.MORNING]: ['5º A', '6º A', '6º B', '7º A', '7º B', '7º C', '8º A', '8º B', '8º C', '9º A', '9º B', '9º C'],
   [Shift.INTEGRAL]: ['1º A', '1º B', '1º C', '2º A', '2º B', '2º C', '3º A', '3º B'],

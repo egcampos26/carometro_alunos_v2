@@ -16,6 +16,7 @@ import { Student, Occurrence, AuthUser, LogEntry } from './types';
 import { studentService } from './services/studentService';
 import { occurrenceService } from './services/occurrenceService';
 import { logService } from './services/logService';
+import { detectStudentChanges, formatChangesForLog } from './utils/changeDetection';
 
 const TEST_USERS: AuthUser[] = [
   { id: 'admin-1', name: 'Diretora Silvia', role: 'Admin', email: 'silvia@escola.com' },
@@ -85,14 +86,26 @@ const App: React.FC = () => {
 
   const updateStudent = async (updatedStudent: Student) => {
     try {
-      // 1. Atualizar no Supabase
+      // 1. Encontrar o aluno original para comparação
+      const originalStudent = students.find(s => s.id === updatedStudent.id);
+
+      // 2. Atualizar no Supabase
       await studentService.updateStudent(updatedStudent);
 
-      // 2. Atualizar estado local
+      // 3. Atualizar estado local
       setStudents(prev => prev.map(s => s.id === updatedStudent.id ? updatedStudent : s));
 
-      // 3. Log
-      addLog('Atualização de Aluno', `Aluno ${updatedStudent.name} (ID: ${updatedStudent.id}) atualizado.`);
+      // 4. Log detalhado com mudanças
+      if (originalStudent) {
+        const changes = detectStudentChanges(originalStudent, updatedStudent);
+        const changeDetails = formatChangesForLog(changes);
+        addLog(
+          'Atualização de Aluno',
+          `Aluno: ${updatedStudent.name} (ID: ${updatedStudent.id})\n${changeDetails}`
+        );
+      } else {
+        addLog('Atualização de Aluno', `Aluno ${updatedStudent.name} (ID: ${updatedStudent.id}) atualizado.`);
+      }
     } catch (err) {
       console.error('Erro ao atualizar aluno:', err);
       alert('Erro ao salvar alterações no banco de dados.');
