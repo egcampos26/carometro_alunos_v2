@@ -283,7 +283,11 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
               <div className="flex flex-col items-center gap-4 mb-8 text-center">
                 <h4 className="text-[#3b5998] font-black uppercase text-sm tracking-widest">Histórico de Ocorrências</h4>
                 <button
-                  onClick={() => navigate(`/occurrences/new/${student.id}`)}
+                  onClick={() => {
+                    console.log(`🔘 Occurrence button clicked for student: ${student.id}`);
+                    console.log(`📍 Navigating to: /occurrences/new/${student.id}`);
+                    navigate(`/occurrences/new/${student.id}`);
+                  }}
                   className="w-full sm:w-auto bg-[#3b5998] text-white text-[11px] font-black px-12 py-3 rounded-full uppercase shadow-lg hover:bg-blue-700 active:scale-95 transition-all"
                 >
                   + Novo Registro

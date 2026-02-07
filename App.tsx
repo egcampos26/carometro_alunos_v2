@@ -15,6 +15,7 @@ import SystemLog from './pages/SystemLog';
 import { Student, Occurrence, AuthUser, LogEntry } from './types';
 import { studentService } from './services/studentService';
 import { occurrenceService } from './services/occurrenceService';
+import { logService } from './services/logService';
 
 const TEST_USERS: AuthUser[] = [
   { id: 'admin-1', name: 'Diretora Silvia', role: 'Admin', email: 'silvia@escola.com' },
@@ -42,13 +43,15 @@ const App: React.FC = () => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const [studentsData, occurrencesData] = await Promise.all([
+        const [studentsData, occurrencesData, logsData] = await Promise.all([
           studentService.fetchStudents(),
-          occurrenceService.fetchOccurrences()
+          occurrenceService.fetchOccurrences(),
+          logService.fetchLogs()
         ]);
         setStudents(studentsData);
         setOccurrences(occurrencesData);
-        console.log(`📊 App loaded: ${studentsData.length} students, ${occurrencesData.length} occurrences`);
+        setLogs(logsData);
+        console.log(`📊 App loaded: ${studentsData.length} students, ${occurrencesData.length} occurrences, ${logsData.length} logs`);
       } catch (err) {
         console.error('Falha ao carregar dados:', err);
         setError('Não foi possível conectar ao banco de dados.');
@@ -60,11 +63,7 @@ const App: React.FC = () => {
     loadData();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('carometro_logs', JSON.stringify(logs));
-  }, [logs]);
-
-  const addLog = (action: string, details: string) => {
+  const addLog = async (action: string, details: string) => {
     const newLog: LogEntry = {
       id: Date.now().toString(),
       timestamp: new Date().toISOString(),
@@ -72,7 +71,16 @@ const App: React.FC = () => {
       action,
       details
     };
+
+    // Update local state immediately for UI responsiveness
     setLogs(prev => [newLog, ...prev]);
+
+    // Save to Supabase in background
+    try {
+      await logService.createLog(newLog);
+    } catch (err) {
+      console.error('Failed to save log to database:', err);
+    }
   };
 
   const updateStudent = async (updatedStudent: Student) => {
@@ -281,7 +289,7 @@ const App: React.FC = () => {
 
             {/* Log do Sistema */}
             <Route
-              path="/log"
+              path="/logs"
               element={
                 <SystemLog
                   logs={logs}
