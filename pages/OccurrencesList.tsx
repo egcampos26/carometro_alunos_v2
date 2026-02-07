@@ -21,24 +21,24 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
 
   const hasSearch = searchTerm.trim().length > 0;
   const hasDateFilter = filterDate !== '';
-  
+
   const filtered = (hasSearch || hasDateFilter)
     ? occurrences.filter(occ => {
-        const student = getStudentById(occ.studentId);
-        const sName = student?.name.toLowerCase() || '';
-        const sRA = student?.registrationNumber.toLowerCase() || '';
-        const search = searchTerm.toLowerCase();
-        
-        const matchesText = !hasSearch || (
-          sName.includes(search) || 
-          sRA.includes(search) || 
-          occ.title.toLowerCase().includes(search)
-        );
+      const student = getStudentById(occ.studentId);
+      const sName = student?.name.toLowerCase() || '';
+      const sRA = student?.registrationNumber.toLowerCase() || '';
+      const search = searchTerm.toLowerCase();
 
-        const matchesDate = !hasDateFilter || occ.date === filterDate;
-        
-        return matchesText && matchesDate;
-      }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      const matchesText = !hasSearch || (
+        sName.includes(search) ||
+        sRA.includes(search) ||
+        occ.title.toLowerCase().includes(search)
+      );
+
+      const matchesDate = !hasDateFilter || occ.date === filterDate;
+
+      return matchesText && matchesDate;
+    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     : [];
 
   const handleAddNew = () => {
@@ -58,12 +58,12 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
   );
 
   return (
-    <Layout 
+    <Layout
       title={headerTitle}
       user={user}
       onToggleRole={onToggleRole}
       rightAction={
-        <button 
+        <button
           onClick={handleAddNew}
           className="w-10 h-10 flex items-center justify-center bg-white text-[#3b5998] rounded-full hover:bg-gray-100 transition-colors shadow-sm active:scale-90"
           title="Novo Registro Coletivo"
@@ -72,7 +72,7 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
         </button>
       }
     >
-      <div className="p-4 sm:p-8 max-w-6xl mx-auto w-full">
+      <div className="p-4 sm:p-8 max-w-6xl 2xl:max-w-7xl mx-auto w-full">
         {/* Filtros Container - Ajustado para w-full para alinhar com a busca centralizada */}
         <div className="flex flex-col md:flex-row gap-4 mb-10 w-full">
           {/* Busca por Texto - flex-1 garante que ocupe o máximo de espaço */}
@@ -97,7 +97,7 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
             />
             <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-[#3b5998]" size={20} />
             {hasDateFilter && (
-              <button 
+              <button
                 onClick={() => setFilterDate('')}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors"
               >
@@ -123,8 +123,8 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
             filtered.map(occ => {
               const student = getStudentById(occ.studentId);
               return (
-                <div 
-                  key={occ.id} 
+                <div
+                  key={occ.id}
                   className="bg-white p-5 rounded-2xl border-2 border-gray-50 shadow-sm hover:border-[#3b5998]/20 hover:shadow-md transition-all flex gap-5 cursor-pointer group"
                   onClick={() => navigate(`/occurrence/${occ.id}`)}
                 >
@@ -139,10 +139,9 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start mb-2">
-                      <span className={`text-[10px] font-black text-white px-3 py-1 rounded-full uppercase shadow-sm ${
-                        occ.category === 'Comportamental' ? 'bg-red-500' : 
-                        occ.category === 'Acadêmica' ? 'bg-blue-500' : 'bg-orange-500'
-                      }`}>
+                      <span className={`text-[10px] font-black text-white px-3 py-1 rounded-full uppercase shadow-sm ${occ.category === 'Comportamental' ? 'bg-red-500' :
+                          occ.category === 'Acadêmica' ? 'bg-blue-500' : 'bg-orange-500'
+                        }`}>
                         {occ.category}
                       </span>
                       <div className="flex items-center gap-1 text-[10px] text-gray-400 font-bold">
@@ -154,8 +153,8 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
                     <p className="text-[11px] text-[#3b5998] font-black uppercase truncate mb-2">{student?.name || 'Aluno Desconhecido'}</p>
                     <div className="flex items-center justify-between pt-3 border-t border-gray-50">
                       <div className="flex items-center gap-2">
-                         <FileText size={12} className="text-gray-300" />
-                         <span className="text-[10px] text-gray-400 font-black">RA: {student?.registrationNumber}</span>
+                        <FileText size={12} className="text-gray-300" />
+                        <span className="text-[10px] text-gray-400 font-black">RA: {student?.registrationNumber}</span>
                       </div>
                       <span className="text-[9px] text-gray-300 font-bold uppercase">Ref: {occ.registeredBy}</span>
                     </div>

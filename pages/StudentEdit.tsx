@@ -17,7 +17,7 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const student = students.find(s => s.id === id);
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -35,7 +35,7 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
 
   if (user.role !== 'Admin') {
     return (
-      <Layout 
+      <Layout
         title="ACESSO NEGADO"
         user={user}
         onToggleRole={onToggleRole}
@@ -46,7 +46,7 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
           </div>
           <h2 className="text-2xl font-black text-gray-900 uppercase">Restrito a Administradores</h2>
           <p className="text-gray-500 max-w-xs mx-auto font-medium">Você não tem permissão para editar perfis de alunos. Redirecionando...</p>
-          <button 
+          <button
             onClick={() => navigate(`/student/${id}`)}
             className="mt-4 text-[#3b5998] font-black uppercase tracking-widest text-xs underline"
           >
@@ -90,7 +90,7 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
   );
 
   return (
-    <Layout 
+    <Layout
       title={headerTitle}
       user={user}
       onToggleRole={onToggleRole}
@@ -98,11 +98,11 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
       showBack={false}
       rightAction={null}
     >
-      <div className="max-w-6xl mx-auto p-4 sm:p-8 lg:p-12 pb-24">
+      <div className="max-w-6xl 2xl:max-w-7xl mx-auto p-4 sm:p-8 lg:p-12 pb-24">
         <form onSubmit={handleSave} className="flex flex-col lg:flex-row gap-8 lg:gap-16">
-          
+
           <div className="flex flex-col items-center lg:w-1/4">
-            <div 
+            <div
               onClick={() => isImageRightsSigned && setShowSourceModal(true)}
               className={`relative w-full max-w-[240px] aspect-[3/4] bg-gray-100 border-4 border-white rounded-3xl mx-auto flex flex-col items-center justify-center overflow-hidden shadow-xl transition-all ${isImageRightsSigned ? 'cursor-pointer active:scale-95' : 'cursor-not-allowed opacity-80'}`}
             >
@@ -138,82 +138,82 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="col-span-1 md:col-span-2 space-y-2">
                 <label className="text-[#3b5998] text-[10px] font-black uppercase block tracking-widest ml-1">Nome Completo</label>
-                <input 
+                <input
                   type="text"
                   className="w-full p-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-2xl text-gray-800 font-bold outline-none transition-all"
                   value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 />
               </div>
 
               <div className="space-y-2">
                 <label className="text-[#3b5998] text-[10px] font-black uppercase block tracking-widest ml-1">RA</label>
-                <input 
+                <input
                   type="text"
                   className="w-full p-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-2xl text-gray-800 font-bold outline-none transition-all"
                   value={formData.registrationNumber}
-                  onChange={(e) => setFormData({...formData, registrationNumber: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, registrationNumber: e.target.value })}
                 />
               </div>
 
               <div className="space-y-2">
                 <label className="text-[#3b5998] text-[10px] font-black uppercase block tracking-widest ml-1">RGA</label>
-                <input 
+                <input
                   type="text"
                   className="w-full p-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-2xl text-gray-800 font-bold outline-none transition-all"
                   value={formData.rga}
-                  onChange={(e) => setFormData({...formData, rga: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, rga: e.target.value })}
                 />
               </div>
 
               <div className="space-y-2">
                 <label className="text-[#3b5998] text-[10px] font-black uppercase block tracking-widest ml-1">RG do Aluno</label>
-                <input 
+                <input
                   type="text"
                   className="w-full p-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-2xl text-gray-800 font-bold outline-none transition-all"
                   value={formData.studentRG || ''}
-                  onChange={(e) => setFormData({...formData, studentRG: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, studentRG: e.target.value })}
                 />
               </div>
 
               <div className="space-y-2">
                 <label className="text-[#3b5998] text-[10px] font-black uppercase block tracking-widest ml-1">CPF do Aluno</label>
-                <input 
+                <input
                   type="text"
                   className="w-full p-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-2xl text-gray-800 font-bold outline-none transition-all"
                   value={formData.studentCPF || ''}
-                  onChange={(e) => setFormData({...formData, studentCPF: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, studentCPF: e.target.value })}
                 />
               </div>
 
               <div className="space-y-2">
                 <label className="text-[#3b5998] text-[10px] font-black uppercase block tracking-widest ml-1">N°</label>
-                <input 
+                <input
                   type="text"
                   placeholder="Ex: 01, 15..."
                   className="w-full p-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-2xl text-gray-800 font-bold outline-none transition-all"
                   value={formData.roomNumber}
-                  onChange={(e) => setFormData({...formData, roomNumber: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, roomNumber: e.target.value })}
                 />
               </div>
 
               <div className="space-y-2">
                 <label className="text-[#3b5998] text-[10px] font-black uppercase block tracking-widest ml-1">Ano/Turma</label>
-                <input 
+                <input
                   type="text"
                   className="w-full p-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-2xl text-gray-800 font-bold outline-none transition-all"
                   value={formData.grade}
-                  onChange={(e) => setFormData({...formData, grade: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
                 />
               </div>
 
               <div className="space-y-2">
                 <label className="text-[#3b5998] text-[10px] font-black uppercase block tracking-widest ml-1">Data de Nascimento</label>
-                <input 
+                <input
                   type="date"
                   className="w-full p-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-2xl text-gray-800 font-bold outline-none transition-all"
                   value={formData.birthDate}
-                  onChange={(e) => setFormData({...formData, birthDate: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
                 />
               </div>
 
@@ -222,7 +222,7 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
                 <select
                   className="w-full p-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-2xl text-gray-800 font-bold outline-none transition-all appearance-none"
                   value={formData.departureMethod}
-                  onChange={(e) => setFormData({...formData, departureMethod: e.target.value as DepartureMethod})}
+                  onChange={(e) => setFormData({ ...formData, departureMethod: e.target.value as DepartureMethod })}
                 >
                   <option value="Responsável">Responsável</option>
                   <option value="Sozinho">Sozinho</option>
@@ -234,33 +234,33 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
               <div className="col-span-1 md:col-span-2 space-y-6 pt-4">
                 <div className="h-px bg-gray-100 w-full" />
                 <span className="text-[#3b5998] text-[10px] font-black uppercase tracking-widest block">Informações dos Responsáveis</span>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-1">
                     <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">Responsável 1</label>
-                    <input 
+                    <input
                       type="text"
                       className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                       value={formData.filiacao1}
-                      onChange={(e) => setFormData({...formData, filiacao1: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, filiacao1: e.target.value })}
                     />
                   </div>
                   <div className="space-y-1">
                     <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">Obs Responsável 1</label>
-                    <input 
+                    <input
                       type="text"
                       className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                       value={formData.obsFiliacao1 || ''}
-                      onChange={(e) => setFormData({...formData, obsFiliacao1: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, obsFiliacao1: e.target.value })}
                     />
                   </div>
                   <div className="space-y-1">
                     <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">Tel Responsável 1</label>
-                    <input 
+                    <input
                       type="text"
                       className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                       value={formData.telefone1}
-                      onChange={(e) => setFormData({...formData, telefone1: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, telefone1: e.target.value })}
                     />
                   </div>
                 </div>
@@ -268,20 +268,20 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4">
                   <div className="space-y-1">
                     <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">RG Resp 1</label>
-                    <input 
+                    <input
                       type="text"
                       className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                       value={formData.resp1RG || ''}
-                      onChange={(e) => setFormData({...formData, resp1RG: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, resp1RG: e.target.value })}
                     />
                   </div>
                   <div className="space-y-1">
                     <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">CPF Resp 1</label>
-                    <input 
+                    <input
                       type="text"
                       className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                       value={formData.resp1CPF || ''}
-                      onChange={(e) => setFormData({...formData, resp1CPF: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, resp1CPF: e.target.value })}
                     />
                   </div>
                 </div>
@@ -289,29 +289,29 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-1">
                     <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">Responsável 2</label>
-                    <input 
+                    <input
                       type="text"
                       className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                       value={formData.filiacao2}
-                      onChange={(e) => setFormData({...formData, filiacao2: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, filiacao2: e.target.value })}
                     />
                   </div>
                   <div className="space-y-1">
                     <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">Obs Responsável 2</label>
-                    <input 
+                    <input
                       type="text"
                       className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                       value={formData.obsFiliacao2 || ''}
-                      onChange={(e) => setFormData({...formData, obsFiliacao2: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, obsFiliacao2: e.target.value })}
                     />
                   </div>
                   <div className="space-y-1">
                     <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">Tel Responsável 2</label>
-                    <input 
+                    <input
                       type="text"
                       className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                       value={formData.telefone2}
-                      onChange={(e) => setFormData({...formData, telefone2: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, telefone2: e.target.value })}
                     />
                   </div>
                 </div>
@@ -319,20 +319,20 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4">
                   <div className="space-y-1">
                     <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">RG Resp 2</label>
-                    <input 
+                    <input
                       type="text"
                       className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                       value={formData.resp2RG || ''}
-                      onChange={(e) => setFormData({...formData, resp2RG: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, resp2RG: e.target.value })}
                     />
                   </div>
                   <div className="space-y-1">
                     <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">CPF Resp 2</label>
-                    <input 
+                    <input
                       type="text"
                       className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                       value={formData.resp2CPF || ''}
-                      onChange={(e) => setFormData({...formData, resp2CPF: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, resp2CPF: e.target.value })}
                     />
                   </div>
                 </div>
@@ -341,20 +341,20 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">Telefone Adicional (3)</label>
-                    <input 
+                    <input
                       type="text"
                       className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                       value={formData.telefone3 || ''}
-                      onChange={(e) => setFormData({...formData, telefone3: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, telefone3: e.target.value })}
                     />
                   </div>
                   <div className="space-y-1">
                     <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">Obs Telefone 3</label>
-                    <input 
+                    <input
                       type="text"
                       className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                       value={formData.obsTelefone3 || ''}
-                      onChange={(e) => setFormData({...formData, obsTelefone3: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, obsTelefone3: e.target.value })}
                     />
                   </div>
                 </div>
@@ -362,20 +362,20 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">Telefone Adicional (4)</label>
-                    <input 
+                    <input
                       type="text"
                       className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                       value={formData.telefone4 || ''}
-                      onChange={(e) => setFormData({...formData, telefone4: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, telefone4: e.target.value })}
                     />
                   </div>
                   <div className="space-y-1">
                     <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">Obs Telefone 4</label>
-                    <input 
+                    <input
                       type="text"
                       className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                       value={formData.obsTelefone4 || ''}
-                      onChange={(e) => setFormData({...formData, obsTelefone4: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, obsTelefone4: e.target.value })}
                     />
                   </div>
                 </div>
@@ -386,7 +386,7 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
                 <select
                   className="w-full p-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-2xl text-gray-800 font-bold outline-none transition-all appearance-none"
                   value={formData.studentStatus}
-                  onChange={(e) => setFormData({...formData, studentStatus: e.target.value as any})}
+                  onChange={(e) => setFormData({ ...formData, studentStatus: e.target.value as any })}
                 >
                   <option value="Ativo">Ativo</option>
                   <option value="Inativo">Inativo</option>
@@ -399,7 +399,7 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
                 <select
                   className="w-full p-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-2xl text-gray-800 font-bold outline-none transition-all appearance-none"
                   value={formData.imageRightsSigned || 'Não'}
-                  onChange={(e) => setFormData({...formData, imageRightsSigned: e.target.value as 'Sim' | 'Não'})}
+                  onChange={(e) => setFormData({ ...formData, imageRightsSigned: e.target.value as 'Sim' | 'Não' })}
                 >
                   <option value="Sim">Sim</option>
                   <option value="Não">Não</option>
@@ -408,14 +408,14 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
             </div>
 
             <div className="flex flex-row gap-3 pt-6">
-              <button 
+              <button
                 type="button"
                 onClick={handleCancel}
                 className="flex-1 bg-gray-100 text-gray-500 py-4 rounded-2xl font-black uppercase hover:bg-gray-200 active:scale-95 transition-all text-sm tracking-widest"
               >
                 Cancelar
               </button>
-              <button 
+              <button
                 type="submit"
                 className="flex-[2] bg-[#3b5998] text-white py-4 rounded-2xl font-black uppercase shadow-lg hover:bg-blue-700 active:scale-95 transition-all text-sm tracking-widest border-b-4 border-blue-900"
               >
@@ -438,9 +438,9 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
                 <X size={24} />
               </button>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4 pb-4">
-              <button 
+              <button
                 onClick={() => cameraInputRef.current?.click()}
                 className="flex flex-col items-center justify-center p-8 bg-blue-50 rounded-[32px] border-2 border-blue-100 active:bg-blue-100 active:scale-95 transition-all group"
               >
@@ -450,7 +450,7 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
                 <span className="text-[10px] font-black text-[#3b5998] uppercase tracking-widest">Câmera</span>
               </button>
 
-              <button 
+              <button
                 onClick={() => fileInputRef.current?.click()}
                 className="flex flex-col items-center justify-center p-8 bg-gray-50 rounded-[32px] border-2 border-gray-100 active:bg-gray-100 active:scale-95 transition-all group"
               >

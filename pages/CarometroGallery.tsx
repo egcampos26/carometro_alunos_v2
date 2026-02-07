@@ -24,7 +24,7 @@ const CarometroGallery: React.FC<CarometroGalleryProps> = ({ students, user, onT
     const matchesShift = isAllShifts || s.shift === shift;
     const matchesGrade = isAllGrades || s.grade === grade;
     const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     return matchesShift && matchesGrade && matchesSearch;
   });
 
@@ -35,12 +35,12 @@ const CarometroGallery: React.FC<CarometroGalleryProps> = ({ students, user, onT
   );
 
   return (
-    <Layout 
+    <Layout
       title={displayTitle}
       user={user}
       onToggleRole={onToggleRole}
     >
-      <div className="p-4 sm:p-8 max-w-7xl mx-auto w-full">
+      <div className="p-4 sm:p-8 2xl:px-12 max-w-[1920px] mx-auto w-full">
         {/* Search Bar */}
         <div className="relative mb-10 max-w-xl mx-auto">
           <input
@@ -54,21 +54,21 @@ const CarometroGallery: React.FC<CarometroGalleryProps> = ({ students, user, onT
         </div>
 
         {filteredStudents.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 sm:gap-x-6 gap-y-10 sm:gap-y-14">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-x-4 sm:gap-x-6 gap-y-10 sm:gap-y-14">
             {filteredStudents.map((student) => {
               const hasImageRights = student.imageRightsSigned !== 'Não';
               const displayPhoto = hasImageRights ? student.photoUrl : NO_IMAGE_RIGHTS_URL;
 
               return (
-                <div 
-                  key={student.id} 
+                <div
+                  key={student.id}
                   className="flex flex-col items-center group cursor-pointer transition-all"
                   onClick={() => navigate(`/student/${student.id}`)}
                 >
                   <div className="w-full aspect-[3/4] bg-gray-100 rounded-2xl overflow-hidden shadow-sm mb-3 border-4 border-transparent group-hover:border-[#3b5998] group-hover:shadow-lg transition-all relative">
-                    <img 
-                      src={displayPhoto} 
-                      alt={student.name} 
+                    <img
+                      src={displayPhoto}
+                      alt={student.name}
                       className={`w-full h-full object-cover transition-all ${!hasImageRights ? 'grayscale opacity-60' : ''}`}
                     />
                     {!hasImageRights && (
@@ -88,7 +88,7 @@ const CarometroGallery: React.FC<CarometroGalleryProps> = ({ students, user, onT
                       </span>
                       <span className="w-1 h-1 bg-gray-300 rounded-full" />
                       <div className="flex items-center gap-0.5 text-gray-400">
-                        <span className="text-[10px] sm:text-[11px] font-black uppercase">N° {student.roomNumber || '?' }</span>
+                        <span className="text-[10px] sm:text-[11px] font-black uppercase">N° {student.roomNumber || '?'}</span>
                       </div>
                     </div>
                   </div>

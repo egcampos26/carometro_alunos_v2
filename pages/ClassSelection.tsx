@@ -25,14 +25,14 @@ const ClassSelection: React.FC<ClassSelectionProps> = ({ user, onToggleRole }) =
   );
 
   return (
-    <Layout 
+    <Layout
       title={headerTitle}
       user={user}
       onToggleRole={onToggleRole}
     >
-      <div className="p-4 sm:p-8 md:p-12 max-w-6xl mx-auto w-full">
+      <div className="p-4 sm:p-8 md:p-12 2xl:px-20 max-w-[1920px] mx-auto w-full">
         {gradesForShift.length > 0 ? (
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-4 sm:gap-6">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-4 sm:gap-6">
             {gradesForShift.map((grade) => (
               <button
                 key={grade}
@@ -45,7 +45,7 @@ const ClassSelection: React.FC<ClassSelectionProps> = ({ user, onToggleRole }) =
           </div>
         ) : (
           <div className="text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-100">
-             <p className="text-gray-400 font-bold uppercase tracking-widest text-sm">Nenhuma turma configurada para este período</p>
+            <p className="text-gray-400 font-bold uppercase tracking-widest text-sm">Nenhuma turma configurada para este período</p>
           </div>
         )}
       </div>

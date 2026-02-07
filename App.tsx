@@ -66,24 +66,45 @@ const App: React.FC = () => {
 
   const updateStudent = (updatedStudent: Student) => {
     const oldStudent = students.find(s => s.id === updatedStudent.id);
-    
+
     // Gerar resumo de alterações
     let changeSummary = '';
     if (oldStudent) {
       const changes = [];
-      if (oldStudent.name !== updatedStudent.name) changes.push(`Nome: de "${oldStudent.name}" para "${updatedStudent.name}"`);
-      if (oldStudent.grade !== updatedStudent.grade) changes.push(`Turma: de "${oldStudent.grade}" para "${updatedStudent.grade}"`);
-      if (oldStudent.shift !== updatedStudent.shift) changes.push(`Período: de "${oldStudent.shift}" para "${updatedStudent.shift}"`);
-      if (oldStudent.photoUrl !== updatedStudent.photoUrl) changes.push('Foto de perfil foi atualizada');
-      if (oldStudent.studentStatus !== updatedStudent.studentStatus) changes.push(`Status: de "${oldStudent.studentStatus}" para "${updatedStudent.studentStatus}"`);
-      if (oldStudent.departureMethod !== updatedStudent.departureMethod) changes.push(`Modo de saída: de "${oldStudent.departureMethod}" para "${updatedStudent.departureMethod}"`);
-      if (oldStudent.telefone3 !== updatedStudent.telefone3) changes.push(`Tel 3: "${oldStudent.telefone3}" -> "${updatedStudent.telefone3}"`);
-      if (oldStudent.obsTelefone3 !== updatedStudent.obsTelefone3) changes.push(`Obs Tel 3: "${oldStudent.obsTelefone3}" -> "${updatedStudent.obsTelefone3}"`);
-      if (oldStudent.telefone4 !== updatedStudent.telefone4) changes.push(`Tel 4: "${oldStudent.telefone4}" -> "${updatedStudent.telefone4}"`);
-      if (oldStudent.obsTelefone4 !== updatedStudent.obsTelefone4) changes.push(`Obs Tel 4: "${oldStudent.obsTelefone4}" -> "${updatedStudent.obsTelefone4}"`);
-      
-      changeSummary = changes.length > 0 
-        ? `\n\nAlterações realizadas:\n• ${changes.join('\n• ')}` 
+      // Dados Pessoais
+      if (oldStudent.name !== updatedStudent.name) changes.push(`Nome: "${oldStudent.name}" -> "${updatedStudent.name}"`);
+      if (oldStudent.imageRightsSigned !== updatedStudent.imageRightsSigned) changes.push(`Direito de Imagem: "${oldStudent.imageRightsSigned || 'Não'}" -> "${updatedStudent.imageRightsSigned}"`);
+      if (oldStudent.photoUrl !== updatedStudent.photoUrl) changes.push('Foto de perfil atualizada');
+      if (oldStudent.birthDate !== updatedStudent.birthDate) changes.push(`Data Nasc.: "${oldStudent.birthDate}" -> "${updatedStudent.birthDate}"`);
+
+      // Documentos
+      if (oldStudent.registrationNumber !== updatedStudent.registrationNumber) changes.push(`RA: "${oldStudent.registrationNumber}" -> "${updatedStudent.registrationNumber}"`);
+      if (oldStudent.rga !== updatedStudent.rga) changes.push(`RGA: "${oldStudent.rga}" -> "${updatedStudent.rga}"`);
+      if (oldStudent.studentRG !== updatedStudent.studentRG) changes.push(`RG Aluno: "${oldStudent.studentRG}" -> "${updatedStudent.studentRG}"`);
+      if (oldStudent.studentCPF !== updatedStudent.studentCPF) changes.push(`CPF Aluno: "${oldStudent.studentCPF}" -> "${updatedStudent.studentCPF}"`);
+
+      // Escolar
+      if (oldStudent.grade !== updatedStudent.grade) changes.push(`Turma: "${oldStudent.grade}" -> "${updatedStudent.grade}"`);
+      if (oldStudent.shift !== updatedStudent.shift) changes.push(`Período: "${oldStudent.shift}" -> "${updatedStudent.shift}"`);
+      if (oldStudent.roomNumber !== updatedStudent.roomNumber) changes.push(`N° Chamada: "${oldStudent.roomNumber}" -> "${updatedStudent.roomNumber}"`);
+      if (oldStudent.studentStatus !== updatedStudent.studentStatus) changes.push(`Status: "${oldStudent.studentStatus}" -> "${updatedStudent.studentStatus}"`);
+      if (oldStudent.departureMethod !== updatedStudent.departureMethod) changes.push(`Saída: "${oldStudent.departureMethod}" -> "${updatedStudent.departureMethod}"`);
+
+      // Responsável 1
+      if (oldStudent.filiacao1 !== updatedStudent.filiacao1) changes.push(`Resp. 1: "${oldStudent.filiacao1}" -> "${updatedStudent.filiacao1}"`);
+      if (oldStudent.telefone1 !== updatedStudent.telefone1) changes.push(`Tel. 1: "${oldStudent.telefone1}" -> "${updatedStudent.telefone1}"`);
+      if (oldStudent.obsFiliacao1 !== updatedStudent.obsFiliacao1) changes.push(`Obs Resp. 1 alterada`);
+
+      // Responsável 2
+      if (oldStudent.filiacao2 !== updatedStudent.filiacao2) changes.push(`Resp. 2: "${oldStudent.filiacao2}" -> "${updatedStudent.filiacao2}"`);
+      if (oldStudent.telefone2 !== updatedStudent.telefone2) changes.push(`Tel. 2: "${oldStudent.telefone2}" -> "${updatedStudent.telefone2}"`);
+
+      // Outros Contatos
+      if (oldStudent.telefone3 !== updatedStudent.telefone3) changes.push(`Tel. 3: "${oldStudent.telefone3}" -> "${updatedStudent.telefone3}"`);
+      if (oldStudent.telefone4 !== updatedStudent.telefone4) changes.push(`Tel. 4: "${oldStudent.telefone4}" -> "${updatedStudent.telefone4}"`);
+
+      changeSummary = changes.length > 0
+        ? `\n\nAlterações realizadas:\n• ${changes.join('\n• ')}`
         : '\n\nNenhuma alteração de conteúdo detectada.';
     }
 
@@ -99,7 +120,7 @@ const App: React.FC = () => {
 
   const updateOccurrence = (updatedOcc: Occurrence) => {
     const oldOcc = occurrences.find(o => o.id === updatedOcc.id);
-    
+
     let changeSummary = '';
     if (oldOcc) {
       const changes = [];
@@ -107,9 +128,9 @@ const App: React.FC = () => {
       if (oldOcc.category !== updatedOcc.category) changes.push(`Categoria: "${oldOcc.category}" -> "${updatedOcc.category}"`);
       if (oldOcc.description !== updatedOcc.description) changes.push('O texto da descrição foi alterado');
       if (oldOcc.date !== updatedOcc.date) changes.push(`Data: ${oldOcc.date} -> ${updatedOcc.date}`);
-      
-      changeSummary = changes.length > 0 
-        ? `\n\nAlterações na ocorrência:\n• ${changes.join('\n• ')}` 
+
+      changeSummary = changes.length > 0
+        ? `\n\nAlterações na ocorrência:\n• ${changes.join('\n• ')}`
         : '\n\nNenhuma alteração de conteúdo detectada.';
     }
 
@@ -120,9 +141,9 @@ const App: React.FC = () => {
   const deleteOccurrence = (id: string) => {
     const occToDelete = occurrences.find(o => o.id === id);
     const student = occToDelete ? students.find(s => s.id === occToDelete.studentId) : null;
-    
+
     setOccurrences(prev => prev.filter(occ => occ.id !== id));
-    
+
     if (occToDelete) {
       addLog('Exclusão de Ocorrência', `A ocorrência "${occToDelete.title}" (ID: ${id}) do aluno ${student?.name || 'Desconhecido'} foi excluída permanentemente do sistema por ${user.name}.`);
     }
@@ -134,11 +155,11 @@ const App: React.FC = () => {
         <div className="flex-1 flex flex-col w-full max-w-7xl mx-auto bg-white shadow-sm md:my-4 md:rounded-xl overflow-hidden relative">
           <Routes>
             <Route path="/" element={<ShiftSelection user={user} />} />
-            <Route path="/classes/:shift" element={<ClassSelection user={user} onToggleRole={() => {}} />} />
-            <Route path="/carometro/:shift/:grade" element={<CarometroGallery students={students} user={user} onToggleRole={() => {}} />} />
-            <Route path="/student/:id" element={<StudentDetail students={students} occurrences={occurrences} user={user} onToggleRole={() => {}} />} />
-            <Route path="/edit-student/:id" element={<StudentEdit students={students} onUpdate={updateStudent} user={user} onToggleRole={() => {}} />} />
-            <Route path="/occurrences" element={<OccurrencesList students={students} occurrences={occurrences} user={user} onToggleRole={() => {}} />} />
+            <Route path="/classes/:shift" element={<ClassSelection user={user} onToggleRole={() => { }} />} />
+            <Route path="/carometro/:shift/:grade" element={<CarometroGallery students={students} user={user} onToggleRole={() => { }} />} />
+            <Route path="/student/:id" element={<StudentDetail students={students} occurrences={occurrences} user={user} onToggleRole={() => { }} />} />
+            <Route path="/edit-student/:id" element={<StudentEdit students={students} onUpdate={updateStudent} user={user} onToggleRole={() => { }} />} />
+            <Route path="/occurrences" element={<OccurrencesList students={students} occurrences={occurrences} user={user} onToggleRole={() => { }} />} />
             <Route path="/occurrence/:id" element={<OccurrenceDetail students={students} occurrences={occurrences} user={user} onDelete={deleteOccurrence} />} />
             <Route path="/edit-occurrence/:id" element={<OccurrenceEdit students={students} occurrences={occurrences} onUpdate={updateOccurrence} user={user} />} />
             <Route path="/add-occurrence/:studentId" element={<OccurrenceAdd students={students} onAdd={addOccurrence} user={user} />} />

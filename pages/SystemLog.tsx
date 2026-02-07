@@ -45,7 +45,7 @@ const SystemLog: React.FC<SystemLogProps> = ({ logs }) => {
 
   return (
     <Layout title={headerTitle}>
-      <div className="p-4 sm:p-8 max-w-6xl mx-auto w-full pb-24">
+      <div className="p-4 sm:p-8 max-w-6xl 2xl:max-w-7xl mx-auto w-full pb-24">
 
         {/* Filtros Container */}
         <div className="bg-white p-6 rounded-[32px] border-2 border-gray-50 shadow-sm mb-8 space-y-4">
