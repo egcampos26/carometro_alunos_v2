@@ -4,14 +4,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Student, Occurrence, AuthUser } from '../types';
 import { UserCheck, Calendar, Search, Users, X, CheckCircle2 } from 'lucide-react';
+import { NO_IMAGE_RIGHTS_URL } from '../constants';
 
 interface OccurrenceAddProps {
   students: Student[];
-  onAdd: (occ: Occurrence) => void;
+  onAddOccurrence: (occ: Occurrence) => void;
   user: AuthUser;
+  onToggleRole: () => void;
 }
 
-const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAdd, user }) => {
+const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAddOccurrence, user, onToggleRole }) => {
   const { studentId } = useParams<{ studentId: string }>();
   const navigate = useNavigate();
   const initialStudent = students.find(s => s.id === studentId);
@@ -62,7 +64,7 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAdd, user }) 
         category,
         registeredBy: user.name
       };
-      onAdd(newOcc);
+      onAddOccurrence(newOcc);
     });
 
     navigate(`/student/${initialStudent.id}`, { replace: true });
@@ -79,7 +81,7 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAdd, user }) 
       <div className="p-6 max-w-4xl mx-auto pb-20">
         {/* Aluno Principal */}
         <div className="mb-6 flex items-center gap-4 p-4 bg-blue-50/30 rounded-2xl border border-blue-100/50">
-          <img src={initialStudent.photoUrl} className="w-16 h-16 rounded-xl object-cover shadow-sm border-2 border-white" alt="" />
+          <img src={initialStudent.photoUrl || NO_IMAGE_RIGHTS_URL} className="w-16 h-16 rounded-xl object-cover shadow-sm border-2 border-white" alt="" />
           <div>
             <h3 className="font-black text-[#3b5998] uppercase text-sm leading-tight">{initialStudent.name}</h3>
             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">{initialStudent.grade} • {initialStudent.shift}</p>
@@ -116,7 +118,7 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAdd, user }) 
                     onClick={() => toggleAdditionalStudent(s.id)}
                     className="w-full p-4 flex items-center gap-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0"
                   >
-                    <img src={s.photoUrl} className="w-10 h-10 rounded-lg object-cover" alt="" />
+                    <img src={s.photoUrl || NO_IMAGE_RIGHTS_URL} className="w-10 h-10 rounded-lg object-cover" alt="" />
                     <div className="text-left">
                       <p className="text-xs font-black text-gray-800 uppercase leading-none">{s.name}</p>
                       <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1">{s.grade} • RA: {s.registrationNumber}</p>

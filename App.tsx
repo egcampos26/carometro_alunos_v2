@@ -48,6 +48,7 @@ const App: React.FC = () => {
         ]);
         setStudents(studentsData);
         setOccurrences(occurrencesData);
+        console.log(`📊 App loaded: ${studentsData.length} students, ${occurrencesData.length} occurrences`);
       } catch (err) {
         console.error('Falha ao carregar dados:', err);
         setError('Não foi possível conectar ao banco de dados.');

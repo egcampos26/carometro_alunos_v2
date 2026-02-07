@@ -13,10 +13,11 @@ const ShiftSelection: React.FC<ShiftSelectionProps> = ({ user }) => {
   const navigate = useNavigate();
 
   const handleSelect = (shift: Shift) => {
+    console.log(`🔘 Shift clicked: ${shift}, navigating to: /turnos/${shift}`);
     if (shift === Shift.ALL) {
       navigate(`/carometro/Todos/Todos`);
     } else {
-      navigate(`/classes/${shift}`);
+      navigate(`/turnos/${shift}`);
     }
   };
 
@@ -27,14 +28,14 @@ const ShiftSelection: React.FC<ShiftSelectionProps> = ({ user }) => {
   );
 
   return (
-    <Layout 
-      title={headerTitle} 
-      showHome={false} 
+    <Layout
+      title={headerTitle}
+      showHome={false}
       showBack={false}
       user={user}
     >
       <div className="px-6 sm:px-10 md:px-12 flex flex-col h-full max-w-5xl mx-auto w-full">
-        
+
         {/* Container de instrução com padding controlado para manter proporção */}
         <div className="flex flex-col items-center justify-center py-8 sm:py-12 md:py-16 lg:py-20">
           <h2 className="text-[#3b5998] font-black uppercase tracking-widest text-lg sm:text-xl md:text-2xl text-center">
@@ -79,7 +80,7 @@ const ShiftSelection: React.FC<ShiftSelectionProps> = ({ user }) => {
             <ClipboardList size={22} />
             Consultar Ocorrências
           </button>
-          
+
           <button
             onClick={() => navigate('/logs')}
             className="w-full bg-gray-50 text-gray-500 py-5 rounded-3xl font-black text-sm sm:text-base shadow-sm border-2 border-gray-200 flex items-center justify-center gap-3 hover:bg-gray-100 active:scale-95 transition-all uppercase tracking-widest"

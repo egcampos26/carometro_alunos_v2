@@ -68,7 +68,7 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
   };
 
   const handleCancel = () => {
-    navigate(`/student/${formData.id}`);
+    navigate(`/student/${formData.id}`, { replace: true });
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

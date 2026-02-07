@@ -3,19 +3,25 @@ import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { SHIFT_GRADES } from '../constants';
-import { AuthUser } from '../types';
+import { AuthUser, Student } from '../types';
 
 interface ClassSelectionProps {
+  students: Student[];
   user: AuthUser;
   onToggleRole: () => void;
 }
 
-const ClassSelection: React.FC<ClassSelectionProps> = ({ user, onToggleRole }) => {
+const ClassSelection: React.FC<ClassSelectionProps> = ({ students, user, onToggleRole }) => {
   const { shift } = useParams<{ shift: string }>();
   const navigate = useNavigate();
 
   // Obtém as turmas específicas do período ou um array vazio se não houver correspondência
   const gradesForShift = shift ? SHIFT_GRADES[shift] || [] : [];
+
+  // Filtra apenas as turmas que realmente têm alunos cadastrados
+  const availableGrades = gradesForShift.filter(grade =>
+    students.some(s => s.shift === shift && s.grade === grade)
+  );
 
   const headerTitle = (
     <div className="flex flex-col items-center leading-none px-1">
@@ -31,9 +37,9 @@ const ClassSelection: React.FC<ClassSelectionProps> = ({ user, onToggleRole }) =
       onToggleRole={onToggleRole}
     >
       <div className="p-4 sm:p-8 md:p-12 2xl:px-20 max-w-[1920px] mx-auto w-full">
-        {gradesForShift.length > 0 ? (
+        {availableGrades.length > 0 ? (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-4 sm:gap-6">
-            {gradesForShift.map((grade) => (
+            {availableGrades.map((grade) => (
               <button
                 key={grade}
                 onClick={() => navigate(`/carometro/${shift}/${grade}`)}

@@ -15,7 +15,12 @@ export const studentService = {
             throw error;
         }
 
-        if (!data) return [];
+        if (!data) {
+            console.warn('No data returned from ALUNOS query');
+            return [];
+        }
+
+        console.log(`✅ Loaded ${data.length} students from database`);
 
         return data.map((row: any) => {
             // Join dados_alunos (should be a single object due to 1:1, but select returns array sometimes? No, with 1:1 it is object if configured right, but let's be safe)
@@ -30,16 +35,16 @@ export const studentService = {
             return {
                 id: row.id_aluno.toString(), // Convert BigInt/Number to String for App
                 name: row.nome_aluno || '',
-                registrationNumber: row.ra || '',
-                rga: row.rga || '',
+                registrationNumber: row.ra_aluno || '',
+                rga: row.rga_aluno || '',
                 studentRG: row.rg_aluno || '',
                 studentCPF: row.cpf_aluno || '',
-                roomNumber: row.n_sala || '',
+                roomNumber: row.n_sala_aluno || '',
                 shift: (row.periodo_aluno as Shift) || Shift.MORNING,
                 grade: gradeCombined,
                 photoUrl: row.foto_aluno || '',
                 birthDate: row.data_nasc_aluno || '',
-                departureMethod: (row.como_vai_embora as DepartureMethod) || 'Responsável',
+                departureMethod: (row.como_vai_aluno as DepartureMethod) || 'Responsável',
                 studentStatus: row.situacao_aluno || 'Ativo',
                 imageRightsSigned: row.direito_imagem_assinado ? 'Sim' : 'Não',
 
@@ -75,17 +80,17 @@ export const studentService = {
         const { error: errorAlunos } = await supabase.from('ALUNOS').insert({
             id_aluno: id,
             nome_aluno: student.name,
-            ra: student.registrationNumber,
-            rga: student.rga,
+            ra_aluno: student.registrationNumber,
+            rga_aluno: student.rga,
             rg_aluno: student.studentRG,
             cpf_aluno: student.studentCPF,
-            n_sala: student.roomNumber,
+            n_sala_aluno: student.roomNumber,
             periodo_aluno: student.shift,
             serie_aluno: serie,
             turma_aluno: turma,
             foto_aluno: student.photoUrl,
             data_nasc_aluno: student.birthDate || null, // Date or null
-            como_vai_embora: student.departureMethod,
+            como_vai_aluno: student.departureMethod,
             situacao_aluno: student.studentStatus,
             direito_imagem_assinado: student.imageRightsSigned === 'Sim'
         });
@@ -126,17 +131,17 @@ export const studentService = {
 
         const { error: errorAlunos } = await supabase.from('ALUNOS').update({
             nome_aluno: student.name,
-            ra: student.registrationNumber,
-            rga: student.rga,
+            ra_aluno: student.registrationNumber,
+            rga_aluno: student.rga,
             rg_aluno: student.studentRG,
             cpf_aluno: student.studentCPF,
-            n_sala: student.roomNumber,
+            n_sala_aluno: student.roomNumber,
             periodo_aluno: student.shift,
             serie_aluno: serie,
             turma_aluno: turma,
             foto_aluno: student.photoUrl,
             data_nasc_aluno: student.birthDate || null,
-            como_vai_embora: student.departureMethod,
+            como_vai_aluno: student.departureMethod,
             situacao_aluno: student.studentStatus,
             direito_imagem_assinado: student.imageRightsSigned === 'Sim'
         }).eq('id_aluno', id);
