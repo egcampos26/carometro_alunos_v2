@@ -82,14 +82,10 @@ const CarometroGallery: React.FC<CarometroGalleryProps> = ({ students, user, onT
                     <span className="text-[11px] sm:text-xs font-black text-gray-800 uppercase leading-tight line-clamp-2">
                       {student.name}
                     </span>
-                    <div className="flex items-center justify-center mt-1 gap-1.5">
+                    <div className="flex items-center justify-center mt-1">
                       <span className="text-sm sm:text-base text-[#3b5998] font-black uppercase tracking-tighter">
                         {student.grade}
                       </span>
-                      <span className="w-1 h-1 bg-gray-300 rounded-full" />
-                      <div className="flex items-center gap-0.5 text-gray-400">
-                        <span className="text-[10px] sm:text-[11px] font-black uppercase">N° {student.roomNumber || '?'}</span>
-                      </div>
                     </div>
                   </div>
                 </div>
