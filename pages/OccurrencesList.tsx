@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Occurrence, Student, AuthUser } from '../types';
 import { Search, User, Clock, FileText, LayoutList, Plus, Calendar, X, EyeOff } from 'lucide-react';
+import { NO_IMAGE_RIGHTS_URL } from '../constants';
 
 interface OccurrencesListProps {
   students: Student[];
@@ -130,8 +131,12 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
                   onClick={() => navigate(`/occurrences/${occ.id}`, { state: { from: 'list' } })}
                 >
                   <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 bg-gray-50 rounded-2xl overflow-hidden border-2 border-white shadow-sm">
-                    {student?.photoUrl ? (
-                      <img src={student.photoUrl} alt={student.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                    {student ? (
+                      <img
+                        src={student.imageRightsSigned === 'Sim' ? student.photoUrl : NO_IMAGE_RIGHTS_URL}
+                        alt={student.name}
+                        className={`w-full h-full object-cover group-hover:scale-110 transition-transform ${student.imageRightsSigned !== 'Sim' ? 'grayscale opacity-60' : ''}`}
+                      />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-200">
                         <User size={32} />

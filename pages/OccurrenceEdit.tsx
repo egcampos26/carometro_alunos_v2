@@ -4,6 +4,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Student, Occurrence, AuthUser } from '../types';
 import { UserCheck, Calendar, Info, Clock, Save, X, Eye, EyeOff } from 'lucide-react';
+import { NO_IMAGE_RIGHTS_URL } from '../constants';
 
 interface OccurrenceEditProps {
   students: Student[];
@@ -101,11 +102,18 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
     </div>
   );
 
+  const hasImageRights = student.imageRightsSigned === 'Sim';
+  const displayPhoto = hasImageRights ? student.photoUrl : NO_IMAGE_RIGHTS_URL;
+
   return (
     <Layout title={headerTitle} showBack={false}>
       <div className="p-6 max-w-4xl mx-auto pb-20">
         <div className="mb-8 flex items-center gap-4 p-5 bg-blue-50/30 rounded-3xl border border-blue-100/50">
-          <img src={student.photoUrl} className="w-16 h-16 rounded-2xl object-cover shadow-sm border-2 border-white" alt="" />
+          <img
+            src={displayPhoto}
+            className={`w-16 h-16 rounded-2xl object-cover shadow-sm border-2 border-white ${!hasImageRights ? 'grayscale opacity-60' : ''}`}
+            alt={student.name}
+          />
           <div>
             <h3 className="font-black text-[#3b5998] uppercase text-sm leading-tight">{student.name}</h3>
             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">{student.grade} • RA: {student.registrationNumber}</p>

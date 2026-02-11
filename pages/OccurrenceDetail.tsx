@@ -4,6 +4,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Student, Occurrence, AuthUser } from '../types';
 import { User, Clock, ChevronRight, Users, Trash2, AlertCircle, Edit3, X, AlertTriangle, EyeOff } from 'lucide-react';
+import { NO_IMAGE_RIGHTS_URL } from '../constants';
 
 interface OccurrenceDetailProps {
   students: Student[];
@@ -68,7 +69,11 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
           className="flex items-center gap-4 p-4 bg-[#3b5998]/5 rounded-xl border border-[#3b5998]/10 active:bg-[#3b5998]/10 transition-colors cursor-pointer"
         >
           <div className="w-16 h-16 shrink-0 bg-white rounded-lg overflow-hidden border-2 border-white shadow-sm">
-            <img src={student.photoUrl} alt={student.name} className="w-full h-full object-cover" />
+            <img
+              src={student.imageRightsSigned === 'Sim' ? student.photoUrl : NO_IMAGE_RIGHTS_URL}
+              alt={student.name}
+              className={`w-full h-full object-cover ${student.imageRightsSigned !== 'Sim' ? 'grayscale opacity-60' : ''}`}
+            />
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-[#3b5998] truncate uppercase text-sm leading-tight">{student.name}</h3>
@@ -129,7 +134,11 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
                         : 'bg-white border-gray-200 text-gray-600 hover:border-[#3b5998] hover:text-[#3b5998]'
                         }`}
                     >
-                      <img src={s.photoUrl} className="w-6 h-6 rounded-full object-cover" alt="" />
+                      <img
+                        src={s.imageRightsSigned === 'Sim' ? s.photoUrl : NO_IMAGE_RIGHTS_URL}
+                        className={`w-6 h-6 rounded-full object-cover ${s.imageRightsSigned !== 'Sim' ? 'grayscale opacity-60' : ''}`}
+                        alt={s.name}
+                      />
                       <span className="text-[10px] font-black uppercase whitespace-nowrap">{s.name.split(' ')[0]}</span>
                     </button>
                   ))}
