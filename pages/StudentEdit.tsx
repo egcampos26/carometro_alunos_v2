@@ -386,7 +386,7 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
                 <select
                   className="w-full p-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-2xl text-gray-800 font-bold outline-none transition-all appearance-none"
                   value={formData.studentStatus}
-                  onChange={(e) => setFormData({ ...formData, studentStatus: e.target.value as any })}
+                  onChange={(e) => setFormData({ ...formData, studentStatus: e.target.value as Student['studentStatus'] })}
                 >
                   <option value="Ativo">Ativo</option>
                   <option value="Inativo">Inativo</option>

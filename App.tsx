@@ -300,6 +300,7 @@ const App: React.FC = () => {
                     } catch (err) {
                       console.error('Erro ao atualizar ocorrência:', err);
                       alert('Erro ao salvar alterações na ocorrência.');
+                      throw err;
                     }
                   }}
                   user={user}

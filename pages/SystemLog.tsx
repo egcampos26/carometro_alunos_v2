@@ -15,7 +15,13 @@ const SystemLog: React.FC<SystemLogProps> = ({ logs }) => {
   const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
 
   const filteredLogs = logs.filter(log => {
-    const logDate = log.timestamp.split('T')[0];
+    const logDateObj = new Date(log.timestamp);
+    // Ajuste para pegar a data local (pt-BR) no formato YYYY-MM-DD para comparação
+    const year = logDateObj.getFullYear();
+    const month = String(logDateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(logDateObj.getDate()).padStart(2, '0');
+    const logDate = `${year}-${month}-${day}`;
+
     const matchesStart = startDate === '' || logDate >= startDate;
     const matchesEnd = endDate === '' || logDate <= endDate;
     const matchesSearch = searchTerm === '' ||
@@ -54,7 +60,7 @@ const SystemLog: React.FC<SystemLogProps> = ({ logs }) => {
             <div className="relative">
               <input
                 type="text"
-                placeholder="Buscar ação, usuário..."
+                placeholder="Buscar ação, usuário, aluno..."
                 className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-2xl outline-none shadow-sm font-medium transition-all text-sm"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}

@@ -188,7 +188,7 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAddOccurrence
                 <button
                   key={cat}
                   type="button"
-                  onClick={() => setCategory(cat as any)}
+                  onClick={() => setCategory(cat as Occurrence['category'])}
                   className={`py-3 px-2 rounded-xl text-xs font-black uppercase tracking-tight border-2 transition-all shadow-sm ${category === cat
                     ? 'bg-[#3b5998] border-[#3b5998] text-white'
                     : 'bg-white border-gray-100 text-gray-400 hover:border-gray-200'
@@ -207,8 +207,8 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAddOccurrence
               type="button"
               onClick={() => setIsConfidential(!isConfidential)}
               className={`w-full p-4 rounded-2xl border-2 transition-all shadow-sm flex items-center justify-between ${isConfidential
-                  ? 'bg-red-50 border-red-300 text-red-700'
-                  : 'bg-gray-50 border-gray-100 text-gray-500 hover:border-gray-200'
+                ? 'bg-red-50 border-red-300 text-red-700'
+                : 'bg-gray-50 border-gray-100 text-gray-500 hover:border-gray-200'
                 }`}
             >
               <div className="flex items-center gap-3">

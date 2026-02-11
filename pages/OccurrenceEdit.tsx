@@ -8,7 +8,7 @@ import { UserCheck, Calendar, Info, Clock, Save, X, Eye, EyeOff } from 'lucide-r
 interface OccurrenceEditProps {
   students: Student[];
   occurrences: Occurrence[];
-  onUpdateOccurrence: (occ: Occurrence) => void;
+  onUpdateOccurrence: (occ: Occurrence) => Promise<void>;
   user: AuthUser;
 }
 
@@ -25,6 +25,7 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
   const [date, setDate] = useState('');
   const [category, setCategory] = useState<Occurrence['category']>('Comportamental');
   const [isConfidential, setIsConfidential] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (occurrence) {
@@ -52,9 +53,11 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
     );
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !description || !date) return;
+
+    setIsSaving(true);
 
     const updatedOcc: Occurrence = {
       ...occurrence,
@@ -65,8 +68,31 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
       isConfidential
     };
 
-    onUpdateOccurrence(updatedOcc);
-    navigate(`/occurrences/${occurrence.id}`, { replace: true, state: location.state });
+    try {
+      await onUpdateOccurrence(updatedOcc);
+
+      // Navigation logic based on previous location
+      const from = location.state?.from;
+
+      if (from === 'student') {
+        navigate(`/student/${updatedOcc.studentId}`, { replace: true });
+      } else if (from === 'list') {
+        navigate('/occurrences', { replace: true });
+      } else {
+        // Default fallback: go back if possible, otherwise student page
+        if (window.history.length > 2) {
+          navigate(-1);
+        } else {
+          navigate(`/student/${updatedOcc.studentId}`, { replace: true });
+        }
+      }
+
+    } catch (error) {
+      console.error("Failed to update occurrence:", error);
+      // Alert is handled in App.tsx, but we stop saving state here
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const headerTitle = (

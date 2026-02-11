@@ -54,7 +54,10 @@ export const occurrenceService = {
         }).eq('id_ocorrencias', occurrence.id);
 
 
-        if (error) throw error;
+        if (error) {
+            console.error('Supabase Error in updateOccurrence:', error);
+            throw error;
+        }
     },
 
     async deleteOccurrence(id: string): Promise<void> {

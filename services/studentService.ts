@@ -70,7 +70,10 @@ export const studentService = {
     },
 
     async createStudent(student: Student): Promise<void> {
-        const id = parseInt(student.id); // Assuming ID is numeric string from input
+        const id = parseInt(student.id);
+        if (isNaN(id)) {
+            throw new Error(`Invalid student ID: ${student.id}`);
+        } // Assuming ID is numeric string from input
 
         // Split grade
         const [serie, ...turmaParts] = student.grade.split(' ');
@@ -126,6 +129,9 @@ export const studentService = {
 
     async updateStudent(student: Student): Promise<void> {
         const id = parseInt(student.id);
+        if (isNaN(id)) {
+            throw new Error(`Invalid student ID: ${student.id}`);
+        }
         const [serie, ...turmaParts] = student.grade.split(' ');
         const turma = turmaParts.join(' ');
 
@@ -170,7 +176,11 @@ export const studentService = {
 
     async deleteStudent(id: string): Promise<void> {
         // Cascade delete handles DADOS_ALUNOS
-        const { error } = await supabase.from('ALUNOS').delete().eq('id_aluno', parseInt(id));
+        const numericId = parseInt(id);
+        if (isNaN(numericId)) {
+            throw new Error(`Invalid student ID: ${id}`);
+        }
+        const { error } = await supabase.from('ALUNOS').delete().eq('id_aluno', numericId);
         if (error) throw error;
     }
 };

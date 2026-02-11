@@ -62,6 +62,7 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
       title={headerTitle}
       user={user}
       onToggleRole={onToggleRole}
+      showBack={false}
       rightAction={
         <button
           onClick={handleAddNew}
