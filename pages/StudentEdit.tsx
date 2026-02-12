@@ -24,16 +24,18 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
   const [formData, setFormData] = useState<Student | null>(student ? { ...student } : null);
   const [showSourceModal, setShowSourceModal] = useState(false);
 
+  const hasPermission = user.role === 'Admin' || user.role === 'Manager' || user.role === 'Editor';
+
   useEffect(() => {
-    if (user.role !== 'Admin') {
+    if (!hasPermission) {
       const timer = setTimeout(() => {
         navigate(`/student/${id}`, { replace: true });
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [user.role, navigate, id]);
+  }, [hasPermission, navigate, id]);
 
-  if (user.role !== 'Admin') {
+  if (!hasPermission) {
     return (
       <Layout
         title="ACESSO NEGADO"

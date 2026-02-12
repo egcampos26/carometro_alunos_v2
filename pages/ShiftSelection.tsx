@@ -3,13 +3,14 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Shift, AuthUser } from '../types';
-import { ClipboardList, Activity } from 'lucide-react';
+import { ClipboardList, Activity, UserPlus } from 'lucide-react';
 
 interface ShiftSelectionProps {
   user: AuthUser;
+  onToggleRole: () => void;
 }
 
-const ShiftSelection: React.FC<ShiftSelectionProps> = ({ user }) => {
+const ShiftSelection: React.FC<ShiftSelectionProps> = ({ user, onToggleRole }) => {
   const navigate = useNavigate();
 
   const handleSelect = (shift: Shift) => {
@@ -33,6 +34,7 @@ const ShiftSelection: React.FC<ShiftSelectionProps> = ({ user }) => {
       showHome={false}
       showBack={false}
       user={user}
+      onToggleRole={onToggleRole}
     >
       <div className="px-6 sm:px-10 md:px-12 flex flex-col h-full max-w-5xl mx-auto w-full">
 
@@ -81,13 +83,25 @@ const ShiftSelection: React.FC<ShiftSelectionProps> = ({ user }) => {
             Consultar Ocorrências
           </button>
 
-          <button
-            onClick={() => navigate('/logs')}
-            className="w-full bg-gray-50 text-gray-500 py-5 rounded-3xl font-black text-sm sm:text-base shadow-sm border-2 border-gray-200 flex items-center justify-center gap-3 hover:bg-gray-100 active:scale-95 transition-all uppercase tracking-widest"
-          >
-            <Activity size={22} />
-            Log do Sistema
-          </button>
+          {user.role !== 'User' && (
+            <button
+              onClick={() => navigate('/student/new')}
+              className="w-full bg-[#3b5998] text-white py-5 rounded-3xl font-black text-sm sm:text-base shadow-sm border-2 border-[#3b5998] flex items-center justify-center gap-3 hover:bg-blue-700 active:scale-95 transition-all uppercase tracking-widest"
+            >
+              <UserPlus size={22} />
+              Incluir Novo Aluno
+            </button>
+          )}
+
+          {user.role === 'Admin' && (
+            <button
+              onClick={() => navigate('/logs')}
+              className="w-full bg-gray-50 text-gray-500 py-5 rounded-3xl font-black text-sm sm:text-base shadow-sm border-2 border-gray-200 flex items-center justify-center gap-3 hover:bg-gray-100 active:scale-95 transition-all uppercase tracking-widest"
+            >
+              <Activity size={22} />
+              Log do Sistema
+            </button>
+          )}
         </div>
       </div>
     </Layout>

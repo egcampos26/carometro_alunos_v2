@@ -6,6 +6,7 @@ import ClassSelection from './pages/ClassSelection';
 import CarometroGallery from './pages/CarometroGallery';
 import StudentDetail from './pages/StudentDetail';
 import StudentEdit from './pages/StudentEdit';
+import StudentCreate from './pages/StudentCreate';
 import OccurrencesList from './pages/OccurrencesList';
 import OccurrenceAdd from './pages/OccurrenceAdd';
 import OccurrenceAddMulti from './pages/OccurrenceAddMulti';
@@ -21,6 +22,7 @@ import { detectStudentChanges, formatChangesForLog } from './utils/changeDetecti
 const TEST_USERS: AuthUser[] = [
   { id: 'user-1', name: 'Usuário 1', role: 'User', email: 'user1@escola.com' },
   { id: 'user-2', name: 'Usuário 2', role: 'User', email: 'user2@escola.com' },
+  { id: 'editor-1', name: 'Editor', role: 'Editor', email: 'editor@escola.com' },
   { id: 'manager-1', name: 'Gestor', role: 'Manager', email: 'gestor@escola.com' },
   { id: 'admin-1', name: 'Administrador', role: 'Admin', email: 'admin@escola.com' },
 ];
@@ -45,27 +47,27 @@ const App: React.FC = () => {
   };
 
   // Fetch Data from Supabase
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const [studentsData, occurrencesData, logsData] = await Promise.all([
-          studentService.fetchStudents(),
-          occurrenceService.fetchOccurrences(),
-          logService.fetchLogs()
-        ]);
-        setStudents(studentsData);
-        setOccurrences(occurrencesData);
-        setLogs(logsData);
-        console.log(`📊 App loaded: ${studentsData.length} students, ${occurrencesData.length} occurrences, ${logsData.length} logs`);
-      } catch (err) {
-        console.error('Falha ao carregar dados:', err);
-        setError('Não foi possível conectar ao banco de dados.');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [studentsData, occurrencesData, logsData] = await Promise.all([
+        studentService.fetchStudents(),
+        occurrenceService.fetchOccurrences(),
+        logService.fetchLogs()
+      ]);
+      setStudents(studentsData);
+      setOccurrences(occurrencesData);
+      setLogs(logsData);
+      console.log(`📊 App loaded: ${studentsData.length} students, ${occurrencesData.length} occurrences, ${logsData.length} logs`);
+    } catch (err) {
+      console.error('Falha ao carregar dados:', err);
+      setError('Não foi possível conectar ao banco de dados.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     loadData();
   }, []);
 
@@ -86,6 +88,19 @@ const App: React.FC = () => {
       await logService.createLog(newLog);
     } catch (err) {
       console.error('Failed to save log to database:', err);
+    }
+  };
+
+  const createStudent = async (student: Student) => {
+    try {
+      await studentService.createStudent(student);
+      await loadData(); // Reload list
+
+      // Update local state if needed (though loadStudents does it)
+      // Log action?
+    } catch (error) {
+      console.error('Error creating student:', error);
+      alert('Erro ao criar aluno. Verifique os dados.');
     }
   };
 
@@ -200,6 +215,21 @@ const App: React.FC = () => {
             />
 
             {/* Detalhes e Edição */}
+            <Route
+              path="/student/new"
+              element={
+                user.role === 'User' ? (
+                  <Navigate to="/" replace />
+                ) : (
+                  <StudentCreate
+                    students={students}
+                    onCreate={createStudent}
+                    user={user}
+                    onToggleRole={handleToggleRole}
+                  />
+                )
+              }
+            />
             <Route
               path="/student/:id"
               element={

@@ -18,13 +18,13 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
   const navigate = useNavigate();
   const [showMoreInfo, setShowMoreInfo] = useState(false);
 
-  const isAdmin = user.role === 'Admin' || user.role === 'Manager';
+  const isAdmin = user.role === 'Admin' || user.role === 'Manager' || user.role === 'Editor';
 
   const student = students.find(s => s.id === id);
   const studentOccurrences = occurrences
     .filter(o => {
       if (o.studentId !== id) return false;
-      if (user.role === 'User') return o.registeredBy === user.name;
+      if (user.role === 'User' || user.role === 'Editor') return o.registeredBy === user.name;
       return true;
     })
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -269,19 +269,21 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
               </div>
 
               {/* Botão Mais Informações - Simplificado sem ícone esquerdo e com ícone de Mais no direito */}
-              <button
-                onClick={() => setShowMoreInfo(!showMoreInfo)}
-                className="w-full flex items-center justify-between p-4 sm:p-5 bg-white rounded-3xl border-2 border-gray-50 hover:border-gray-100 transition-all group"
-              >
-                <span className="text-[10px] sm:text-[11px] font-black text-gray-400 uppercase tracking-widest group-hover:text-gray-600 transition-colors">
-                  {showMoreInfo ? 'Ocultar informações' : 'Mais informações'}
-                </span>
-                {showMoreInfo ? (
-                  <Minus className="text-gray-300 group-hover:text-[#3b5998] transition-colors" size={20} />
-                ) : (
-                  <Plus className="text-gray-300 group-hover:text-[#3b5998] transition-colors" size={20} />
-                )}
-              </button>
+              {isAdmin && (
+                <button
+                  onClick={() => setShowMoreInfo(!showMoreInfo)}
+                  className="w-full flex items-center justify-between p-4 sm:p-5 bg-white rounded-3xl border-2 border-gray-50 hover:border-gray-100 transition-all group"
+                >
+                  <span className="text-[10px] sm:text-[11px] font-black text-gray-400 uppercase tracking-widest group-hover:text-gray-600 transition-colors">
+                    {showMoreInfo ? 'Ocultar informações' : 'Mais informações'}
+                  </span>
+                  {showMoreInfo ? (
+                    <Minus className="text-gray-300 group-hover:text-[#3b5998] transition-colors" size={20} />
+                  ) : (
+                    <Plus className="text-gray-300 group-hover:text-[#3b5998] transition-colors" size={20} />
+                  )}
+                </button>
+              )}
             </div>
 
             <div className="pt-8">

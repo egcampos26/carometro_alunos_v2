@@ -36,10 +36,10 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
         occ.title.toLowerCase().includes(search)
       );
 
-      const matchesDate = !hasDateFilter || occ.date === filterDate;
-      const matchesRole = user.role === 'User' ? occ.registeredBy === user.name : true;
+      const mtachesDate = !hasDateFilter || occ.date === filterDate;
+      const matchesRole = (user.role === 'User' || user.role === 'Editor') ? occ.registeredBy === user.name : true;
 
-      return matchesText && matchesDate && matchesRole;
+      return matchesText && mtachesDate && matchesRole;
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     : [];
 

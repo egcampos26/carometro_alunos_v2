@@ -70,18 +70,21 @@ export const studentService = {
     },
 
     async createStudent(student: Student): Promise<void> {
-        const id = parseInt(student.id);
-        if (isNaN(id)) {
-            throw new Error(`Invalid student ID: ${student.id}`);
-        } // Assuming ID is numeric string from input
+
+        let idVal: number | undefined;
+        if (student.id) {
+            const parsed = parseInt(student.id);
+            if (!isNaN(parsed)) {
+                idVal = parsed;
+            }
+        }
 
         // Split grade
         const [serie, ...turmaParts] = student.grade.split(' ');
         const turma = turmaParts.join(' ');
 
         // Insert into ALUNOS
-        const { error: errorAlunos } = await supabase.from('ALUNOS').insert({
-            id_aluno: id,
+        const payload: any = {
             nome_aluno: student.name,
             ra_aluno: student.registrationNumber,
             rga_aluno: student.rga,
@@ -96,13 +99,25 @@ export const studentService = {
             como_vai_aluno: student.departureMethod,
             situacao_aluno: student.studentStatus,
             direito_imagem_assinado: student.imageRightsSigned === 'Sim'
-        });
+        };
+
+        if (idVal !== undefined) {
+            payload.id_aluno = idVal;
+        }
+
+        const { data: insertedStudent, error: errorAlunos } = await supabase
+            .from('ALUNOS')
+            .insert(payload)
+            .select()
+            .single();
 
         if (errorAlunos) throw errorAlunos;
 
+        const newId = insertedStudent.id_aluno;
+
         // Insert into DADOS_ALUNOS
         const { error: errorDados } = await supabase.from('DADOS_ALUNOS').insert({
-            id_aluno: id,
+            id_aluno: newId,
             responsavel_1_aluno: student.filiacao1,
             obs_responsavel_1_aluno: student.obsFiliacao1,
             tel_responsavel_1_aluno: student.telefone1,
@@ -120,9 +135,9 @@ export const studentService = {
         });
 
         if (errorDados) {
-            // Rollback? Supabase doesn't support multi-table transactions via JS client easily without RPC.
-            // For now, simple error throwing.
             console.error('Error creating DADOS_ALUNOS:', errorDados);
+            // Optional: Try to delete the created student to rollback
+            await supabase.from('ALUNOS').delete().eq('id_aluno', newId);
             throw errorDados;
         }
     },
