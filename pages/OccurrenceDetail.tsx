@@ -42,8 +42,8 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
     );
   }
 
-  // Permissão: Admin ou o próprio autor do registro
-  const canModify = user.role === 'Admin' || occurrence.registeredBy === user.name;
+  // Permissão: Admin, Gestor ou o próprio autor do registro
+  const canModify = user.role === 'Admin' || user.role === 'Manager' || (user.role === 'User' && occurrence.registeredBy === user.name);
 
   const confirmDelete = () => {
     const idToDelete = occurrence.id;
@@ -62,7 +62,7 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
   );
 
   return (
-    <Layout title={headerTitle}>
+    <Layout title={headerTitle} showBack={false}>
       <div className="p-6 space-y-6 max-w-4xl mx-auto pb-20">
         <div
           onClick={() => navigate(`/student/${student.id}`)}
@@ -185,6 +185,15 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
             )}
           </div>
         </div>
+
+        {/* Botão Voltar */}
+        <button
+          onClick={() => navigate(`/student/${student.id}`)}
+          className="w-full py-4 bg-gray-100 text-gray-400 rounded-3xl font-black uppercase tracking-widest hover:bg-gray-200 transition-all flex items-center justify-center gap-2 border-2 border-transparent hover:border-gray-200"
+        >
+          <ChevronRight size={18} className="rotate-180" />
+          Voltar para o Perfil
+        </button>
       </div>
 
       {/* Modal de Confirmação de Exclusão */}

@@ -19,9 +19,10 @@ import { logService } from './services/logService';
 import { detectStudentChanges, formatChangesForLog } from './utils/changeDetection';
 
 const TEST_USERS: AuthUser[] = [
-  { id: 'admin-1', name: 'Diretora Silvia', role: 'Admin', email: 'silvia@escola.com' },
-  { id: 'teacher-1', name: 'Prof. Eduardo', role: 'Teacher', email: 'eduardo@escola.com' },
-  { id: 'teacher-2', name: 'Profa. Márcia', role: 'Teacher', email: 'marcia@escola.com' },
+  { id: 'user-1', name: 'Usuário 1', role: 'User', email: 'user1@escola.com' },
+  { id: 'user-2', name: 'Usuário 2', role: 'User', email: 'user2@escola.com' },
+  { id: 'manager-1', name: 'Gestor', role: 'Manager', email: 'gestor@escola.com' },
+  { id: 'admin-1', name: 'Administrador', role: 'Admin', email: 'admin@escola.com' },
 ];
 
 const App: React.FC = () => {
@@ -36,8 +37,12 @@ const App: React.FC = () => {
   });
 
   // Mantendo o estado apenas para o usuário atual padrão (Admin para visualização total)
-  const [currentUserIndex] = useState(0);
+  const [currentUserIndex, setCurrentUserIndex] = useState(0);
   const user = TEST_USERS[currentUserIndex];
+
+  const handleToggleRole = () => {
+    setCurrentUserIndex((prev) => (prev + 1) % TEST_USERS.length);
+  };
 
   // Fetch Data from Supabase
   useEffect(() => {
@@ -114,8 +119,8 @@ const App: React.FC = () => {
 
   const handleCreateOccurrence = async (newOccurrence: Occurrence) => {
     try {
-      await occurrenceService.createOccurrence(newOccurrence);
-      setOccurrences(prev => [newOccurrence, ...prev]);
+      const createdOccurrence = await occurrenceService.createOccurrence(newOccurrence);
+      setOccurrences(prev => [createdOccurrence, ...prev]);
       const student = students.find(s => s.id === newOccurrence.studentId);
       const studentName = student ? student.name : 'Aluno Desconhecido';
       addLog('Nova Ocorrência', `Ocorrência "${newOccurrence.title}" criada para o aluno ${studentName}.`);
@@ -166,7 +171,7 @@ const App: React.FC = () => {
               element={
                 <ShiftSelection
                   user={user}
-                  onToggleRole={() => { }}
+                  onToggleRole={handleToggleRole}
                 />
               }
             />
@@ -177,7 +182,7 @@ const App: React.FC = () => {
                 <ClassSelection
                   students={students}
                   user={user}
-                  onToggleRole={() => { }}
+                  onToggleRole={handleToggleRole}
                 />
               }
             />
@@ -189,7 +194,7 @@ const App: React.FC = () => {
                   students={students}
                   occurrences={occurrences}
                   user={user}
-                  onToggleRole={() => { }}
+                  onToggleRole={handleToggleRole}
                 />
               }
             />
@@ -202,7 +207,7 @@ const App: React.FC = () => {
                   students={students}
                   occurrences={occurrences}
                   user={user}
-                  onToggleRole={() => { }}
+                  onToggleRole={handleToggleRole}
                 />
               }
             />
@@ -210,12 +215,16 @@ const App: React.FC = () => {
             <Route
               path="/student/:id/edit"
               element={
-                <StudentEdit
-                  students={students}
-                  onUpdate={updateStudent}
-                  user={user}
-                  onToggleRole={() => { }}
-                />
+                user.role === 'User' ? (
+                  <Navigate to="/" replace />
+                ) : (
+                  <StudentEdit
+                    students={students}
+                    onUpdate={updateStudent}
+                    user={user}
+                    onToggleRole={handleToggleRole}
+                  />
+                )
               }
             />
 
@@ -227,7 +236,7 @@ const App: React.FC = () => {
                   students={students}
                   occurrences={occurrences}
                   user={user}
-                  onToggleRole={() => { }}
+                  onToggleRole={handleToggleRole}
                 />
               }
             />
@@ -239,7 +248,7 @@ const App: React.FC = () => {
                   students={students}
                   onAddOccurrence={handleCreateOccurrence}
                   user={user}
-                  onToggleRole={() => { }}
+                  onToggleRole={handleToggleRole}
                 />
               }
             />
@@ -251,7 +260,7 @@ const App: React.FC = () => {
                   students={students}
                   onAddOccurrence={handleCreateOccurrence}
                   user={user}
-                  onToggleRole={() => { }}
+                  onToggleRole={handleToggleRole}
                 />
               }
             />
@@ -304,7 +313,7 @@ const App: React.FC = () => {
                     }
                   }}
                   user={user}
-                  onToggleRole={() => { }}
+                  onToggleRole={handleToggleRole}
                 />
               }
             />
@@ -313,9 +322,13 @@ const App: React.FC = () => {
             <Route
               path="/logs"
               element={
-                <SystemLog
-                  logs={logs}
-                />
+                user.role !== 'Admin' ? (
+                  <Navigate to="/" replace />
+                ) : (
+                  <SystemLog
+                    logs={logs}
+                  />
+                )
               }
             />
             <Route path="*" element={<Navigate to="/turnos" />} />

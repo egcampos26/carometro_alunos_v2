@@ -39,6 +39,7 @@ const CarometroGallery: React.FC<CarometroGalleryProps> = ({ students, user, onT
       title={displayTitle}
       user={user}
       onToggleRole={onToggleRole}
+      onBack={() => navigate(`/turnos/${shift}`)}
     >
       <div className="p-4 sm:p-8 2xl:px-12 max-w-[1920px] mx-auto w-full">
         {/* Search Bar */}

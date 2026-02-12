@@ -35,6 +35,7 @@ const ClassSelection: React.FC<ClassSelectionProps> = ({ students, user, onToggl
       title={headerTitle}
       user={user}
       onToggleRole={onToggleRole}
+      onBack={() => navigate('/turnos')}
     >
       <div className="p-4 sm:p-8 md:p-12 2xl:px-20 max-w-[1920px] mx-auto w-full">
         {availableGrades.length > 0 ? (

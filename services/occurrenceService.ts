@@ -27,8 +27,8 @@ export const occurrenceService = {
         }));
     },
 
-    async createOccurrence(occurrence: Occurrence): Promise<void> {
-        const { error } = await supabase.from('OCORRENCIAS_ALUNOS').insert({
+    async createOccurrence(occurrence: Occurrence): Promise<Occurrence> {
+        const { data, error } = await supabase.from('OCORRENCIAS_ALUNOS').insert({
             id_aluno: parseInt(occurrence.studentId),
             date: occurrence.date,
             title: occurrence.title,
@@ -37,9 +37,21 @@ export const occurrenceService = {
             registered_by: occurrence.registeredBy,
             group_id: occurrence.groupId || null,
             is_confidential: occurrence.isConfidential || false
-        });
+        }).select().single();
 
         if (error) throw error;
+
+        return {
+            id: data.id_ocorrencias,
+            studentId: data.id_aluno?.toString() || '',
+            date: data.date,
+            title: data.title,
+            description: data.description,
+            category: data.category,
+            registeredBy: data.registered_by,
+            groupId: data.group_id,
+            isConfidential: data.is_confidential || false
+        };
     },
 
     async updateOccurrence(occurrence: Occurrence): Promise<void> {

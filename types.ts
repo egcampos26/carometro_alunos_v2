@@ -65,6 +65,6 @@ export interface Student {
 export interface AuthUser {
   id: string;
   name: string;
-  role: 'Admin' | 'Teacher';
+  role: 'Admin' | 'Manager' | 'User';
   email: string;
 }

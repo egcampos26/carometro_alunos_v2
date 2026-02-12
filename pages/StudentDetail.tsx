@@ -18,14 +18,18 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
   const navigate = useNavigate();
   const [showMoreInfo, setShowMoreInfo] = useState(false);
 
+  const isAdmin = user.role === 'Admin' || user.role === 'Manager';
+
   const student = students.find(s => s.id === id);
   const studentOccurrences = occurrences
-    .filter(o => o.studentId === id)
+    .filter(o => {
+      if (o.studentId !== id) return false;
+      if (user.role === 'User') return o.registeredBy === user.name;
+      return true;
+    })
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   if (!student) return <div>Aluno não encontrado</div>;
-
-  const isAdmin = user.role === 'Admin';
   const displayPhoto = student.imageRightsSigned === 'Sim' ? student.photoUrl : NO_IMAGE_RIGHTS_URL;
 
   const handleEdit = (e: React.MouseEvent) => {
@@ -63,6 +67,7 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
       user={user}
       onToggleRole={onToggleRole}
       leftAction={null}
+      onBack={() => navigate(`/carometro/${student.shift}/${student.grade}`)}
       rightAction={
         isAdmin ? (
           <button

@@ -11,6 +11,7 @@ interface LayoutProps {
   showBack?: boolean;
   leftAction?: React.ReactNode;
   rightAction?: React.ReactNode;
+  onBack?: () => void;
 }
 
 const Layout: React.FC<LayoutProps> = ({
@@ -19,7 +20,8 @@ const Layout: React.FC<LayoutProps> = ({
   showHome = true,
   showBack = true,
   leftAction,
-  rightAction
+  rightAction,
+  onBack
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -27,6 +29,12 @@ const Layout: React.FC<LayoutProps> = ({
   const handleBack = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (onBack) {
+      onBack();
+      return;
+    }
+
     if (location.pathname === '/') return;
     navigate(-1);
   };

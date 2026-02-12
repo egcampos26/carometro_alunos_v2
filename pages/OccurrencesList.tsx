@@ -37,8 +37,9 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
       );
 
       const matchesDate = !hasDateFilter || occ.date === filterDate;
+      const matchesRole = user.role === 'User' ? occ.registeredBy === user.name : true;
 
-      return matchesText && matchesDate;
+      return matchesText && matchesDate && matchesRole;
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     : [];
 
