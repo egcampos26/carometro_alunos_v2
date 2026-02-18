@@ -280,7 +280,7 @@ const App: React.FC = () => {
   return (
     <HashRouter>
       <div className="min-h-screen bg-gray-50 flex flex-col w-full overflow-x-hidden">
-        <div className="flex-1 flex flex-col w-full max-w-7xl mx-auto bg-white shadow-sm md:my-4 md:rounded-xl overflow-hidden relative">
+        <div className="flex-1 flex flex-col w-full overflow-hidden relative">
           <Routes>
             <Route path="/" element={<Navigate to="/turnos" replace />} />
 
