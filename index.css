@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+/* Custom scrollbar and base styles for a mobile app feel */
+body {
+    background-color: #f3f4f6;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+}
