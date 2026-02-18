@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Portal Tarsila (Teste de Integração)</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f0f2f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 20px;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin-top: 0;
+            color: #3b5998;
+        }
+
+        .user-card {
+            background: #e8f0fe;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 800px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            background: #3b5998;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #2d4373;
+        }
+
+        #logs {
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            background: #333;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 4px;
+            height: 150px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="sidebar">
+            <h2>Portal Tarsila</h2>
+            <div class="user-card">
+                <strong>Usuário Logado:</strong><br>
+                <span id="user-name">Carregando...</span><br>
+                <small id="user-role">...</small>
+            </div>
+
+            <label>Teste de Login:</label>
+            <select id="user-select" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+                <option value="func-001">Func: João (User)</option>
+                <option value="admin-1">Admin: Diretor (Admin)</option>
+                <option value="invalid-user">Usuário Inválido</option>
+            </select>
+            <button onclick="sendAuth()">Re-enviar Autenticação</button>
+
+            <div id="logs">LOGS DO PORTAL:</div>
+        </div>
+
+        <div class="content">
+            <h1>Aplicação Carômetro (Iframe)</h1>
+            <!-- Apontando para o localhost do Vite -->
+            <iframe id="carometro-frame" src="http://localhost:5173" allow="clipboard-read; clipboard-write"></iframe>
+        </div>
+    </div>
+
+    <script>
+        const iframe = document.getElementById('carometro-frame');
+        const logDiv = document.getElementById('logs');
+
+        function log(msg) {
+            logDiv.innerHTML += `<div>> ${msg}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // Usuários Mockados para Teste
+        const MOCK_USERS = {
+            'func-001': { id_func: 'func-001', name: 'João Silva', role: 'User', email: 'joao@escola.sp.gov.br' },
+            'admin-1': { id_func: 'admin-1', name: 'Diretora Maria', role: 'Admin', email: 'diretora@escola.sp.gov.br' },
+            'invalid-user': { id_func: '99999', name: 'Inexistente', role: 'User' }
+        };
+
+        // 1. Escuta mensagens do Iframe
+        window.addEventListener('message', (event) => {
+            // Log tudo para debug
+            console.log("Portal recebeu mensagem:", event.data);
+
+            if (event.data.type === 'CAROMETRO_READY') {
+                log("RECIEVED: CAROMETRO_READY");
+                log("Enviando autenticação automática...");
+                sendAuth();
+            }
+        });
+
+        function sendAuth() {
+            const userId = document.getElementById('user-select').value;
+            const user = MOCK_USERS[userId];
+
+            // Atualiza UI do Portal
+            document.getElementById('user-name').innerText = user.name;
+            document.getElementById('user-role').innerText = user.role;
+
+            log(`SENDING: AUTH_USER (${user.name})`);
+
+            // Envia para o Iframe
+            iframe.contentWindow.postMessage({
+                type: 'AUTH_USER',
+                payload: user
+            }, '*'); // Em produção, usar a URL correta
+        }
+    </script>
+
+</body>
+
+</html>

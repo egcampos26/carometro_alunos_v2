@@ -71,48 +71,100 @@ const App: React.FC = () => {
   // Auth & Data Loading
   useEffect(() => {
     const initApp = async () => {
-      // 1. Check for id_func in URL
+      let authUser: AuthUser | null = null;
+      let isAuthPending = true;
+
+      // 1. Setup postMessage Listener (Priority)
+      const messageHandler = async (event: MessageEvent) => {
+        // Security: In production, check event.origin
+        // if (event.origin !== "https://portal-tarsila.com") return;
+
+        const data = event.data;
+
+        if (data && data.type === 'AUTH_USER' && data.payload) {
+          console.log("📩 Received remote auth:", data.payload);
+          const payload = data.payload;
+
+          // Map payload to AuthUser
+          // Expecting payload to have: id_func, nome_func (or we fetch it)
+          if (payload.id_func) {
+            await authenticateWithIdFunc(payload.id_func);
+          } else if (payload.id && payload.name) {
+            // Direct trust (if Portal sends full data)
+            const cleanUser: AuthUser = {
+              id: payload.id,
+              name: payload.name,
+              role: payload.role || 'User',
+              email: payload.email || 'educacao@sme.prefeitura.sp.gov.br',
+              idFunc: payload.id // Assuming ID is id_func
+            };
+            setAuthenticatedUser(cleanUser);
+          }
+        }
+      };
+
+      window.addEventListener('message', messageHandler);
+
+      // Tell Portal we are ready
+      // Timeout to ensure parent is listening if we are in iframe
+      setTimeout(() => {
+        window.parent.postMessage({ type: 'CAROMETRO_READY' }, '*');
+      }, 500);
+
+
+      // 2. Check for id_func in URL (Fallback/Direct Link)
       const params = new URLSearchParams(window.location.search);
       const idFunc = params.get('id_func');
 
       if (idFunc) {
-        try {
-          // Fetch employee data
-          const { data: funcData, error: funcError } = await supabase
-            .from('FUNCIONARIOS')
-            .select('*')
-            .eq('id_func', idFunc)
-            .single();
-
-          if (funcData && !funcError) {
-            console.log("✅ Authenticated as:", funcData.nome_func);
-            // Update the user object with real data
-            const cleanUser: AuthUser = {
-              id: funcData.id_func,
-              name: funcData.nome_func,
-              role: 'User', // Default role, can be enhanced logic later
-              email: funcData.email_edu || funcData.email_sme || 'educacao@sme.prefeitura.sp.gov.br',
-              idFunc: funcData.id_func
-            };
-
-            // Override the default TEST_USER in the array (hacky but works for current structure)
-            TEST_USERS[0] = cleanUser;
-            // Force re-render/update
-            setCurrentUserIndex(0);
-          } else {
-            console.warn("User not found for id_func:", idFunc);
-          }
-        } catch (err) {
-          console.error("Auth error:", err);
-        }
+        await authenticateWithIdFunc(idFunc);
       }
 
-      // 2. Load Application Data
+      // 3. Load Application Data
       await loadData();
+
+      return () => {
+        window.removeEventListener('message', messageHandler);
+      }
     };
 
     initApp();
   }, []);
+
+  const authenticateWithIdFunc = async (idFunc: string) => {
+    try {
+      // Fetch employee data
+      const { data: funcData, error: funcError } = await supabase
+        .from('FUNCIONARIOS')
+        .select('*')
+        .eq('id_func', idFunc)
+        .single();
+
+      if (funcData && !funcError) {
+        console.log("✅ Authenticated as:", funcData.nome_func);
+        // Update the user object with real data
+        const cleanUser: AuthUser = {
+          id: funcData.id_func,
+          name: funcData.nome_func,
+          role: 'User', // Default role, can be enhanced logic later
+          email: funcData.email_edu || funcData.email_sme || 'educacao@sme.prefeitura.sp.gov.br',
+          idFunc: funcData.id_func
+        };
+        setAuthenticatedUser(cleanUser);
+      } else {
+        console.warn("User not found for id_func:", idFunc);
+      }
+    } catch (err) {
+      console.error("Auth error:", err);
+    }
+  }
+
+  const setAuthenticatedUser = (user: AuthUser) => {
+    // Override the default TEST_USER in the array (hacky but works for current structure)
+    TEST_USERS[0] = user;
+    // Force re-render/update
+    setCurrentUserIndex(0);
+  }
 
   const addLog = async (action: string, details: string) => {
     const newLog: LogEntry = {
