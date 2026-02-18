@@ -83,6 +83,7 @@ const App: React.FC = () => {
 
         if (data && data.type === 'AUTH_USER' && data.payload) {
           console.log("📩 Received remote auth:", data.payload);
+          isAuthPending = false; // Stop the ready signal interval
           const payload = data.payload;
 
           // Map payload to AuthUser
@@ -106,9 +107,17 @@ const App: React.FC = () => {
       window.addEventListener('message', messageHandler);
 
       // Tell Portal we are ready
-      // Timeout to ensure parent is listening if we are in iframe
-      setTimeout(() => {
+      // Send signal repeatedly until we get auth data or timeout (max 10s)
+      let attempts = 0;
+      const readyInterval = setInterval(() => {
+        // Stop if auth received (isAuthPending toggled in messageHandler) or max attempts reached
+        if (!isAuthPending || attempts > 20) {
+          clearInterval(readyInterval);
+          return;
+        }
+        console.log("📡 Sending CAROMETRO_READY signal to parent...");
         window.parent.postMessage({ type: 'CAROMETRO_READY' }, '*');
+        attempts++;
       }, 500);
 
 
