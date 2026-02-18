@@ -21,7 +21,8 @@ export const occurrenceService = {
             title: row.title,
             description: row.description,
             category: row.category,
-            registeredBy: row.registered_by,
+            nomeFunc: row.nome_func, // Updated column name
+            idFunc: row.id_func,
             groupId: row.group_id,
             isConfidential: row.is_confidential || false
         }));
@@ -34,7 +35,8 @@ export const occurrenceService = {
             title: occurrence.title,
             description: occurrence.description,
             category: occurrence.category,
-            registered_by: occurrence.registeredBy,
+            nome_func: occurrence.nomeFunc, // Updated column name
+            id_func: occurrence.idFunc || null, // Optional link to employee
             group_id: occurrence.groupId || null,
             is_confidential: occurrence.isConfidential || false
         }).select().single();
@@ -48,7 +50,8 @@ export const occurrenceService = {
             title: data.title,
             description: data.description,
             category: data.category,
-            registeredBy: data.registered_by,
+            nomeFunc: data.nome_func,
+            idFunc: data.id_func,
             groupId: data.group_id,
             isConfidential: data.is_confidential || false
         };
@@ -60,7 +63,8 @@ export const occurrenceService = {
             title: occurrence.title,
             description: occurrence.description,
             category: occurrence.category,
-            registered_by: occurrence.registeredBy,
+            nome_func: occurrence.nomeFunc,
+            id_func: occurrence.idFunc || null,
             group_id: occurrence.groupId || null,
             is_confidential: occurrence.isConfidential || false
         }).eq('id_ocorrencias', occurrence.id);

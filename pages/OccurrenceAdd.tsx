@@ -63,7 +63,8 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAddOccurrence
         title,
         description,
         category,
-        registeredBy: user.name,
+        nomeFunc: user.name,
+        idFunc: user.idFunc,
         isConfidential
       };
       onAddOccurrence(newOcc);

@@ -43,7 +43,7 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
       setIsConfidential(occurrence.isConfidential || false);
 
       // Verificação de permissão
-      const canEdit = user.role === 'Admin' || user.role === 'Manager' || ((user.role === 'User' || user.role === 'Editor') && occurrence.registeredBy === user.name);
+      const canEdit = user.role === 'Admin' || user.role === 'Manager' || ((user.role === 'User' || user.role === 'Editor') && occurrence.nomeFunc === user.name);
       if (!canEdit) {
         navigate(`/occurrences/${id}`, { replace: true });
       }
@@ -153,7 +153,8 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
             title,
             description,
             category,
-            registeredBy: user.name,
+            nomeFunc: user.name,
+            idFunc: user.idFunc,
             isConfidential
           };
           return onAddOccurrence(newOcc);
@@ -317,7 +318,7 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
               <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Autor do Registro</label>
               <div className="flex items-center gap-3 p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-gray-400 font-bold italic">
                 <UserCheck size={18} className="text-gray-300" />
-                <span className="text-sm">{occurrence.registeredBy}</span>
+                <span className="text-sm">{occurrence.nomeFunc}</span>
               </div>
             </div>
           </div>

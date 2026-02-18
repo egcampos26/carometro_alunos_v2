@@ -24,7 +24,7 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
   const studentOccurrences = occurrences
     .filter(o => {
       if (o.studentId !== id) return false;
-      if (user.role === 'User' || user.role === 'Editor') return o.registeredBy === user.name;
+      if (user.role === 'User' || user.role === 'Editor') return o.nomeFunc === user.name;
       return true;
     })
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());

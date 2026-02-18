@@ -14,7 +14,9 @@ export interface Occurrence {
   title: string;
   description: string;
   category: 'Comportamental' | 'Acadêmica' | 'Médica' | 'Outros';
-  registeredBy: string;
+  nomeFunc: string; // Renamed from registeredBy
+  idFunc?: string; // New field linked to FUNCIONARIOS
+  registeredBy?: string; // Keeping for compatibility during migration if needed, but should be removed eventually
   isConfidential?: boolean; // Indica se a ocorrência é sigilosa
 }
 
@@ -67,4 +69,5 @@ export interface AuthUser {
   name: string;
   role: 'Admin' | 'Manager' | 'Editor' | 'User';
   email: string;
+  idFunc?: string; // ID do funcionário vinculado
 }

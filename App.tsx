@@ -17,6 +17,7 @@ import { Student, Occurrence, AuthUser, LogEntry } from './types';
 import { studentService } from './services/studentService';
 import { occurrenceService } from './services/occurrenceService';
 import { logService } from './services/logService';
+import { supabase } from './services/supabase';
 import { detectStudentChanges, formatChangesForLog } from './utils/changeDetection';
 
 const TEST_USERS: AuthUser[] = [
@@ -67,8 +68,50 @@ const App: React.FC = () => {
     }
   };
 
+  // Auth & Data Loading
   useEffect(() => {
-    loadData();
+    const initApp = async () => {
+      // 1. Check for id_func in URL
+      const params = new URLSearchParams(window.location.search);
+      const idFunc = params.get('id_func');
+
+      if (idFunc) {
+        try {
+          // Fetch employee data
+          const { data: funcData, error: funcError } = await supabase
+            .from('FUNCIONARIOS')
+            .select('*')
+            .eq('id_func', idFunc)
+            .single();
+
+          if (funcData && !funcError) {
+            console.log("✅ Authenticated as:", funcData.nome_func);
+            // Update the user object with real data
+            const cleanUser: AuthUser = {
+              id: funcData.id_func,
+              name: funcData.nome_func,
+              role: 'User', // Default role, can be enhanced logic later
+              email: funcData.email_edu || funcData.email_sme || 'educacao@sme.prefeitura.sp.gov.br',
+              idFunc: funcData.id_func
+            };
+
+            // Override the default TEST_USER in the array (hacky but works for current structure)
+            TEST_USERS[0] = cleanUser;
+            // Force re-render/update
+            setCurrentUserIndex(0);
+          } else {
+            console.warn("User not found for id_func:", idFunc);
+          }
+        } catch (err) {
+          console.error("Auth error:", err);
+        }
+      }
+
+      // 2. Load Application Data
+      await loadData();
+    };
+
+    initApp();
   }, []);
 
   const addLog = async (action: string, details: string) => {

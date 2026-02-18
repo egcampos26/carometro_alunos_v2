@@ -37,7 +37,7 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
       );
 
       const mtachesDate = !hasDateFilter || occ.date === filterDate;
-      const matchesRole = (user.role === 'User' || user.role === 'Editor') ? occ.registeredBy === user.name : true;
+      const matchesRole = (user.role === 'User' || user.role === 'Editor') ? occ.nomeFunc === user.name : true;
 
       return matchesText && mtachesDate && matchesRole;
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -168,7 +168,7 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
                         <FileText size={12} className="text-gray-300" />
                         <span className="text-[10px] text-gray-400 font-black">RA: {student?.registrationNumber}</span>
                       </div>
-                      <span className="text-[9px] text-gray-300 font-bold uppercase">Ref: {occ.registeredBy}</span>
+                      <span className="text-[9px] text-gray-300 font-bold uppercase">Ref: {occ.nomeFunc}</span>
                     </div>
                   </div>
                 </div>
