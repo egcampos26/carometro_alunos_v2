@@ -3,17 +3,19 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Student, Occurrence, AuthUser } from '../types';
-import { UserCheck, Calendar, Info, Clock, Save, X, Eye, EyeOff } from 'lucide-react';
+import { UserCheck, Calendar, Save, Eye, EyeOff, Search, CheckCircle2, X, Users } from 'lucide-react';
 import { NO_IMAGE_RIGHTS_URL } from '../constants';
 
 interface OccurrenceEditProps {
   students: Student[];
   occurrences: Occurrence[];
   onUpdateOccurrence: (occ: Occurrence) => Promise<void>;
+  onAddOccurrence: (occ: Occurrence) => Promise<void>;
+  onDeleteOccurrence: (id: string) => Promise<void>;
   user: AuthUser;
 }
 
-const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, onUpdateOccurrence, user }) => {
+const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, onUpdateOccurrence, onAddOccurrence, onDeleteOccurrence, user }) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,6 +30,10 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
   const [isConfidential, setIsConfidential] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  // New state for adding students
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [studentSearch, setStudentSearch] = useState('');
+
   useEffect(() => {
     if (occurrence) {
       setTitle(occurrence.title);
@@ -41,8 +47,18 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
       if (!canEdit) {
         navigate(`/occurrences/${id}`, { replace: true });
       }
+
+      // Initialize selectedIds with existing group members (excluding self)
+      if (occurrence.groupId) {
+        const groupMembers = occurrences.filter(o => o.groupId === occurrence.groupId && o.id !== occurrence.id);
+        // Only map if we find valid students
+        const memberIds = groupMembers.map(m => m.studentId).filter(id => students.some(s => s.id === id));
+        setSelectedIds(memberIds);
+      } else {
+        setSelectedIds([]);
+      }
     }
-  }, [occurrence, user, navigate, id]);
+  }, [occurrence, occurrences, user, navigate, id, students]);
 
   if (!occurrence || !student) {
     return (
@@ -54,23 +70,119 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
     );
   }
 
+  // Filter students for search
+  const filteredStudents = studentSearch.trim() === ''
+    ? []
+    : students.filter(s =>
+      (s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
+        s.registrationNumber.toLowerCase().includes(studentSearch.toLowerCase())) &&
+      s.id !== student.id && // Exclude current student
+      !selectedIds.includes(s.id) // Exclude already selected
+    ).slice(0, 5);
+
+  const toggleAdditionalStudent = (studentId: string) => {
+    setSelectedIds(prev =>
+      prev.includes(studentId) ? prev.filter(i => i !== studentId) : [...prev, studentId]
+    );
+    setStudentSearch('');
+  };
+
+  const getStudent = (id: string) => students.find(s => s.id === id);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !description || !date) return;
 
     setIsSaving(true);
 
-    const updatedOcc: Occurrence = {
-      ...occurrence,
-      date,
-      title,
-      description,
-      category,
-      isConfidential
-    };
-
     try {
+      // 1. Identify Group Members Changes
+      const originalGroupMembers = occurrence.groupId
+        ? occurrences.filter(o => o.groupId === occurrence.groupId && o.id !== occurrence.id)
+        : [];
+
+      const originalMemberIds = originalGroupMembers.map(m => m.studentId);
+
+      // Removed students (were in group, now not in selectedIds)
+      const studentsToRemove = originalGroupMembers.filter(m => !selectedIds.includes(m.studentId));
+
+      // Added students (in selectedIds, but weren't in group)
+      const studentsToAddIds = selectedIds.filter(id => !originalMemberIds.includes(id));
+
+      // 2. Determine effective groupId
+      let groupId = occurrence.groupId;
+
+      // If we have selected students (new or kept) and no group ID, create one
+      if (!groupId && selectedIds.length > 0) {
+        groupId = `group-${Date.now()}`;
+      } else if (selectedIds.length === 0 && originalGroupMembers.length > 0) {
+        // If no one else is selected, and there were original group members, remove from group
+        groupId = undefined;
+      } else if (!groupId && selectedIds.length === 0) {
+        // If no group ID and no selected students, keep groupId as undefined
+        groupId = undefined;
+      }
+
+
+      // 3. Update existing occurrence
+      const updatedOcc: Occurrence = {
+        ...occurrence,
+        date,
+        title,
+        description,
+        category,
+        isConfidential,
+        groupId: groupId // Assign the group ID (new, existing, or removed)
+      };
+
       await onUpdateOccurrence(updatedOcc);
+
+      // 4. Handle Removals (Delete occurrences)
+      if (studentsToRemove.length > 0) {
+        await Promise.all(studentsToRemove.map(m => onDeleteOccurrence(m.id)));
+      }
+
+      // 5. Handle Additions (Create occurrences)
+      if (studentsToAddIds.length > 0) {
+        const promises = studentsToAddIds.map((newStudentId, index) => {
+          const newOcc: Occurrence = {
+            id: (Date.now() + index).toString(), // Temporary ID
+            studentId: newStudentId,
+            groupId: groupId, // Must be defined if we are adding
+            date: date,
+            title,
+            description,
+            category,
+            registeredBy: user.name,
+            isConfidential
+          };
+          return onAddOccurrence(newOcc);
+        });
+
+        await Promise.all(promises);
+      }
+
+      // 6. Update REMAINING group members (sync changes)
+      // We should ideally update the other members too if the title/desc changed
+      // But user didn't explicitly ask for full sync. 
+      // Yet "Group" implies sync. The previous "Add Multi" syncs on creation.
+      // If we don't sync, they drift apart.
+      // Let's safe-guard: Update ONLY if they are still in the group (not removed).
+      const membersToUpdate = originalGroupMembers.filter(m => selectedIds.includes(m.studentId));
+
+      if (membersToUpdate.length > 0) {
+        const updates = membersToUpdate.map(m => ({
+          ...m,
+          date,
+          title,
+          description,
+          category,
+          isConfidential,
+          groupId
+        }));
+        await Promise.all(updates.map(u => onUpdateOccurrence(u)));
+      }
+
 
       // Navigation logic based on previous location
       const from = location.state?.from;
@@ -121,6 +233,68 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
           <div className="ml-auto hidden sm:block">
             <span className="text-[9px] font-black bg-[#3b5998]/10 text-[#3b5998] px-3 py-1.5 rounded-full border border-[#3b5998]/20 uppercase">Registro Original</span>
           </div>
+        </div>
+
+        {/* Seleção de Alunos Adicionais */}
+        <div className="mb-10 p-5 bg-gray-50/50 rounded-2xl border-2 border-dashed border-gray-100 space-y-4">
+          <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1 flex items-center gap-2">
+            <Users size={16} /> Acrescentar mais alunos a este registro?
+          </label>
+
+          <div className="relative">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300">
+              <Search size={18} />
+            </div>
+            <input
+              type="text"
+              placeholder="Buscar aluno por nome ou RA..."
+              className="w-full pl-12 pr-4 py-4 bg-white border-2 border-gray-100 rounded-2xl focus:border-[#3b5998] outline-none font-bold text-gray-700 transition-all text-sm"
+              value={studentSearch}
+              onChange={(e) => setStudentSearch(e.target.value)}
+            />
+
+            {filteredStudents.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-40">
+                {filteredStudents.map(s => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => toggleAdditionalStudent(s.id)}
+                    className="w-full p-4 flex items-center gap-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0"
+                  >
+                    <img src={s.photoUrl || NO_IMAGE_RIGHTS_URL} className="w-10 h-10 rounded-lg object-cover" alt="" />
+                    <div className="text-left">
+                      <p className="text-xs font-black text-gray-800 uppercase leading-none">{s.name}</p>
+                      <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1">{s.grade} • RA: {s.registrationNumber}</p>
+                    </div>
+                    <CheckCircle2 size={18} className="ml-auto text-gray-200" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Chips dos selecionados */}
+          {selectedIds.length > 0 && (
+            <div className="flex flex-wrap gap-2 pt-2">
+              {selectedIds.map(id => {
+                const s = getStudent(id);
+                if (!s) return null;
+                return (
+                  <div key={id} className="flex items-center gap-2 bg-blue-50 text-[#3b5998] pl-2 pr-1 py-1 rounded-full border border-blue-100 animate-in fade-in zoom-in duration-200">
+                    <span className="text-[10px] font-black uppercase truncate max-w-[120px]">{s.name.split(' ')[0]}</span>
+                    <button
+                      type="button"
+                      onClick={() => toggleAdditionalStudent(id)}
+                      className="w-5 h-5 bg-white rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
@@ -232,10 +406,17 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
             </button>
             <button
               type="submit"
-              className="flex-[2] bg-[#3b5998] text-white py-4 sm:py-5 rounded-3xl font-black uppercase shadow-xl hover:bg-blue-700 active:scale-95 transition-all text-sm sm:text-base tracking-widest border-b-4 border-blue-900 flex items-center justify-center gap-3"
+              disabled={isSaving}
+              className="flex-[2] bg-[#3b5998] text-white py-4 sm:py-5 rounded-3xl font-black uppercase shadow-xl hover:bg-blue-700 active:scale-95 transition-all text-sm sm:text-base tracking-widest border-b-4 border-blue-900 flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              <Save size={20} />
-              Salvar Alterações
+              {isSaving ? (
+                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  <Save size={20} />
+                  Salvar {selectedIds.length > 0 ? `(+${selectedIds.length} alunos)` : 'Alterações'}
+                </>
+              )}
             </button>
           </div>
         </form>

@@ -342,6 +342,24 @@ const App: React.FC = () => {
                       throw err;
                     }
                   }}
+                  onAddOccurrence={handleCreateOccurrence}
+                  onDeleteOccurrence={async (idToDelete) => {
+                    try {
+                      const occToDelete = occurrences.find(o => o.id === idToDelete);
+                      await occurrenceService.deleteOccurrence(idToDelete);
+                      setOccurrences(prev => prev.filter(occ => occ.id !== idToDelete));
+                      const student = occToDelete ? students.find(s => s.id === occToDelete.studentId) : null;
+                      const studentName = student ? student.name : 'Aluno Desconhecido';
+
+                      if (occToDelete) {
+                        addLog('Exclusão de Ocorrência (Edição)', `A ocorrência "${occToDelete.title}" do aluno ${studentName} foi removida.`);
+                      }
+                    } catch (err) {
+                      console.error('Erro ao excluir ocorrência:', err);
+                      alert('Erro ao excluir ocorrência.');
+                      throw err;
+                    }
+                  }}
                   user={user}
                   onToggleRole={handleToggleRole}
                 />
