@@ -41,7 +41,7 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
 
   const headerTitle = (
     <div className="flex flex-col items-center leading-tight">
-      <span className="text-xl sm:text-3xl font-black tracking-tighter uppercase">PERFIL DO ALUNO</span>
+      <span className="text-sm sm:text-3xl font-black tracking-tighter uppercase">PERFIL DO ALUNO</span>
     </div>
   );
 

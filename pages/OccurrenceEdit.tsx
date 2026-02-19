@@ -211,7 +211,7 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
 
   const headerTitle = (
     <div className="flex flex-col items-center justify-center leading-tight">
-      <span className="text-xl sm:text-3xl font-black tracking-tighter uppercase">EDITAR OCORRÊNCIA</span>
+      <span className="text-sm sm:text-3xl font-black tracking-tighter uppercase">EDITAR OCORRÊNCIA</span>
     </div>
   );
 

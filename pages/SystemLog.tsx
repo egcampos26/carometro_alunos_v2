@@ -34,8 +34,8 @@ const SystemLog: React.FC<SystemLogProps> = ({ logs }) => {
 
   const headerTitle = (
     <div className="flex flex-col items-center leading-tight">
-      <span className="text-xl sm:text-3xl font-black tracking-tighter uppercase mb-0.5">LOG DO SISTEMA</span>
-      <span className="text-xs sm:text-sm font-bold opacity-80 tracking-widest uppercase">HISTÓRICO DE ATIVIDADES</span>
+      <span className="text-sm sm:text-3xl font-black tracking-tighter uppercase">LOG DO SISTEMA</span>
+      <span className="hidden sm:block text-xs sm:text-sm font-bold opacity-80 tracking-widest uppercase">HISTÓRICO DE ATIVIDADES</span>
     </div>
   );
 

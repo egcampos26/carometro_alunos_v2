@@ -124,7 +124,7 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
 
   const headerTitle = (
     <div className="flex flex-col items-center leading-tight">
-      <span className="text-xl sm:text-3xl font-black tracking-tighter uppercase">EDITOR DE PERFIL</span>
+      <span className="text-sm sm:text-3xl font-black tracking-tighter uppercase">EDITOR DE PERFIL</span>
     </div>
   );
 
