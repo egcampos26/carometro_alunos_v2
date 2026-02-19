@@ -82,9 +82,9 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
       }
     >
       <div className="max-w-6xl 2xl:max-w-7xl mx-auto p-4 sm:p-8 lg:p-12">
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
-          <div className="flex flex-col items-center lg:w-1/3 space-y-8">
-            <div className="w-full max-w-[320px] lg:max-w-none">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center lg:items-start">
+          <div className="w-full flex flex-col items-center lg:w-1/3 space-y-8">
+            <div className="w-full max-w-[240px] sm:max-w-[280px] lg:max-w-none">
               <div className="aspect-[3/4] bg-gray-50 rounded-3xl overflow-hidden shadow-2xl border-8 border-white relative">
                 <img src={displayPhoto} alt={student.name} className={`w-full h-full object-cover ${student.imageRightsSigned !== 'Sim' ? 'grayscale opacity-70' : ''}`} />
                 {student.imageRightsSigned !== 'Sim' && (
@@ -104,7 +104,7 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
             <div className="border-b-4 border-gray-50 pb-5 sm:pb-8 flex flex-col items-center text-center">
               <div className="w-full">
                 <span className="text-[#3b5998] text-xs font-black uppercase block mb-3 tracking-widest">NOME COMPLETO</span>
-                <h3 className="text-gray-900 font-black text-3xl sm:text-4xl leading-tight uppercase tracking-tight mb-2">{student.name}</h3>
+                <h3 className="text-gray-900 font-black text-3xl sm:text-4xl leading-tight uppercase tracking-tight mb-2 break-words">{student.name}</h3>
                 <div className="flex items-center justify-center gap-1 text-gray-400 font-black uppercase mb-4">
                   <span className="text-sm tracking-widest">N° {student.roomNumber || '-'}</span>
                 </div>

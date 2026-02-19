@@ -124,7 +124,7 @@ const Layout: React.FC<LayoutProps> = ({
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto bg-gray-50/30 safe-area-bottom custom-scrollbar">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden bg-gray-50/30 safe-area-bottom custom-scrollbar">
         {children}
       </main>
     </div>
