@@ -72,10 +72,11 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
         isAdmin ? (
           <button
             onClick={handleEdit}
-            className="w-10 h-10 flex items-center justify-center bg-white text-[#3b5998] rounded-full hover:bg-gray-100 transition-colors shadow-sm active:scale-90"
+            className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-white text-[#3b5998] rounded-full hover:bg-gray-100 transition-colors shadow-sm active:scale-90 shrink-0"
             title="Editar Aluno"
           >
-            <Edit2 size={18} />
+            <Edit2 size={15} className="sm:hidden" />
+            <Edit2 size={18} className="hidden sm:block" />
           </button>
         ) : null
       }

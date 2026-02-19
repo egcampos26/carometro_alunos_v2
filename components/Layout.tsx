@@ -95,7 +95,7 @@ const Layout: React.FC<LayoutProps> = ({
 
           {/* Centro: Título (absoluto dentro do inner container) */}
           <div className="flex-1 flex flex-col items-center justify-center text-center px-1 overflow-hidden min-w-0 absolute inset-x-0 mx-auto pointer-events-none">
-            <div className="pointer-events-auto max-w-[50%] sm:max-w-[60%] mx-auto">
+            <div className="pointer-events-auto max-w-[40%] sm:max-w-[55%] mx-auto">
               {typeof title === 'string' ? (
                 <h1 className="text-sm sm:text-xl font-black uppercase tracking-tight truncate w-full">
                   {title}
@@ -107,15 +107,16 @@ const Layout: React.FC<LayoutProps> = ({
           </div>
 
           {/* Lado Direito: Ações Contextuais + Voltar */}
-          <div className="flex items-center justify-end min-w-[3.5rem] pr-1 gap-3 z-20 ml-auto">
+          <div className="flex items-center justify-end min-w-[3.5rem] pr-1 gap-1 sm:gap-3 z-20 ml-auto">
             {rightAction}
             {showBack && (
               <button
                 onClick={handleBack}
-                className="w-11 h-11 flex items-center justify-center rounded-full hover:bg-white/10 active:scale-90 transition-all border border-white/10 focus:outline-none shrink-0"
+                className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-white/10 active:scale-90 transition-all border border-white/10 focus:outline-none shrink-0"
                 aria-label="Voltar"
               >
-                <ChevronLeft size={24} />
+                <ChevronLeft size={18} className="sm:hidden" />
+                <ChevronLeft size={22} className="hidden sm:block" />
               </button>
             )}
           </div>
