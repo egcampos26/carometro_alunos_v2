@@ -3,17 +3,25 @@ import { supabase } from './supabase';
 const BUCKET = 'fotos-alunos';
 
 /**
- * Sanitiza grade + nome do aluno para um nome de arquivo seguro.
- * Exemplo: grade="1 A", name="João da Silva" → "1A - João da Silva.webp"
+ * Sanitiza grade + nome do aluno para um nome de arquivo seguro para o Supabase Storage.
+ * Exemplo: grade="5ºA", name="João da Silva" → "5A - Joao da Silva.webp"
+ *
+ * Regras:
+ * - Ordinais º e ª são removidos (causam erro 400 no Storage)
+ * - Caracteres acentuados são convertidos para ASCII (ex: ã→a, é→e)
+ * - Espaços dentro do grade são removidos
+ * - Caracteres especiais inválidos são removidos
  */
 export function buildPhotoFileName(grade: string, name: string): string {
     const sanitized = (str: string) =>
         str
-            .normalize('NFC')           // mantém acentos (são válidos no Storage)
-            .replace(/[\\/:*?"<>|]/g, '') // remove caracteres inválidos em nomes de arquivo
+            .replace(/[ºª]/g, '')                   // remove ordinais (causam erro 400)
+            .normalize('NFD')                        // decompõe acentos em base + diacrítico
+            .replace(/[\u0300-\u036f]/g, '')         // remove diacríticos (acentos)
+            .replace(/[\\/:*?"<>|]/g, '')            // remove caracteres inválidos em nomes de arquivo
             .trim();
 
-    const gradeClean = sanitized(grade).replace(/\s+/g, ''); // "1 A" → "1A"
+    const gradeClean = sanitized(grade).replace(/\s+/g, ''); // "5 A" → "5A", "5ºA" → "5A"
     const nameClean = sanitized(name);
     return `${gradeClean} - ${nameClean}.webp`;
 }
