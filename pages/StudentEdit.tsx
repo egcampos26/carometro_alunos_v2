@@ -3,8 +3,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Student, AuthUser, DepartureMethod } from '../types';
-import { Camera, Image as ImageIcon, UserCircle2, X, ShieldAlert, Lock } from 'lucide-react';
+import { Camera, Image as ImageIcon, UserCircle2, X, ShieldAlert, Lock, Loader2 } from 'lucide-react';
 import { NO_IMAGE_RIGHTS_URL } from '../constants';
+import { compressToWebP } from '../utils/imageUtils';
+import { uploadStudentPhoto } from '../services/photoService';
 
 interface StudentEditProps {
   students: Student[];
@@ -23,6 +25,10 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
 
   const [formData, setFormData] = useState<Student | null>(student ? { ...student } : null);
   const [showSourceModal, setShowSourceModal] = useState(false);
+  const [pendingPhotoBlob, setPendingPhotoBlob] = useState<Blob | null>(null);
+  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const hasPermission = user.role === 'Admin' || user.role === 'Manager' || user.role === 'Editor';
 
@@ -63,26 +69,57 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
 
   const isImageRightsSigned = formData.imageRightsSigned !== 'Não';
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    onUpdate(formData);
-    navigate(`/student/${formData.id}`, { replace: true });
+    if (!formData) return;
+
+    setUploading(true);
+    setUploadError(null);
+
+    try {
+      let finalPhotoUrl = formData.photoUrl;
+
+      // Se houver uma nova foto selecionada, faz o upload agora
+      if (pendingPhotoBlob) {
+        finalPhotoUrl = await uploadStudentPhoto(formData.grade, formData.name, pendingPhotoBlob);
+      }
+
+      const studentToSave = { ...formData, photoUrl: finalPhotoUrl };
+      onUpdate(studentToSave);
+      navigate(`/student/${formData.id}`, { replace: true });
+    } catch (err) {
+      console.error('Erro ao salvar foto:', err);
+      setUploadError('Falha ao fazer upload da foto. Tente novamente.');
+      setUploading(false);
+    }
   };
 
   const handleCancel = () => {
     navigate(`/student/${formData.id}`, { replace: true });
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({ ...formData, photoUrl: reader.result as string });
-        setShowSourceModal(false);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    try {
+      // Comprime para WebP 400x400 no cliente
+      const blob = await compressToWebP(file);
+
+      // Revoga o objectURL anterior para liberar memória
+      if (localPreviewUrl) URL.revokeObjectURL(localPreviewUrl);
+
+      const previewUrl = URL.createObjectURL(blob);
+      setPendingPhotoBlob(blob);
+      setLocalPreviewUrl(previewUrl);
+      setShowSourceModal(false);
+    } catch (err) {
+      console.error('Erro ao comprimir imagem:', err);
+      alert('Não foi possível processar a imagem. Tente outro arquivo.');
     }
+
+    // Reseta o input para permitir selecionar o mesmo arquivo novamente
+    e.target.value = '';
   };
 
   const headerTitle = (
@@ -117,9 +154,9 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
                     <p className="text-white/70 text-[8px] font-bold uppercase mt-1">Direito de imagem não assinado</p>
                   </div>
                 </div>
-              ) : formData.photoUrl ? (
+              ) : (localPreviewUrl || formData.photoUrl) ? (
                 <>
-                  <img src={formData.photoUrl} alt="Preview" className="w-full h-full object-cover" />
+                  <img src={localPreviewUrl || formData.photoUrl} alt="Preview" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col items-center justify-end pb-6">
                     <div className="bg-white/20 backdrop-blur-md p-3 rounded-full mb-2">
                       <Camera className="text-white" size={24} />
@@ -409,19 +446,27 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
               </div>
             </div>
 
+            {uploadError && (
+              <p className="text-red-500 text-xs font-bold text-center">{uploadError}</p>
+            )}
+
             <div className="flex flex-row gap-3 pt-6">
               <button
                 type="button"
                 onClick={handleCancel}
-                className="flex-1 bg-gray-100 text-gray-500 py-4 rounded-2xl font-black uppercase hover:bg-gray-200 active:scale-95 transition-all text-sm tracking-widest"
+                disabled={uploading}
+                className="flex-1 bg-gray-100 text-gray-500 py-4 rounded-2xl font-black uppercase hover:bg-gray-200 active:scale-95 transition-all text-sm tracking-widest disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                className="flex-[2] bg-[#3b5998] text-white py-4 rounded-2xl font-black uppercase shadow-lg hover:bg-blue-700 active:scale-95 transition-all text-sm tracking-widest border-b-4 border-blue-900"
+                disabled={uploading}
+                className="flex-[2] bg-[#3b5998] text-white py-4 rounded-2xl font-black uppercase shadow-lg hover:bg-blue-700 active:scale-95 transition-all text-sm tracking-widest border-b-4 border-blue-900 disabled:opacity-60 flex items-center justify-center gap-2"
               >
-                Salvar Perfil
+                {uploading ? (
+                  <><Loader2 size={18} className="animate-spin" /> Salvando...</>
+                ) : 'Salvar Perfil'}
               </button>
             </div>
           </div>
