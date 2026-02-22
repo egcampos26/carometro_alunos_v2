@@ -13,6 +13,79 @@
             background: #f0f2f5;
         }
 
+        /* ===== TELA DE ACESSO ===== */
+        #access-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+        }
+
+        .access-card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            max-width: 360px;
+            width: 100%;
+        }
+
+        .access-card h2 {
+            color: #3b5998;
+            margin-top: 0;
+        }
+
+        .access-card p {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .access-card input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+            text-align: center;
+            letter-spacing: 4px;
+        }
+
+        .access-card input[type="password"]:focus {
+            outline: none;
+            border-color: #3b5998;
+        }
+
+        .access-card button {
+            background: #3b5998;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .access-card button:hover {
+            background: #2d4373;
+        }
+
+        #access-error {
+            color: #c0392b;
+            font-size: 13px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        /* ===== CONTEÚDO PRINCIPAL ===== */
+        #main-content {
+            display: none;
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -151,67 +224,110 @@
         .legend li {
             margin-bottom: 2px;
         }
+
+        .admin-badge {
+            font-size: 10px;
+            background: #fce4ec;
+            color: #880e4f;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
     </style>
 </head>
 
 <body>
 
-    <div class="container">
-        <div class="sidebar">
-            <h2>Portal Tarsila</h2>
-
-            <div class="user-card">
-                <strong>Usuário Logado:</strong><br>
-                <span id="user-name">Aguardando...</span><br>
-                <span id="user-role-badge" class="role-badge">-</span>
-            </div>
-
-            <label><strong>Simular Login:</strong></label>
-            <select id="user-select">
-                <option value="func-usuario">👤 Usuário (usuario)</option>
-                <option value="func-editor">✏️ Editor (editor)</option>
-                <option value="func-gestor">📋 Gestor (gestor)</option>
-                <option value="func-coordenador">🎓 Coordenador (coordenador)</option>
-                <option value="func-diretor">🏫 Diretor (diretor)</option>
-                <option value="func-admin">🔑 Administrador (administrador)</option>
-                <option value="invalid-user">❌ Usuário Inválido (id inexistente)</option>
-            </select>
-            <button onclick="sendAuth()">Enviar / Re-enviar Autenticação</button>
-
-            <div class="legend">
-                <strong>Permissões resumidas:</strong>
-                <ul>
-                    <li><b>Usuário</b>: visualiza, ocorrências próprias</li>
-                    <li><b>Editor</b>: edita alunos, ocorrências próprias</li>
-                    <li><b>Gestor</b>: edita tudo, vê todas as ocorrências</li>
-                    <li><b>Coordenador</b>: igual Gestor (sem Log do Sistema)</li>
-                    <li><b>Diretor</b>: igual Gestor (sem Log do Sistema)</li>
-                    <li><b>Admin</b>: acesso total + Log do Sistema</li>
-                </ul>
-            </div>
-
-            <div id="logs">LOGS:</div>
+    <!-- TELA DE ACESSO (senha admin) -->
+    <div id="access-screen">
+        <div class="access-card">
+            <div style="font-size:48px; margin-bottom:12px;">🔒</div>
+            <h2>Ambiente de Teste</h2>
+            <p>Este ambiente é restrito ao <strong>Administrador</strong>.<br>Digite a senha para continuar.</p>
+            <input type="password" id="admin-password" placeholder="••••••" maxlength="20"
+                onkeydown="if(event.key==='Enter') checkPassword()" autofocus />
+            <button onclick="checkPassword()">Entrar</button>
+            <div id="access-error">❌ Senha incorreta. Tente novamente.</div>
         </div>
+    </div>
 
-        <div class="content">
-            <h1>Carômetro dos Alunos</h1>
-            <iframe id="carometro-frame" src="http://localhost:5173" allow="clipboard-read; clipboard-write"></iframe>
+    <!-- CONTEÚDO PRINCIPAL (visível após autenticação) -->
+    <div id="main-content">
+        <div class="container">
+            <div class="sidebar">
+                <h2>Portal Tarsila</h2>
+                <div class="admin-badge">🔑 Modo Admin — Ambiente de Teste</div>
+
+                <div class="user-card">
+                    <strong>Usuário Logado:</strong><br>
+                    <span id="user-name">Aguardando...</span><br>
+                    <span id="user-role-badge" class="role-badge">-</span>
+                </div>
+
+                <label><strong>Simular Login:</strong></label>
+                <select id="user-select">
+                    <option value="func-usuario">👤 Usuário (usuario)</option>
+                    <option value="func-usuario1">👤 Usuario1 (usuario)</option>
+                    <option value="func-usuario2">👤 Usuario2 (usuario)</option>
+                    <option value="func-editor">✏️ Editor (editor)</option>
+                    <option value="func-gestor">📋 Gestor (gestor)</option>
+                    <option value="func-coordenador">🎓 Coordenador (coordenador)</option>
+                    <option value="func-diretor">🏫 Diretor (diretor)</option>
+                    <option value="func-admin">🔑 Administrador (administrador)</option>
+                    <option value="invalid-user">❌ Usuário Inválido (id inexistente)</option>
+                </select>
+                <button onclick="sendAuth()">Enviar / Re-enviar Autenticação</button>
+
+                <div class="legend">
+                    <strong>Permissões resumidas:</strong>
+                    <ul>
+                        <li><b>Usuário</b>: visualiza, ocorrências próprias</li>
+                        <li><b>Editor</b>: edita alunos, ocorrências próprias</li>
+                        <li><b>Gestor</b>: edita tudo, vê todas as ocorrências</li>
+                        <li><b>Coordenador</b>: igual Gestor (sem Log do Sistema)</li>
+                        <li><b>Diretor</b>: igual Gestor (sem Log do Sistema)</li>
+                        <li><b>Admin</b>: acesso total + Log do Sistema</li>
+                    </ul>
+                </div>
+
+                <div id="logs">LOGS:</div>
+            </div>
+
+            <div class="content">
+                <h1>Carômetro dos Alunos</h1>
+                <iframe id="carometro-frame" src="http://localhost:5173"
+                    allow="clipboard-read; clipboard-write"></iframe>
+            </div>
         </div>
     </div>
 
     <script>
-        const iframe = document.getElementById('carometro-frame');
-        const logDiv = document.getElementById('logs');
+        // ===== SENHA DO ADMINISTRADOR =====
+        const ADMIN_PASSWORD = 'admin2025';
 
-        function log(msg) {
-            const time = new Date().toLocaleTimeString('pt-BR');
-            logDiv.innerHTML += `<div>[${time}] ${msg}</div>`;
-            logDiv.scrollTop = logDiv.scrollHeight;
+        function checkPassword() {
+            const input = document.getElementById('admin-password').value;
+            if (input === ADMIN_PASSWORD) {
+                document.getElementById('access-screen').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                // Inicializa iframe após liberar acesso
+                setupIframe();
+            } else {
+                const err = document.getElementById('access-error');
+                err.style.display = 'block';
+                document.getElementById('admin-password').value = '';
+                document.getElementById('admin-password').focus();
+            }
         }
 
-        // Usuários mockados — tipo_usuario espelha o valor da coluna na tabela login do portal
+        // ===== IFRAME & MOCK USERS =====
         const MOCK_USERS = {
             'func-usuario': { id_func: 'func-001', name: 'João Silva', tipo_usuario: 'usuario', email: 'joao@escola.sp.gov.br' },
+            'func-usuario1': { id_func: 'func-007', name: 'Usuario1', tipo_usuario: 'usuario', email: 'usuario1@escola.sp.gov.br' },
+            'func-usuario2': { id_func: 'func-008', name: 'Usuario2', tipo_usuario: 'usuario', email: 'usuario2@escola.sp.gov.br' },
             'func-editor': { id_func: 'func-002', name: 'Ana Editora', tipo_usuario: 'editor', email: 'ana@escola.sp.gov.br' },
             'func-gestor': { id_func: 'func-003', name: 'Carlos Gestor', tipo_usuario: 'gestor', email: 'carlos@escola.sp.gov.br' },
             'func-coordenador': { id_func: 'func-004', name: 'Sônia Coordenadora', tipo_usuario: 'coordenador', email: 'sonia@escola.sp.gov.br' },
@@ -229,19 +345,28 @@
             'administrador': 'role-administrador'
         };
 
-        // Recebe mensagens do iframe
-        window.addEventListener('message', (event) => {
-            if (event.data && event.data.type === 'CAROMETRO_READY') {
-                log('RECEIVED: CAROMETRO_READY — enviando autenticação...');
-                sendAuth();
-            }
-        });
+        function log(msg) {
+            const logDiv = document.getElementById('logs');
+            const time = new Date().toLocaleTimeString('pt-BR');
+            logDiv.innerHTML += `<div>[${time}] ${msg}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function setupIframe() {
+            const iframe = document.getElementById('carometro-frame');
+            window.addEventListener('message', (event) => {
+                if (event.data && event.data.type === 'CAROMETRO_READY') {
+                    log('RECEIVED: CAROMETRO_READY — enviando autenticação...');
+                    sendAuth();
+                }
+            });
+        }
 
         function sendAuth() {
+            const iframe = document.getElementById('carometro-frame');
             const userId = document.getElementById('user-select').value;
             const user = MOCK_USERS[userId];
 
-            // Atualiza sidebar
             document.getElementById('user-name').innerText = user.name;
             const badge = document.getElementById('user-role-badge');
             badge.innerText = user.tipo_usuario;
@@ -249,7 +374,6 @@
 
             log(`SENDING: AUTH_USER { id_func: ${user.id_func}, tipo_usuario: ${user.tipo_usuario} }`);
 
-            // Envia mensagem ao iframe
             iframe.contentWindow.postMessage({
                 type: 'AUTH_USER',
                 payload: user
