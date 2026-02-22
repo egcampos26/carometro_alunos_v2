@@ -155,14 +155,21 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
                       </div>
                     )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start mb-1">
-                      <span className={`text-[9px] font-black text-white px-2 py-0.5 rounded-full uppercase shadow-sm ${occ.category === 'Comportamental' ? 'bg-red-500' :
-                        occ.category === 'Pedagógica' ? 'bg-blue-500' : 'bg-orange-500'
-                        }`}>
-                        {occ.category}
-                      </span>
-                      <div className="flex flex-col items-end gap-0.5">
+                  <div className="flex-1 min-w-0 flex flex-col justify-center">
+                    <div className="flex justify-between items-center mb-1.5">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`text-[9px] font-black text-white px-2 py-0.5 rounded-full uppercase shadow-sm ${occ.category === 'Comportamental' ? 'bg-red-500' :
+                          occ.category === 'Pedagógica' ? 'bg-blue-500' : 'bg-orange-500'
+                          }`}>
+                          {occ.category}
+                        </span>
+                        {occ.tipoViolencia && (
+                          <span className="text-red-600 text-[11px] font-black uppercase tracking-tighter flex items-center gap-1">
+                            ⚠ {occ.tipoViolencia}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex flex-col items-end shrink-0">
                         <div className="flex items-center gap-1.5">
                           {occ.isConfidential && (
                             <EyeOff size={10} className="text-red-500" />
@@ -172,14 +179,9 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
                             {new Date(occ.date).toLocaleDateString()}
                           </div>
                         </div>
-                        <span className="text-[8px] text-gray-300 font-bold uppercase leading-none tracking-tighter">Ref: {occ.nomeFunc}</span>
+                        <span className="text-[8px] text-gray-300 font-bold uppercase leading-none tracking-tighter mt-0.5">Ref: {occ.nomeFunc}</span>
                       </div>
                     </div>
-                    {occ.tipoViolencia ? (
-                      <h4 className="font-black text-red-600 text-[13px] leading-tight uppercase tracking-tighter mb-0.5">⚠ {occ.tipoViolencia}</h4>
-                    ) : (
-                      <h4 className="font-black text-gray-400 text-[11px] leading-tight uppercase tracking-tighter mb-0.5">{occ.category}</h4>
-                    )}
                     <p className="text-[11px] text-[#3b5998] font-black uppercase truncate leading-none">{student?.name || 'Aluno Desconhecido'}</p>
                   </div>
                 </div>

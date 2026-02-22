@@ -317,20 +317,28 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
                       onClick={() => navigate(`/occurrences/${occ.id}`, { state: { from: 'student' } })}
                     >
                       <div className="flex-1 min-w-0 pr-4">
-                        <div className="flex flex-col gap-0.5 mb-1">
-                          <div className="flex items-center gap-2">
-                            <span className={`w-2 h-2 rounded-full ${occ.category === 'Comportamental' ? 'bg-red-500' : 'bg-blue-500'}`} />
-                            {occ.isConfidential && <EyeOff size={10} className="text-red-500" />}
-                            <h4 className="font-black text-gray-800 text-[11px] uppercase tracking-tighter truncate">
-                              {occ.tipoViolencia ? `⚠ ${occ.tipoViolencia}` : occ.category}
-                            </h4>
-                          </div>
+                        <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                          <span className={`w-2 h-2 rounded-full shrink-0 ${occ.category === 'Comportamental' ? 'bg-red-500' : 'bg-blue-500'}`} />
+                          {occ.isConfidential && <EyeOff size={10} className="text-red-500 shrink-0" />}
+                          <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase shadow-sm text-white ${occ.category === 'Comportamental' ? 'bg-red-500' : 'bg-blue-500'}`}>
+                            {occ.category}
+                          </span>
+                          {occ.tipoViolencia && (
+                            <span className="text-red-600 text-[11px] font-black uppercase tracking-tighter flex items-center gap-1">
+                              ⚠ {occ.tipoViolencia}
+                            </span>
+                          )}
                         </div>
                         <div className="flex flex-col">
-                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-none">
-                            {new Date(occ.date).toLocaleDateString()}
+                          <p className="text-[11px] text-[#3b5998] font-black uppercase truncate leading-none mb-1">
+                            {student?.name || 'Aluno'}
                           </p>
-                          <span className="text-[8px] text-gray-300 font-bold uppercase tracking-tighter mt-0.5">Ref: {occ.nomeFunc}</span>
+                          <div className="flex items-center gap-3">
+                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-none">
+                              {new Date(occ.date).toLocaleDateString()}
+                            </p>
+                            <span className="text-[8px] text-gray-300 font-bold uppercase tracking-tighter">Ref: {occ.nomeFunc}</span>
+                          </div>
                         </div>
                       </div>
                       <ChevronRight size={18} className="text-gray-300 group-hover:text-[#3b5998] transition-colors" />
