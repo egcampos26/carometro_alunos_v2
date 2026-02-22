@@ -19,6 +19,7 @@ import { occurrenceService } from './services/occurrenceService';
 import { logService } from './services/logService';
 import { supabase } from './services/supabase';
 import { detectStudentChanges, formatChangesForLog } from './utils/changeDetection';
+import TestModePanel from './components/TestModePanel';
 
 // Mapeia tipo_usuario do Portal para role interno do App
 const mapPortalRole = (tipoUsuario: string | undefined): AuthUser['role'] => {
@@ -33,13 +34,14 @@ const mapPortalRole = (tipoUsuario: string | undefined): AuthUser['role'] => {
   }
 };
 
-const TEST_USERS: AuthUser[] = [
-  { id: 'user-1', name: 'Usuário', role: 'User', email: 'usuario@escola.com' },
-  { id: 'editor-1', name: 'Editor', role: 'Editor', email: 'editor@escola.com' },
-  { id: 'manager-1', name: 'Gestor', role: 'Manager', email: 'gestor@escola.com' },
-  { id: 'coord-1', name: 'Coordenador', role: 'Coordinator', email: 'coord@escola.com' },
-  { id: 'diretor-1', name: 'Diretor', role: 'Director', email: 'diretor@escola.com' },
-  { id: 'admin-1', name: 'Administrador', role: 'Admin', email: 'admin@escola.com' },
+// Roles simuláveis pelo Admin no modo teste
+const SIMULATABLE_ROLES: { label: string; role: AuthUser['role'] }[] = [
+  { label: '👤 Usuário', role: 'User' },
+  { label: '✏️ Editor', role: 'Editor' },
+  { label: '📋 Gestor', role: 'Manager' },
+  { label: '🎓 Coordenador', role: 'Coordinator' },
+  { label: '🏫 Diretor', role: 'Director' },
+  { label: '🔑 Admin', role: 'Admin' },
 ];
 
 const App: React.FC = () => {
@@ -53,13 +55,37 @@ const App: React.FC = () => {
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Mantendo o estado apenas para o usuário atual padrão (Admin para visualização total)
-  const [currentUserIndex, setCurrentUserIndex] = useState(0);
-  const user = TEST_USERS[currentUserIndex];
+  // Usuário real autenticado (vem do Portal via postMessage)
+  const [realUser, setRealUser] = useState<AuthUser>(
+    { id: 'admin-1', name: 'Administrador', role: 'Admin', email: 'admin@escola.com' }
+  );
 
-  const handleToggleRole = () => {
-    setCurrentUserIndex((prev) => (prev + 1) % TEST_USERS.length);
+  // Usuário simulado (só Admin pode simular; null = sem simulação)
+  const [simulatedUser, setSimulatedUser] = useState<AuthUser | null>(null);
+
+  // Usuário ativo = simulado (se houver) ou real
+  const user = simulatedUser ?? realUser;
+
+  const handleSimulateRole = (role: AuthUser['role']) => {
+    if (realUser.role !== 'Admin') return; // Segurança extra
+    if (role === realUser.role) {
+      setSimulatedUser(null); // Resets to real user
+      return;
+    }
+    const label = SIMULATABLE_ROLES.find(r => r.role === role)?.label ?? role;
+    setSimulatedUser({
+      id: `sim-${role.toLowerCase()}`,
+      name: `[Teste] ${label.replace(/^.+?\s/, '')}`,
+      role,
+      email: `sim-${role.toLowerCase()}@escola.com`,
+      idFunc: realUser.idFunc, // mantém o idFunc real para operações no banco
+    });
   };
+
+  const handleResetSimulation = () => setSimulatedUser(null);
+
+  // Mantido por compatibilidade (não usado mais ativamente)
+  const handleToggleRole = () => { };
 
   // Fetch Data from Supabase
   const loadData = async () => {
@@ -186,11 +212,9 @@ const App: React.FC = () => {
     }
   }
 
-  const setAuthenticatedUser = (user: AuthUser) => {
-    // Override the default TEST_USER in the array (hacky but works for current structure)
-    TEST_USERS[0] = user;
-    // Force re-render/update
-    setCurrentUserIndex(0);
+  const setAuthenticatedUser = (authUser: AuthUser) => {
+    setRealUser(authUser);
+    setSimulatedUser(null); // Resetar simulação ao re-autenticar
   }
 
   const addLog = async (action: string, details: string) => {
@@ -299,6 +323,18 @@ const App: React.FC = () => {
     <HashRouter>
       <div className="min-h-screen bg-gray-50 flex flex-col w-full overflow-x-hidden">
         <div className="flex-1 flex flex-col w-full overflow-hidden relative">
+
+          {/* Painel flutuante Modo Teste — visível apenas para Admin real */}
+          {realUser.role === 'Admin' && (
+            <TestModePanel
+              realUser={realUser}
+              simulatedUser={simulatedUser}
+              roles={SIMULATABLE_ROLES}
+              onSimulate={handleSimulateRole}
+              onReset={handleResetSimulation}
+            />
+          )}
+
           <Routes>
             <Route path="/" element={<Navigate to="/turnos" replace />} />
 

@@ -69,31 +69,6 @@ const Layout: React.FC<LayoutProps> = ({
               </button>
             )}
 
-            {/* Role Switcher (Visible only if user prop is present) */}
-            {user && onToggleRole && (
-              <button
-                onClick={onToggleRole}
-                className={`flex flex-col items-center px-3 py-1.5 rounded-lg border transition-all ml-1 sm:ml-2 shadow-sm active:scale-95 shrink-0 ${user.role === 'Admin'
-                  ? 'bg-red-500/20 border-red-400/30 text-red-100 hover:bg-red-500/30'
-                  : user.role === 'Manager'
-                    ? 'bg-amber-500/20 border-amber-400/30 text-amber-100 hover:bg-amber-500/30'
-                    : user.role === 'Editor'
-                      ? 'bg-purple-500/20 border-purple-400/30 text-purple-100 hover:bg-purple-500/30'
-                      : user.role === 'Coordinator'
-                        ? 'bg-emerald-600/20 border-emerald-400/30 text-emerald-100 hover:bg-emerald-600/30'
-                        : user.role === 'Director'
-                          ? 'bg-violet-600/20 border-violet-400/30 text-violet-100 hover:bg-violet-600/30'
-                          : 'bg-emerald-500/20 border-emerald-400/30 text-emerald-100 hover:bg-emerald-500/30'
-                  }`}
-                title={`Trocar usuário (Atual: ${user.name})`}
-              >
-                <span className="text-[8px] font-black uppercase tracking-widest opacity-80 leading-none">AMB. TESTE</span>
-                <div className="flex items-center gap-1 mt-0.5">
-                  <span className="text-[10px] sm:text-xs font-black uppercase tracking-tight leading-none whitespace-nowrap">{user.name}</span>
-                </div>
-              </button>
-            )}
-
             {leftAction}
           </div>
 
