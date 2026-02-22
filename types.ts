@@ -18,6 +18,7 @@ export interface Occurrence {
   idFunc?: string; // New field linked to FUNCIONARIOS
   registeredBy?: string; // Keeping for compatibility during migration if needed, but should be removed eventually
   isConfidential?: boolean; // Indica se a ocorrência é sigilosa
+  tipoViolencia?: string | null; // Mapa de Violências (nullable)
 }
 
 export interface LogEntry {

@@ -21,10 +21,11 @@ export const occurrenceService = {
             title: row.title,
             description: row.description,
             category: row.category,
-            nomeFunc: row.nome_func, // Updated column name
+            nomeFunc: row.nome_func,
             idFunc: row.id_func,
             groupId: row.group_id,
-            isConfidential: row.is_confidential || false
+            isConfidential: row.is_confidential || false,
+            tipoViolencia: row.tipo_violencia || null
         }));
     },
 
@@ -35,10 +36,11 @@ export const occurrenceService = {
             title: occurrence.title,
             description: occurrence.description,
             category: occurrence.category,
-            nome_func: occurrence.nomeFunc, // Updated column name
-            id_func: occurrence.idFunc || null, // Optional link to employee
+            nome_func: occurrence.nomeFunc,
+            id_func: occurrence.idFunc || null,
             group_id: occurrence.groupId || null,
-            is_confidential: occurrence.isConfidential || false
+            is_confidential: occurrence.isConfidential || false,
+            tipo_violencia: occurrence.tipoViolencia || null
         }).select().single();
 
         if (error) throw error;
@@ -53,7 +55,8 @@ export const occurrenceService = {
             nomeFunc: data.nome_func,
             idFunc: data.id_func,
             groupId: data.group_id,
-            isConfidential: data.is_confidential || false
+            isConfidential: data.is_confidential || false,
+            tipoViolencia: data.tipo_violencia || null
         };
     },
 
@@ -66,7 +69,8 @@ export const occurrenceService = {
             nome_func: occurrence.nomeFunc,
             id_func: occurrence.idFunc || null,
             group_id: occurrence.groupId || null,
-            is_confidential: occurrence.isConfidential || false
+            is_confidential: occurrence.isConfidential || false,
+            tipo_violencia: occurrence.tipoViolencia || null
         }).eq('id_ocorrencias', occurrence.id);
 
 

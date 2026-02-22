@@ -1,9 +1,9 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Student, Occurrence, AuthUser } from '../types';
-import { UserCheck, Calendar, Search, X, Users, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { UserCheck, Calendar, Search, X, Users, CheckCircle2, Eye, EyeOff, ShieldAlert } from 'lucide-react';
+import { supabase } from '../services/supabase';
 
 interface OccurrenceAddMultiProps {
   students: Student[];
@@ -24,6 +24,21 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
   const [date, setDate] = useState(today);
   const [category, setCategory] = useState<Occurrence['category']>('Comportamental');
   const [isConfidential, setIsConfidential] = useState(false);
+  const [tipoViolencia, setTipoViolencia] = useState<string>('');
+  const [tiposViolencia, setTiposViolencia] = useState<string[]>([]);
+  const [showNovoTipo, setShowNovoTipo] = useState(false);
+  const [novoTipo, setNovoTipo] = useState('');
+
+  useEffect(() => {
+    supabase
+      .from('TIPOS_VIOLENCIAS')
+      .select('descricao')
+      .eq('ativo', true)
+      .order('id')
+      .then(({ data }) => {
+        if (data) setTiposViolencia(data.map((r: any) => r.descricao));
+      });
+  }, []);
 
   const filteredStudents = studentSearch.trim() === ''
     ? []
@@ -62,14 +77,15 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
       const newOcc: Occurrence = {
         id: (Date.now() + index).toString(),
         studentId,
-        groupId, // Associates records
+        groupId,
         date: date,
         title,
         description,
         category,
         nomeFunc: user.name,
         idFunc: user.idFunc,
-        isConfidential
+        isConfidential,
+        tipoViolencia: tipoViolencia || null
       };
       onAddOccurrence(newOcc);
     });
@@ -228,6 +244,65 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
                   }`} />
               </div>
             </button>
+          </div>
+          {/* Mapa de Violências */}
+          <div className="space-y-3">
+            <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1 flex items-center gap-2">
+              <ShieldAlert size={16} /> Mapa de Violências
+            </label>
+            <select
+              value={tipoViolencia}
+              onChange={(e) => {
+                if (e.target.value === '__novo__') {
+                  setShowNovoTipo(true);
+                } else {
+                  setTipoViolencia(e.target.value);
+                  setShowNovoTipo(false);
+                }
+              }}
+              className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:bg-white focus:border-[#3b5998] outline-none font-bold text-gray-700 transition-all"
+            >
+              <option value="">— Não se aplica —</option>
+              {tiposViolencia.map(tipo => (
+                <option key={tipo} value={tipo}>{tipo}</option>
+              ))}
+              <option value="__novo__">➕ Acrescentar nova violência...</option>
+            </select>
+            {showNovoTipo && (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Nome do novo tipo de violência"
+                  value={novoTipo}
+                  onChange={(e) => setNovoTipo(e.target.value)}
+                  className="flex-1 p-4 bg-white border-2 border-[#3b5998]/30 rounded-2xl outline-none font-bold text-gray-700 focus:border-[#3b5998] transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const desc = novoTipo.trim();
+                    if (!desc) return;
+                    await supabase.from('TIPOS_VIOLENCIAS').insert({ descricao: desc });
+                    setTiposViolencia(prev => [...prev, desc]);
+                    setTipoViolencia(desc);
+                    setNovoTipo('');
+                    setShowNovoTipo(false);
+                  }}
+                  className="px-5 py-2 bg-[#3b5998] text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-blue-700 active:scale-95 transition-all"
+                >
+                  Salvar
+                </button>
+              </div>
+            )}
+            {tipoViolencia && tipoViolencia !== '__novo__' && (
+              <div className="flex items-center gap-2 bg-orange-50 text-orange-600 px-4 py-2 rounded-xl border border-orange-100">
+                <ShieldAlert size={14} />
+                <span className="text-xs font-black uppercase">{tipoViolencia}</span>
+                <button type="button" onClick={() => setTipoViolencia('')} className="ml-auto text-orange-400 hover:text-red-500">
+                  <X size={14} />
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">

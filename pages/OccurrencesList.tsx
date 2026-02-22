@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Occurrence, Student, AuthUser } from '../types';
-import { Search, User, Clock, FileText, LayoutList, Plus, Calendar, X, EyeOff } from 'lucide-react';
+import { Search, User, Clock, FileText, LayoutList, Plus, Calendar, X, EyeOff, ShieldAlert } from 'lucide-react';
 import { NO_IMAGE_RIGHTS_URL } from '../constants';
 
 interface OccurrencesListProps {
@@ -23,26 +23,30 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
   const hasSearch = searchTerm.trim().length > 0;
   const hasDateFilter = filterDate !== '';
 
-  const filtered = (hasSearch || hasDateFilter)
-    ? occurrences.filter(occ => {
-      const student = getStudentById(occ.studentId);
-      const sName = student?.name.toLowerCase() || '';
-      const sRA = student?.registrationNumber.toLowerCase() || '';
-      const search = searchTerm.toLowerCase();
+  // Filtra por role SEMPRE (independente de busca)
+  const visibleOccurrences = occurrences.filter(occ => {
+    // User/Editor: só veem as próprias. Os demais veem todas.
+    if (user.role === 'User' || user.role === 'Editor') return occ.nomeFunc === user.name;
+    return true;
+  });
 
-      const matchesText = !hasSearch || (
-        sName.includes(search) ||
-        sRA.includes(search) ||
-        occ.title.toLowerCase().includes(search)
-      );
+  // Aplica filtros de texto/data sobre as ocorrências visíveis
+  const filtered = visibleOccurrences.filter(occ => {
+    const student = getStudentById(occ.studentId);
+    const sName = student?.name.toLowerCase() || '';
+    const sRA = student?.registrationNumber.toLowerCase() || '';
+    const search = searchTerm.toLowerCase();
 
-      const mtachesDate = !hasDateFilter || occ.date === filterDate;
-      // User/Editor: veem apenas as próprias ocorrências. Manager/Admin/Coordinator/Director: veem todas.
-      const matchesRole = (user.role === 'User' || user.role === 'Editor') ? occ.nomeFunc === user.name : true;
+    const matchesText = !hasSearch || (
+      sName.includes(search) ||
+      sRA.includes(search) ||
+      occ.title.toLowerCase().includes(search)
+    );
 
-      return matchesText && mtachesDate && matchesRole;
-    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    : [];
+    const matchesDate = !hasDateFilter || occ.date === filterDate;
+
+    return matchesText && matchesDate;
+  }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const handleAddNew = () => {
     navigate('/occurrences/new-multi');
@@ -77,9 +81,8 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
       }
     >
       <div className="p-4 sm:p-8 max-w-6xl 2xl:max-w-7xl mx-auto w-full">
-        {/* Filtros Container - Ajustado para w-full para alinhar com a busca centralizada */}
-        <div className="flex flex-col md:flex-row gap-4 mb-10 w-full">
-          {/* Busca por Texto - flex-1 garante que ocupe o máximo de espaço */}
+        {/* Filtros */}
+        <div className="flex flex-col md:flex-row gap-4 mb-8 w-full">
           <div className="relative flex-1">
             <input
               type="text"
@@ -89,9 +92,16 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#3b5998]" size={20} />
+            {hasSearch && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            )}
           </div>
 
-          {/* Filtro de Data */}
           <div className="relative w-full md:w-64">
             <input
               type="date"
@@ -111,19 +121,19 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
           </div>
         </div>
 
-        {/* Dynamic Grid for Results */}
+        {/* Contador */}
+        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">
+          {filtered.length} {filtered.length === 1 ? 'registro encontrado' : 'registros encontrados'}
+          {(hasSearch || hasDateFilter) && (
+            <button onClick={clearFilters} className="ml-3 text-[#3b5998] hover:underline">
+              Limpar filtros
+            </button>
+          )}
+        </p>
+
+        {/* Grid de Resultados */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6">
-          {!(hasSearch || hasDateFilter) ? (
-            <div className="col-span-full text-center py-24 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-100 px-6">
-              <div className="bg-white w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm">
-                <LayoutList size={32} className="text-[#3b5998] opacity-50" />
-              </div>
-              <h3 className="text-gray-800 font-black mb-2 uppercase text-sm tracking-widest">Busca Centralizada</h3>
-              <p className="text-gray-400 text-xs leading-relaxed max-w-xs mx-auto font-bold uppercase tracking-tighter">
-                Utilize os filtros acima para pesquisar registros por aluno, assunto ou data específica.
-              </p>
-            </div>
-          ) : filtered.length > 0 ? (
+          {filtered.length > 0 ? (
             filtered.map(occ => {
               const student = getStudentById(occ.studentId);
               return (
@@ -152,18 +162,28 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
                         }`}>
                         {occ.category}
                       </span>
-                      {occ.isConfidential && (
-                        <div className="bg-red-50 text-red-500 p-1 rounded-full border border-red-100" title="Ocorrência Sigilosa">
-                          <EyeOff size={10} />
+                      <div className="flex items-center gap-2">
+                        {occ.isConfidential && (
+                          <div className="bg-red-50 text-red-500 p-1 rounded-full border border-red-100" title="Ocorrência Sigilosa">
+                            <EyeOff size={10} />
+                          </div>
+                        )}
+                        {occ.tipoViolencia && (
+                          <div className="bg-orange-50 text-orange-500 p-1 rounded-full border border-orange-100" title={occ.tipoViolencia}>
+                            <ShieldAlert size={10} />
+                          </div>
+                        )}
+                        <div className="flex items-center gap-1 text-[10px] text-gray-400 font-bold">
+                          <Clock size={12} />
+                          {new Date(occ.date).toLocaleDateString()}
                         </div>
-                      )}
-                      <div className="flex items-center gap-1 text-[10px] text-gray-400 font-bold">
-                        <Clock size={12} />
-                        {new Date(occ.date).toLocaleDateString()}
                       </div>
                     </div>
                     <h4 className="font-black text-gray-900 text-base mb-1 truncate uppercase tracking-tighter">{occ.title}</h4>
                     <p className="text-[11px] text-[#3b5998] font-black uppercase truncate mb-2">{student?.name || 'Aluno Desconhecido'}</p>
+                    {occ.tipoViolencia && (
+                      <p className="text-[9px] text-orange-500 font-black uppercase truncate mb-1">⚠ {occ.tipoViolencia}</p>
+                    )}
                     <div className="flex items-center justify-between pt-3 border-t border-gray-50">
                       <div className="flex items-center gap-2">
                         <FileText size={12} className="text-gray-300" />
@@ -176,10 +196,23 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
               );
             })
           ) : (
-            <div className="col-span-full text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-100">
-              <Search size={32} className="mx-auto text-gray-200 mb-4" />
-              <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Nenhum resultado encontrado</p>
-              <button onClick={clearFilters} className="mt-4 text-[#3b5998] text-[10px] font-black uppercase tracking-widest hover:underline">Limpar todos os filtros</button>
+            <div className="col-span-full text-center py-24 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-100 px-6">
+              <div className="bg-white w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm">
+                <LayoutList size={32} className="text-[#3b5998] opacity-50" />
+              </div>
+              <h3 className="text-gray-800 font-black mb-2 uppercase text-sm tracking-widest">
+                {(hasSearch || hasDateFilter) ? 'Nenhum resultado' : 'Sem registros'}
+              </h3>
+              <p className="text-gray-400 text-xs leading-relaxed max-w-xs mx-auto font-bold uppercase tracking-tighter">
+                {(hasSearch || hasDateFilter)
+                  ? 'Nenhuma ocorrência corresponde aos filtros aplicados.'
+                  : 'Ainda não há ocorrências registradas.'}
+              </p>
+              {(hasSearch || hasDateFilter) && (
+                <button onClick={clearFilters} className="mt-4 text-[#3b5998] text-[10px] font-black uppercase tracking-widest hover:underline">
+                  Limpar todos os filtros
+                </button>
+              )}
             </div>
           )}
         </div>

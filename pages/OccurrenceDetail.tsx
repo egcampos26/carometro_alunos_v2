@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Student, Occurrence, AuthUser } from '../types';
-import { User, Clock, ChevronRight, Users, Trash2, AlertCircle, Edit3, X, AlertTriangle, EyeOff } from 'lucide-react';
+import { User, Clock, ChevronRight, Users, Trash2, AlertCircle, Edit3, X, AlertTriangle, EyeOff, ShieldAlert } from 'lucide-react';
 import { NO_IMAGE_RIGHTS_URL } from '../constants';
 
 interface OccurrenceDetailProps {
@@ -117,6 +117,17 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
                   {occurrence.description}
                 </p>
               </div>
+
+              {/* Mapa de Violências */}
+              {occurrence.tipoViolencia && (
+                <div className="flex items-center gap-3 bg-orange-50 border border-orange-100 px-5 py-3 rounded-2xl">
+                  <ShieldAlert size={16} className="text-orange-500 shrink-0" />
+                  <div>
+                    <p className="text-[9px] font-black text-orange-400 uppercase tracking-widest leading-none mb-0.5">Mapa de Violências</p>
+                    <p className="text-sm font-black text-orange-700 uppercase tracking-tight">{occurrence.tipoViolencia}</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {involvedStudents.length > 1 && (
