@@ -84,13 +84,13 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
 
         <div className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden">
           <div className={`h-3 w-full ${occurrence.category === 'Comportamental' ? 'bg-red-500' :
-            occurrence.category === 'Acadêmica' ? 'bg-blue-500' : 'bg-orange-500'
+            occurrence.category === 'Pedagógica' ? 'bg-blue-500' : 'bg-orange-500'
             }`} />
 
           <div className="p-6 sm:p-8 space-y-8">
             <div className="flex justify-between items-center border-b border-gray-50 pb-6">
               <span className={`text-[10px] font-black text-white px-4 py-1.5 rounded-full uppercase shadow-sm ${occurrence.category === 'Comportamental' ? 'bg-red-500' :
-                occurrence.category === 'Acadêmica' ? 'bg-blue-500' : 'bg-orange-500'
+                occurrence.category === 'Pedagógica' ? 'bg-blue-500' : 'bg-orange-500'
                 }`}>
                 {occurrence.category}
               </span>

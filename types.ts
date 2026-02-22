@@ -13,7 +13,7 @@ export interface Occurrence {
   date: string;
   title: string;
   description: string;
-  category: 'Comportamental' | 'Acadêmica' | 'Médica' | 'Outros';
+  category: 'Comportamental' | 'Pedagógica' | 'Médica' | 'Outros';
   nomeFunc: string; // Renamed from registeredBy
   idFunc?: string; // New field linked to FUNCIONARIOS
   registeredBy?: string; // Keeping for compatibility during migration if needed, but should be removed eventually

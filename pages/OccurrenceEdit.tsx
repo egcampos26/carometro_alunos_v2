@@ -344,7 +344,7 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
           <div className="space-y-3">
             <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Categoria</label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {['Comportamental', 'Acadêmica', 'Médica', 'Outros'].map((cat) => (
+              {['Comportamental', 'Pedagógica', 'Médica', 'Outros'].map((cat) => (
                 <button
                   key={cat}
                   type="button"

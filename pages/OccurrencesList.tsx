@@ -158,7 +158,7 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start mb-2">
                       <span className={`text-[10px] font-black text-white px-3 py-1 rounded-full uppercase shadow-sm ${occ.category === 'Comportamental' ? 'bg-red-500' :
-                        occ.category === 'Acadêmica' ? 'bg-blue-500' : 'bg-orange-500'
+                        occ.category === 'Pedagógica' ? 'bg-blue-500' : 'bg-orange-500'
                         }`}>
                         {occ.category}
                       </span>
