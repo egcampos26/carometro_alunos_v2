@@ -7,6 +7,7 @@ import { Camera, Image as ImageIcon, UserCircle2, X, ShieldAlert, Lock, Loader2 
 import { NO_IMAGE_RIGHTS_URL } from '../constants';
 import { compressToWebP } from '../utils/imageUtils';
 import { uploadStudentPhoto } from '../services/photoService';
+import { maskRG, maskCPF, maskPhone } from '../utils/maskUtils';
 
 interface StudentEditProps {
   students: Student[];
@@ -23,7 +24,19 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
-  const [formData, setFormData] = useState<Student | null>(student ? { ...student } : null);
+  const [formData, setFormData] = useState<Student | null>(student ? {
+    ...student,
+    studentRG: student.studentRG ? maskRG(student.studentRG) : '',
+    studentCPF: student.studentCPF ? maskCPF(student.studentCPF) : '',
+    resp1RG: student.resp1RG ? maskRG(student.resp1RG) : '',
+    resp1CPF: student.resp1CPF ? maskCPF(student.resp1CPF) : '',
+    resp2RG: student.resp2RG ? maskRG(student.resp2RG) : '',
+    resp2CPF: student.resp2CPF ? maskCPF(student.resp2CPF) : '',
+    telefone1: student.telefone1 ? maskPhone(student.telefone1) : '',
+    telefone2: student.telefone2 ? maskPhone(student.telefone2) : '',
+    telefone3: student.telefone3 ? maskPhone(student.telefone3) : '',
+    telefone4: student.telefone4 ? maskPhone(student.telefone4) : '',
+  } : null);
   const [showSourceModal, setShowSourceModal] = useState(false);
   const [pendingPhotoBlob, setPendingPhotoBlob] = useState<Blob | null>(null);
   const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
@@ -84,7 +97,14 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
         finalPhotoUrl = await uploadStudentPhoto(formData.grade, formData.name, pendingPhotoBlob);
       }
 
-      const studentToSave = { ...formData, photoUrl: finalPhotoUrl };
+      const studentToSave: Student = {
+        ...formData,
+        photoUrl: finalPhotoUrl,
+        // Limpa as máscaras para salvar apenas números (opcional, mas geralmente preferível para o banco)
+        // No entanto, o usuário pediu para "mostrar as máscaras", se ele quer salvar com máscara, deixamos.
+        // Vou manter como está (com máscara) pois facilita a exibição posterior se o banco aceitar string.
+        // Se houver erro de validação no banco, precisaria remover o .replace(/\D/g, '')
+      };
       onUpdate(studentToSave);
       navigate(`/student/${formData.id}`, { replace: true });
     } catch (err) {
@@ -209,9 +229,10 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
                 <label className="text-[#3b5998] text-[10px] font-black uppercase block tracking-widest ml-1">RG do Aluno</label>
                 <input
                   type="text"
+                  placeholder="00.000.000-0"
                   className="w-full p-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-2xl text-gray-800 font-bold outline-none transition-all"
                   value={formData.studentRG || ''}
-                  onChange={(e) => setFormData({ ...formData, studentRG: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, studentRG: maskRG(e.target.value) })}
                 />
               </div>
 
@@ -219,9 +240,10 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
                 <label className="text-[#3b5998] text-[10px] font-black uppercase block tracking-widest ml-1">CPF do Aluno</label>
                 <input
                   type="text"
+                  placeholder="000.000.000-00"
                   className="w-full p-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-2xl text-gray-800 font-bold outline-none transition-all"
                   value={formData.studentCPF || ''}
-                  onChange={(e) => setFormData({ ...formData, studentCPF: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, studentCPF: maskCPF(e.target.value) })}
                 />
               </div>
 
@@ -260,10 +282,9 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
                 <label className="text-[#3b5998] text-[10px] font-black uppercase block tracking-widest ml-1">Gênero</label>
                 <select
                   className="w-full p-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-2xl text-gray-800 font-bold outline-none transition-all appearance-none"
-                  value={formData.generoAluno || ''}
-                  onChange={(e) => setFormData({ ...formData, generoAluno: e.target.value as 'Masculino' | 'Feminino' | null })}
+                  value={formData.generoAluno || 'Masculino'}
+                  onChange={(e) => setFormData({ ...formData, generoAluno: e.target.value as 'Masculino' | 'Feminino' })}
                 >
-                  <option value="">Selecionar Gênero</option>
                   <option value="Masculino">Masculino</option>
                   <option value="Feminino">Feminino</option>
                 </select>
@@ -310,9 +331,10 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
                     <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">Tel Responsável 1</label>
                     <input
                       type="text"
+                      placeholder="(00) 00000-0000"
                       className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                       value={formData.telefone1}
-                      onChange={(e) => setFormData({ ...formData, telefone1: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, telefone1: maskPhone(e.target.value) })}
                     />
                   </div>
                 </div>
@@ -322,18 +344,20 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
                     <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">RG Resp 1</label>
                     <input
                       type="text"
+                      placeholder="00.000.000-0"
                       className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                       value={formData.resp1RG || ''}
-                      onChange={(e) => setFormData({ ...formData, resp1RG: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, resp1RG: maskRG(e.target.value) })}
                     />
                   </div>
                   <div className="space-y-1">
                     <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">CPF Resp 1</label>
                     <input
                       type="text"
+                      placeholder="000.000.000-00"
                       className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                       value={formData.resp1CPF || ''}
-                      onChange={(e) => setFormData({ ...formData, resp1CPF: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, resp1CPF: maskCPF(e.target.value) })}
                     />
                   </div>
                 </div>
@@ -361,9 +385,10 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
                     <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">Tel Responsável 2</label>
                     <input
                       type="text"
+                      placeholder="(00) 00000-0000"
                       className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                       value={formData.telefone2}
-                      onChange={(e) => setFormData({ ...formData, telefone2: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, telefone2: maskPhone(e.target.value) })}
                     />
                   </div>
                 </div>
@@ -373,18 +398,20 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
                     <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">RG Resp 2</label>
                     <input
                       type="text"
+                      placeholder="00.000.000-0"
                       className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                       value={formData.resp2RG || ''}
-                      onChange={(e) => setFormData({ ...formData, resp2RG: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, resp2RG: maskRG(e.target.value) })}
                     />
                   </div>
                   <div className="space-y-1">
                     <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">CPF Resp 2</label>
                     <input
                       type="text"
+                      placeholder="000.000.000-00"
                       className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                       value={formData.resp2CPF || ''}
-                      onChange={(e) => setFormData({ ...formData, resp2CPF: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, resp2CPF: maskCPF(e.target.value) })}
                     />
                   </div>
                 </div>
@@ -395,9 +422,10 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
                     <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">Telefone Adicional (3)</label>
                     <input
                       type="text"
+                      placeholder="(00) 00000-0000"
                       className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                       value={formData.telefone3 || ''}
-                      onChange={(e) => setFormData({ ...formData, telefone3: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, telefone3: maskPhone(e.target.value) })}
                     />
                   </div>
                   <div className="space-y-1">

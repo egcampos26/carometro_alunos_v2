@@ -5,6 +5,7 @@ import Layout from '../components/Layout';
 import { Student, Occurrence, AuthUser } from '../types';
 import { Edit2, Phone, User, ChevronRight, CreditCard, ShieldAlert, Calendar, MapPin, Plus, Minus, EyeOff } from 'lucide-react';
 import { NO_IMAGE_RIGHTS_URL } from '../constants';
+import { maskRG, maskCPF, maskPhone } from '../utils/maskUtils';
 
 interface StudentDetailProps {
   students: Student[];
@@ -119,7 +120,7 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
             </div>
 
             {/* Informações Básicas (Sempre Visíveis) - AGORA ACIMA DO SHOW MORE INFO */}
-            <div className="grid grid-cols-3 lg:grid-cols-3 gap-1.5 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-4">
               <div className="py-3 px-1 sm:p-4 bg-white rounded-2xl border-2 border-gray-50 shadow-sm flex flex-col items-center justify-center text-center">
                 <span className="text-[#3b5998] text-[9px] sm:text-[9px] font-black uppercase block mb-1 tracking-widest leading-none">ANO/TURMA</span>
                 <p className="font-black text-gray-800 text-xs sm:text-lg leading-none">{student.grade}</p>
@@ -134,6 +135,10 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
                   {student.birthDate ? new Date(student.birthDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-'}
                 </p>
               </div>
+              <div className="py-3 px-1 sm:p-4 bg-white rounded-2xl border-2 border-gray-50 shadow-sm flex flex-col items-center justify-center text-center">
+                <span className="text-[#3b5998] text-[9px] sm:text-[9px] font-black uppercase block mb-1 tracking-widest leading-none">GÊNERO</span>
+                <p className="font-black text-gray-800 text-xs sm:text-lg uppercase leading-none">{student.generoAluno || '-'}</p>
+              </div>
             </div>
 
             {/* Informações Expandidas (RG, CPF, RA/RGA) - AGORA ABAIXO DAS BÁSICAS */}
@@ -142,11 +147,11 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
                 <div className="w-full max-w-md mx-auto grid grid-cols-2 gap-3">
                   <div className="bg-[#3b5998] py-1.5 px-4 rounded-2xl shadow-lg border-b-4 border-blue-900 flex flex-col items-center">
                     <span className="text-[9px] font-black text-blue-200 uppercase block mb-0.5 tracking-widest">RG DO ALUNO</span>
-                    <p className="text-lg sm:text-xl font-black text-white whitespace-nowrap leading-tight">{student.studentRG || '-'}</p>
+                    <p className="text-lg sm:text-xl font-black text-white whitespace-nowrap leading-tight">{student.studentRG ? maskRG(student.studentRG) : '-'}</p>
                   </div>
                   <div className="bg-[#3b5998] py-1.5 px-4 rounded-2xl shadow-lg border-b-4 border-blue-900 flex flex-col items-center">
                     <span className="text-[9px] font-black text-blue-200 uppercase block mb-0.5 tracking-widest">CPF DO ALUNO</span>
-                    <p className="text-lg sm:text-xl font-black text-white whitespace-nowrap leading-tight">{student.studentCPF || '-'}</p>
+                    <p className="text-lg sm:text-xl font-black text-white whitespace-nowrap leading-tight">{student.studentCPF ? maskCPF(student.studentCPF) : '-'}</p>
                   </div>
                 </div>
 
@@ -176,18 +181,18 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
                                 <p className="text-[9px] sm:text-[10px] font-black text-blue-400 uppercase tracking-widest">{student.obsFiliacao1}</p>
                               )}
                             </div>
-                            <p className="text-sm sm:text-base font-black text-[#3b5998] whitespace-nowrap">{student.telefone1 || '-'}</p>
+                            <p className="text-sm sm:text-base font-black text-[#3b5998] whitespace-nowrap">{student.telefone1 ? maskPhone(student.telefone1) : '-'}</p>
                           </div>
 
                           {showMoreInfo && (
                             <div className="grid grid-cols-[1fr_1.3fr] gap-2 mt-2 pt-2 border-t border-dashed border-gray-100 animate-in fade-in slide-in-from-top-1 duration-300">
                               <div className="bg-blue-50/50 py-1.5 px-2 sm:px-3 rounded-xl border border-blue-100 flex flex-col items-center">
                                 <span className="text-[8px] sm:text-[9px] font-black text-[#3b5998] uppercase block mb-0.5 tracking-tighter">RG RESP.</span>
-                                <p className="text-sm sm:text-lg font-black text-gray-800 leading-tight whitespace-nowrap">{student.resp1RG || '-'}</p>
+                                <p className="text-sm sm:text-lg font-black text-gray-800 leading-tight whitespace-nowrap">{student.resp1RG ? maskRG(student.resp1RG) : '-'}</p>
                               </div>
                               <div className="bg-blue-50/50 py-1.5 px-2 sm:px-3 rounded-xl border border-blue-100 flex flex-col items-center">
                                 <span className="text-[8px] sm:text-[9px] font-black text-[#3b5998] uppercase block mb-0.5 tracking-tighter">CPF RESP.</span>
-                                <p className="text-sm sm:text-lg font-black text-gray-800 leading-tight whitespace-nowrap">{student.resp1CPF || '-'}</p>
+                                <p className="text-sm sm:text-lg font-black text-gray-800 leading-tight whitespace-nowrap">{student.resp1CPF ? maskCPF(student.resp1CPF) : '-'}</p>
                               </div>
                             </div>
                           )}
@@ -203,18 +208,18 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
                                 <p className="text-[9px] sm:text-[10px] font-black text-blue-400 uppercase tracking-widest">{student.obsFiliacao2}</p>
                               )}
                             </div>
-                            <p className="text-sm sm:text-base font-black text-[#3b5998] whitespace-nowrap">{student.telefone2 || '-'}</p>
+                            <p className="text-sm sm:text-base font-black text-[#3b5998] whitespace-nowrap">{student.telefone2 ? maskPhone(student.telefone2) : '-'}</p>
                           </div>
 
                           {showMoreInfo && (
                             <div className="grid grid-cols-[1fr_1.3fr] gap-2 mt-2 pt-2 border-t border-dashed border-gray-100 animate-in fade-in slide-in-from-top-1 duration-300">
                               <div className="bg-gray-100/50 py-1.5 px-2 sm:px-3 rounded-xl border border-gray-200 flex flex-col items-center">
                                 <span className="text-[8px] sm:text-[9px] font-black text-gray-400 uppercase block mb-0.5 tracking-tighter">RG RESP.</span>
-                                <p className="text-sm sm:text-lg font-black text-gray-800 leading-tight whitespace-nowrap">{student.resp2RG || '-'}</p>
+                                <p className="text-sm sm:text-lg font-black text-gray-800 leading-tight whitespace-nowrap">{student.resp2RG ? maskRG(student.resp2RG) : '-'}</p>
                               </div>
                               <div className="bg-gray-100/50 py-1.5 px-2 sm:px-3 rounded-xl border border-gray-200 flex flex-col items-center">
                                 <span className="text-[8px] sm:text-[9px] font-black text-gray-400 uppercase block mb-0.5 tracking-tighter">CPF RESP.</span>
-                                <p className="text-sm sm:text-lg font-black text-gray-800 leading-tight whitespace-nowrap">{student.resp2CPF || '-'}</p>
+                                <p className="text-sm sm:text-lg font-black text-gray-800 leading-tight whitespace-nowrap">{student.resp2CPF ? maskCPF(student.resp2CPF) : '-'}</p>
                               </div>
                             </div>
                           )}
@@ -228,7 +233,7 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
                               <div className="flex items-center justify-between gap-2">
                                 <div className="flex items-center gap-2">
                                   <Phone size={12} className="text-[#3b5998]" />
-                                  <p className="text-sm sm:text-base font-black text-[#3b5998]">{student.telefone3}</p>
+                                  <p className="text-sm sm:text-base font-black text-[#3b5998]">{maskPhone(student.telefone3)}</p>
                                 </div>
                                 {student.obsTelefone3 && (
                                   <span className="text-[9px] sm:text-[10px] font-black text-blue-400 uppercase tracking-widest truncate max-w-[50%]">{student.obsTelefone3}</span>
@@ -242,7 +247,7 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
                               <div className="flex items-center justify-between gap-2">
                                 <div className="flex items-center gap-2">
                                   <Phone size={12} className="text-[#3b5998]" />
-                                  <p className="text-sm sm:text-base font-black text-[#3b5998]">{student.telefone4}</p>
+                                  <p className="text-sm sm:text-base font-black text-[#3b5998]">{maskPhone(student.telefone4)}</p>
                                 </div>
                                 {student.obsTelefone4 && (
                                   <span className="text-[9px] sm:text-[10px] font-black text-blue-400 uppercase tracking-widest truncate max-w-[50%]">{student.obsTelefone4}</span>

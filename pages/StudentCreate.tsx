@@ -7,6 +7,7 @@ import { Camera, Image as ImageIcon, UserCircle2, X, Lock, Loader2 } from 'lucid
 import { NO_IMAGE_RIGHTS_URL } from '../constants';
 import { compressToWebP } from '../utils/imageUtils';
 import { uploadStudentPhoto } from '../services/photoService';
+import { maskRG, maskCPF, maskPhone } from '../utils/maskUtils';
 
 interface StudentCreateProps {
     students: Student[];
@@ -35,6 +36,7 @@ const StudentCreate: React.FC<StudentCreateProps> = ({ onCreate, user, onToggleR
         departureMethod: 'Responsável',
         studentStatus: 'Ativo',
         imageRightsSigned: 'Não',
+        generoAluno: 'Masculino',
         filiacao1: '',
         obsFiliacao1: '',
         telefone1: '',
@@ -218,9 +220,10 @@ const StudentCreate: React.FC<StudentCreateProps> = ({ onCreate, user, onToggleR
                                 <label className="text-[#3b5998] text-[10px] font-black uppercase block tracking-widest ml-1">RG do Aluno</label>
                                 <input
                                     type="text"
+                                    placeholder="00.000.000-0"
                                     className="w-full p-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-2xl text-gray-800 font-bold outline-none transition-all"
                                     value={formData.studentRG}
-                                    onChange={(e) => setFormData({ ...formData, studentRG: e.target.value })}
+                                    onChange={(e) => setFormData({ ...formData, studentRG: maskRG(e.target.value) })}
                                 />
                             </div>
 
@@ -228,9 +231,10 @@ const StudentCreate: React.FC<StudentCreateProps> = ({ onCreate, user, onToggleR
                                 <label className="text-[#3b5998] text-[10px] font-black uppercase block tracking-widest ml-1">CPF do Aluno</label>
                                 <input
                                     type="text"
+                                    placeholder="000.000.000-00"
                                     className="w-full p-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-2xl text-gray-800 font-bold outline-none transition-all"
                                     value={formData.studentCPF}
-                                    onChange={(e) => setFormData({ ...formData, studentCPF: e.target.value })}
+                                    onChange={(e) => setFormData({ ...formData, studentCPF: maskCPF(e.target.value) })}
                                 />
                             </div>
 
@@ -281,6 +285,18 @@ const StudentCreate: React.FC<StudentCreateProps> = ({ onCreate, user, onToggleR
                             </div>
 
                             <div className="space-y-2">
+                                <label className="text-[#3b5998] text-[10px] font-black uppercase block tracking-widest ml-1">Gênero</label>
+                                <select
+                                    className="w-full p-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-2xl text-gray-800 font-bold outline-none transition-all appearance-none"
+                                    value={formData.generoAluno || 'Masculino'}
+                                    onChange={(e) => setFormData({ ...formData, generoAluno: e.target.value as 'Masculino' | 'Feminino' })}
+                                >
+                                    <option value="Masculino">Masculino</option>
+                                    <option value="Feminino">Feminino</option>
+                                </select>
+                            </div>
+
+                            <div className="space-y-2">
                                 <label className="text-[#3b5998] text-[10px] font-black uppercase block tracking-widest ml-1">Como vai embora</label>
                                 <select
                                     className="w-full p-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-2xl text-gray-800 font-bold outline-none transition-all appearance-none"
@@ -321,9 +337,10 @@ const StudentCreate: React.FC<StudentCreateProps> = ({ onCreate, user, onToggleR
                                         <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">Tel Responsável 1</label>
                                         <input
                                             type="text"
+                                            placeholder="(00) 00000-0000"
                                             className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                                             value={formData.telefone1}
-                                            onChange={(e) => setFormData({ ...formData, telefone1: e.target.value })}
+                                            onChange={(e) => setFormData({ ...formData, telefone1: maskPhone(e.target.value) })}
                                         />
                                     </div>
                                 </div>
@@ -333,18 +350,20 @@ const StudentCreate: React.FC<StudentCreateProps> = ({ onCreate, user, onToggleR
                                         <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">RG Resp 1</label>
                                         <input
                                             type="text"
+                                            placeholder="00.000.000-0"
                                             className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                                             value={formData.resp1RG}
-                                            onChange={(e) => setFormData({ ...formData, resp1RG: e.target.value })}
+                                            onChange={(e) => setFormData({ ...formData, resp1RG: maskRG(e.target.value) })}
                                         />
                                     </div>
                                     <div className="space-y-1">
                                         <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">CPF Resp 1</label>
                                         <input
                                             type="text"
+                                            placeholder="000.000.000-00"
                                             className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                                             value={formData.resp1CPF}
-                                            onChange={(e) => setFormData({ ...formData, resp1CPF: e.target.value })}
+                                            onChange={(e) => setFormData({ ...formData, resp1CPF: maskCPF(e.target.value) })}
                                         />
                                     </div>
                                 </div>
@@ -372,9 +391,10 @@ const StudentCreate: React.FC<StudentCreateProps> = ({ onCreate, user, onToggleR
                                         <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">Tel Responsável 2</label>
                                         <input
                                             type="text"
+                                            placeholder="(00) 00000-0000"
                                             className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                                             value={formData.telefone2}
-                                            onChange={(e) => setFormData({ ...formData, telefone2: e.target.value })}
+                                            onChange={(e) => setFormData({ ...formData, telefone2: maskPhone(e.target.value) })}
                                         />
                                     </div>
                                 </div>
@@ -384,18 +404,20 @@ const StudentCreate: React.FC<StudentCreateProps> = ({ onCreate, user, onToggleR
                                         <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">RG Resp 2</label>
                                         <input
                                             type="text"
+                                            placeholder="00.000.000-0"
                                             className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                                             value={formData.resp2RG}
-                                            onChange={(e) => setFormData({ ...formData, resp2RG: e.target.value })}
+                                            onChange={(e) => setFormData({ ...formData, resp2RG: maskRG(e.target.value) })}
                                         />
                                     </div>
                                     <div className="space-y-1">
                                         <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">CPF Resp 2</label>
                                         <input
                                             type="text"
+                                            placeholder="000.000.000-00"
                                             className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                                             value={formData.resp2CPF}
-                                            onChange={(e) => setFormData({ ...formData, resp2CPF: e.target.value })}
+                                            onChange={(e) => setFormData({ ...formData, resp2CPF: maskCPF(e.target.value) })}
                                         />
                                     </div>
                                 </div>
@@ -405,9 +427,10 @@ const StudentCreate: React.FC<StudentCreateProps> = ({ onCreate, user, onToggleR
                                         <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">Telefone Adicional (3)</label>
                                         <input
                                             type="text"
+                                            placeholder="(00) 00000-0000"
                                             className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                                             value={formData.telefone3}
-                                            onChange={(e) => setFormData({ ...formData, telefone3: e.target.value })}
+                                            onChange={(e) => setFormData({ ...formData, telefone3: maskPhone(e.target.value) })}
                                         />
                                     </div>
                                     <div className="space-y-1">
@@ -426,9 +449,10 @@ const StudentCreate: React.FC<StudentCreateProps> = ({ onCreate, user, onToggleR
                                         <label className="text-gray-400 text-[9px] font-black uppercase tracking-tighter ml-1">Telefone Adicional (4)</label>
                                         <input
                                             type="text"
+                                            placeholder="(00) 00000-0000"
                                             className="w-full p-3 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-xl text-gray-800 font-bold outline-none transition-all text-sm"
                                             value={formData.telefone4}
-                                            onChange={(e) => setFormData({ ...formData, telefone4: e.target.value })}
+                                            onChange={(e) => setFormData({ ...formData, telefone4: maskPhone(e.target.value) })}
                                         />
                                     </div>
                                     <div className="space-y-1">
