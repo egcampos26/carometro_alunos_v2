@@ -60,6 +60,7 @@ export interface Student {
   departureMethod: DepartureMethod; // como_vai_embora
   studentStatus: 'Ativo' | 'Inativo' | 'Transferido';
   imageRightsSigned?: 'Sim' | 'Não'; // Novo campo: Direito de Imagem
+  generoAluno?: 'Masculino' | 'Feminino' | null; // Gênero do aluno
   // Mantendo para compatibilidade caso existam referências
   guardianName?: string;
   guardianPhone?: string;

@@ -47,6 +47,7 @@ export const studentService = {
                 departureMethod: (row.como_vai_aluno as DepartureMethod) || 'Responsável',
                 studentStatus: row.situacao_aluno || 'Ativo',
                 imageRightsSigned: row.direito_imagem_assinado ? 'Sim' : 'Não',
+                generoAluno: (row.genero_aluno as 'Masculino' | 'Feminino') || null,
 
                 // Dados Alunos Fields
                 filiacao1: details.responsavel_1_aluno || '',
@@ -98,7 +99,8 @@ export const studentService = {
             data_nasc_aluno: student.birthDate || null, // Date or null
             como_vai_aluno: student.departureMethod,
             situacao_aluno: student.studentStatus,
-            direito_imagem_assinado: student.imageRightsSigned === 'Sim'
+            direito_imagem_assinado: student.imageRightsSigned === 'Sim',
+            genero_aluno: student.generoAluno || null
         };
 
         if (idVal !== undefined) {
@@ -164,7 +166,8 @@ export const studentService = {
             data_nasc_aluno: student.birthDate || null,
             como_vai_aluno: student.departureMethod,
             situacao_aluno: student.studentStatus,
-            direito_imagem_assinado: student.imageRightsSigned === 'Sim'
+            direito_imagem_assinado: student.imageRightsSigned === 'Sim',
+            genero_aluno: student.generoAluno || null
         }).eq('id_aluno', id);
 
         if (errorAlunos) throw errorAlunos;
