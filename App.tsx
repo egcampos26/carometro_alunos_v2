@@ -35,8 +35,10 @@ const mapPortalRole = (tipoUsuario: string | undefined): AuthUser['role'] => {
 };
 
 // Roles simuláveis pelo Admin no modo teste
-const SIMULATABLE_ROLES: { label: string; role: AuthUser['role'] }[] = [
+const SIMULATABLE_ROLES: { label: string; role: AuthUser['role']; name?: string; id?: string }[] = [
   { label: '👤 Usuário', role: 'User' },
+  { label: '👤 Usuario1', role: 'User', name: 'Usuario1', id: 'sim-user1' },
+  { label: '👤 Usuario2', role: 'User', name: 'Usuario2', id: 'sim-user2' },
   { label: '✏️ Editor', role: 'Editor' },
   { label: '📋 Gestor', role: 'Manager' },
   { label: '🎓 Coordenador', role: 'Coordinator' },
@@ -66,19 +68,19 @@ const App: React.FC = () => {
   // Usuário ativo = simulado (se houver) ou real
   const user = simulatedUser ?? realUser;
 
-  const handleSimulateRole = (role: AuthUser['role']) => {
-    if (realUser.role !== 'Admin') return; // Segurança extra
-    if (role === realUser.role) {
-      setSimulatedUser(null); // Resets to real user
+  const handleSimulateRole = (entry: { label: string; role: AuthUser['role']; name?: string; id?: string }) => {
+    if (realUser.role !== 'Admin') return;
+    if (entry.role === 'Admin') {
+      setSimulatedUser(null);
       return;
     }
-    const label = SIMULATABLE_ROLES.find(r => r.role === role)?.label ?? role;
+    const displayName = entry.name ?? `[Teste] ${entry.label.replace(/^.+?\s/, '')}`;
     setSimulatedUser({
-      id: `sim-${role.toLowerCase()}`,
-      name: `[Teste] ${label.replace(/^.+?\s/, '')}`,
-      role,
-      email: `sim-${role.toLowerCase()}@escola.com`,
-      idFunc: realUser.idFunc, // mantém o idFunc real para operações no banco
+      id: entry.id ?? `sim-${entry.role.toLowerCase()}`,
+      name: displayName,
+      role: entry.role,
+      email: `${(entry.id ?? `sim-${entry.role.toLowerCase()}`)}@escola.com`,
+      idFunc: realUser.idFunc,
     });
   };
 
