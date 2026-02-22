@@ -313,18 +313,25 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
                   studentOccurrences.map(occ => (
                     <div
                       key={occ.id}
-                      className="bg-white p-5 rounded-2xl border-2 border-gray-50 shadow-sm flex justify-between items-center group cursor-pointer transition-all"
+                      className="bg-white p-4 rounded-2xl border-2 border-gray-50 shadow-sm flex justify-between items-center group cursor-pointer transition-all hover:border-[#3b5998]/20"
                       onClick={() => navigate(`/occurrences/${occ.id}`, { state: { from: 'student' } })}
                     >
                       <div className="flex-1 min-w-0 pr-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className={`w-2 h-2 rounded-full ${occ.category === 'Comportamental' ? 'bg-red-500' : 'bg-blue-500'}`} />
-                          {occ.isConfidential && <EyeOff size={10} className="text-red-500" />}
-                          <p className="font-black text-gray-800 text-sm uppercase tracking-tighter truncate">{occ.title}</p>
+                        <div className="flex flex-col gap-0.5 mb-1">
+                          <div className="flex items-center gap-2">
+                            <span className={`w-2 h-2 rounded-full ${occ.category === 'Comportamental' ? 'bg-red-500' : 'bg-blue-500'}`} />
+                            {occ.isConfidential && <EyeOff size={10} className="text-red-500" />}
+                            <h4 className="font-black text-gray-800 text-[11px] uppercase tracking-tighter truncate">
+                              {occ.tipoViolencia ? `⚠ ${occ.tipoViolencia}` : occ.category}
+                            </h4>
+                          </div>
                         </div>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                          {new Date(occ.date).toLocaleDateString()}
-                        </p>
+                        <div className="flex flex-col">
+                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-none">
+                            {new Date(occ.date).toLocaleDateString()}
+                          </p>
+                          <span className="text-[8px] text-gray-300 font-bold uppercase tracking-tighter mt-0.5">Ref: {occ.nomeFunc}</span>
+                        </div>
                       </div>
                       <ChevronRight size={18} className="text-gray-300 group-hover:text-[#3b5998] transition-colors" />
                     </div>

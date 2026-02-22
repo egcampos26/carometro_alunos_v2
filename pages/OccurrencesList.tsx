@@ -139,10 +139,10 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
               return (
                 <div
                   key={occ.id}
-                  className="bg-white p-5 rounded-2xl border-2 border-gray-50 shadow-sm hover:border-[#3b5998]/20 hover:shadow-md transition-all flex gap-5 cursor-pointer group"
+                  className="bg-white p-4 rounded-2xl border-2 border-gray-50 shadow-sm hover:border-[#3b5998]/20 hover:shadow-md transition-all flex gap-4 cursor-pointer group"
                   onClick={() => navigate(`/occurrences/${occ.id}`, { state: { from: 'list' } })}
                 >
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 bg-gray-50 rounded-2xl overflow-hidden border-2 border-white shadow-sm">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 bg-gray-50 rounded-2xl overflow-hidden border-2 border-white shadow-sm">
                     {student ? (
                       <img
                         src={student.imageRightsSigned === 'Sim' ? student.photoUrl : NO_IMAGE_RIGHTS_URL}
@@ -151,46 +151,36 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-200">
-                        <User size={32} />
+                        <User size={28} />
                       </div>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className={`text-[10px] font-black text-white px-3 py-1 rounded-full uppercase shadow-sm ${occ.category === 'Comportamental' ? 'bg-red-500' :
+                    <div className="flex justify-between items-start mb-1">
+                      <span className={`text-[9px] font-black text-white px-2 py-0.5 rounded-full uppercase shadow-sm ${occ.category === 'Comportamental' ? 'bg-red-500' :
                         occ.category === 'Pedagógica' ? 'bg-blue-500' : 'bg-orange-500'
                         }`}>
                         {occ.category}
                       </span>
-                      <div className="flex items-center gap-2">
-                        {occ.isConfidential && (
-                          <div className="bg-red-50 text-red-500 p-1 rounded-full border border-red-100" title="Ocorrência Sigilosa">
-                            <EyeOff size={10} />
+                      <div className="flex flex-col items-end gap-0.5">
+                        <div className="flex items-center gap-1.5">
+                          {occ.isConfidential && (
+                            <EyeOff size={10} className="text-red-500" />
+                          )}
+                          <div className="flex items-center gap-1 text-[10px] text-gray-400 font-bold uppercase">
+                            <Clock size={10} />
+                            {new Date(occ.date).toLocaleDateString()}
                           </div>
-                        )}
-                        {occ.tipoViolencia && (
-                          <div className="bg-orange-50 text-orange-500 p-1 rounded-full border border-orange-100" title={occ.tipoViolencia}>
-                            <ShieldAlert size={10} />
-                          </div>
-                        )}
-                        <div className="flex items-center gap-1 text-[10px] text-gray-400 font-bold">
-                          <Clock size={12} />
-                          {new Date(occ.date).toLocaleDateString()}
                         </div>
+                        <span className="text-[8px] text-gray-300 font-bold uppercase leading-none tracking-tighter">Ref: {occ.nomeFunc}</span>
                       </div>
                     </div>
-                    <h4 className="font-black text-gray-900 text-base mb-1 truncate uppercase tracking-tighter">{occ.title}</h4>
-                    <p className="text-[11px] text-[#3b5998] font-black uppercase truncate mb-2">{student?.name || 'Aluno Desconhecido'}</p>
-                    {occ.tipoViolencia && (
-                      <p className="text-[9px] text-orange-500 font-black uppercase truncate mb-1">⚠ {occ.tipoViolencia}</p>
+                    {occ.tipoViolencia ? (
+                      <h4 className="font-black text-red-600 text-[13px] leading-tight uppercase tracking-tighter mb-0.5">⚠ {occ.tipoViolencia}</h4>
+                    ) : (
+                      <h4 className="font-black text-gray-400 text-[11px] leading-tight uppercase tracking-tighter mb-0.5">{occ.category}</h4>
                     )}
-                    <div className="flex items-center justify-between pt-3 border-t border-gray-50">
-                      <div className="flex items-center gap-2">
-                        <FileText size={12} className="text-gray-300" />
-                        <span className="text-[10px] text-gray-400 font-black">RA: {student?.registrationNumber}</span>
-                      </div>
-                      <span className="text-[9px] text-gray-300 font-bold uppercase">Ref: {occ.nomeFunc}</span>
-                    </div>
+                    <p className="text-[11px] text-[#3b5998] font-black uppercase truncate leading-none">{student?.name || 'Aluno Desconhecido'}</p>
                   </div>
                 </div>
               );
