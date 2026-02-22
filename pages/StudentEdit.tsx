@@ -257,6 +257,19 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
               </div>
 
               <div className="space-y-2">
+                <label className="text-[#3b5998] text-[10px] font-black uppercase block tracking-widest ml-1">Gênero</label>
+                <select
+                  className="w-full p-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-2xl text-gray-800 font-bold outline-none transition-all appearance-none"
+                  value={formData.generoAluno || ''}
+                  onChange={(e) => setFormData({ ...formData, generoAluno: e.target.value as 'Masculino' | 'Feminino' | null })}
+                >
+                  <option value="">Selecionar Gênero</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Feminino">Feminino</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
                 <label className="text-[#3b5998] text-[10px] font-black uppercase block tracking-widest ml-1">Como vai embora</label>
                 <select
                   className="w-full p-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-2xl text-gray-800 font-bold outline-none transition-all appearance-none"

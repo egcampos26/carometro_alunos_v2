@@ -294,15 +294,6 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
                 </button>
               </div>
             )}
-            {tipoViolencia && tipoViolencia !== '__novo__' && (
-              <div className="flex items-center gap-2 bg-orange-50 text-orange-600 px-4 py-2 rounded-xl border border-orange-100">
-                <ShieldAlert size={14} />
-                <span className="text-xs font-black uppercase">{tipoViolencia}</span>
-                <button type="button" onClick={() => setTipoViolencia('')} className="ml-auto text-orange-400 hover:text-red-500">
-                  <X size={14} />
-                </button>
-              </div>
-            )}
           </div>
 
           <div className="space-y-2">
