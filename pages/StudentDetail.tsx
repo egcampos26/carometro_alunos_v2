@@ -120,7 +120,7 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
             </div>
 
             {/* Informações Básicas (Sempre Visíveis) - AGORA ACIMA DO SHOW MORE INFO */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-4">
+            <div className="grid grid-cols-3 sm:grid-cols-3 gap-1.5 sm:gap-4">
               <div className="py-3 px-1 sm:p-4 bg-white rounded-2xl border-2 border-gray-50 shadow-sm flex flex-col items-center justify-center text-center">
                 <span className="text-[#3b5998] text-[9px] sm:text-[9px] font-black uppercase block mb-1 tracking-widest leading-none">ANO/TURMA</span>
                 <p className="font-black text-gray-800 text-xs sm:text-lg leading-none">{student.grade}</p>
@@ -135,16 +135,16 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
                   {student.birthDate ? new Date(student.birthDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-'}
                 </p>
               </div>
-              <div className="py-3 px-1 sm:p-4 bg-white rounded-2xl border-2 border-gray-50 shadow-sm flex flex-col items-center justify-center text-center">
-                <span className="text-[#3b5998] text-[9px] sm:text-[9px] font-black uppercase block mb-1 tracking-widest leading-none">GÊNERO</span>
-                <p className="font-black text-gray-800 text-xs sm:text-lg uppercase leading-none">{student.generoAluno || '-'}</p>
-              </div>
             </div>
 
             {/* Informações Expandidas (RG, CPF, RA/RGA) - AGORA ABAIXO DAS BÁSICAS */}
             {showMoreInfo && (
               <div className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
-                <div className="w-full max-w-md mx-auto grid grid-cols-2 gap-3">
+                <div className="w-full max-w-lg mx-auto grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <div className="bg-[#3b5998] py-1.5 px-4 rounded-2xl shadow-lg border-b-4 border-blue-900 flex flex-col items-center">
+                    <span className="text-[9px] font-black text-blue-200 uppercase block mb-0.5 tracking-widest">GÊNERO</span>
+                    <p className="text-lg sm:text-xl font-black text-white whitespace-nowrap leading-tight uppercase">{student.generoAluno || '-'}</p>
+                  </div>
                   <div className="bg-[#3b5998] py-1.5 px-4 rounded-2xl shadow-lg border-b-4 border-blue-900 flex flex-col items-center">
                     <span className="text-[9px] font-black text-blue-200 uppercase block mb-0.5 tracking-widest">RG DO ALUNO</span>
                     <p className="text-lg sm:text-xl font-black text-white whitespace-nowrap leading-tight">{student.studentRG ? maskRG(student.studentRG) : '-'}</p>
