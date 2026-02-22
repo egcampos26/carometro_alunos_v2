@@ -43,7 +43,7 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
   }
 
   // Permissão: Admin, Gestor ou o próprio autor do registro
-  const canModify = user.role === 'Admin' || user.role === 'Manager' || ((user.role === 'User' || user.role === 'Editor') && occurrence.nomeFunc === user.name);
+  const canModify = user.role === 'Admin' || user.role === 'Manager' || user.role === 'Coordinator' || user.role === 'Director' || ((user.role === 'User' || user.role === 'Editor') && occurrence.nomeFunc === user.name);
 
   const confirmDelete = () => {
     const idToDelete = occurrence.id;

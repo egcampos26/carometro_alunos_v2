@@ -30,7 +30,7 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const hasPermission = user.role === 'Admin' || user.role === 'Manager' || user.role === 'Editor';
+  const hasPermission = user.role === 'Admin' || user.role === 'Manager' || user.role === 'Editor' || user.role === 'Coordinator' || user.role === 'Director';
 
   useEffect(() => {
     if (!hasPermission) {

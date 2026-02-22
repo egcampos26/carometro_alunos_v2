@@ -18,12 +18,13 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
   const navigate = useNavigate();
   const [showMoreInfo, setShowMoreInfo] = useState(false);
 
-  const isAdmin = user.role === 'Admin' || user.role === 'Manager' || user.role === 'Editor';
+  const isAdmin = user.role === 'Admin' || user.role === 'Manager' || user.role === 'Editor' || user.role === 'Coordinator' || user.role === 'Director';
 
   const student = students.find(s => s.id === id);
   const studentOccurrences = occurrences
     .filter(o => {
       if (o.studentId !== id) return false;
+      // Coordinator e Director veem todas; User e Editor veem apenas as próprias
       if (user.role === 'User' || user.role === 'Editor') return o.nomeFunc === user.name;
       return true;
     })

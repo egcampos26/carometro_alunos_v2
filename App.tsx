@@ -20,11 +20,25 @@ import { logService } from './services/logService';
 import { supabase } from './services/supabase';
 import { detectStudentChanges, formatChangesForLog } from './utils/changeDetection';
 
+// Mapeia tipo_usuario do Portal para role interno do App
+const mapPortalRole = (tipoUsuario: string | undefined): AuthUser['role'] => {
+  switch ((tipoUsuario || '').toLowerCase()) {
+    case 'administrador': return 'Admin';
+    case 'gestor': return 'Manager';
+    case 'editor': return 'Editor';
+    case 'coordenador': return 'Coordinator';
+    case 'diretor': return 'Director';
+    case 'usuario':       // fallthrough
+    default: return 'User';
+  }
+};
+
 const TEST_USERS: AuthUser[] = [
-  { id: 'user-1', name: 'Usuário 1', role: 'User', email: 'user1@escola.com' },
-  { id: 'user-2', name: 'Usuário 2', role: 'User', email: 'user2@escola.com' },
+  { id: 'user-1', name: 'Usuário', role: 'User', email: 'usuario@escola.com' },
   { id: 'editor-1', name: 'Editor', role: 'Editor', email: 'editor@escola.com' },
   { id: 'manager-1', name: 'Gestor', role: 'Manager', email: 'gestor@escola.com' },
+  { id: 'coord-1', name: 'Coordenador', role: 'Coordinator', email: 'coord@escola.com' },
+  { id: 'diretor-1', name: 'Diretor', role: 'Director', email: 'diretor@escola.com' },
   { id: 'admin-1', name: 'Administrador', role: 'Admin', email: 'admin@escola.com' },
 ];
 
@@ -87,17 +101,18 @@ const App: React.FC = () => {
           const payload = data.payload;
 
           // Map payload to AuthUser
-          // Expecting payload to have: id_func, nome_func (or we fetch it)
+          // Expecting payload to have: id_func + tipo_usuario from Portal
           if (payload.id_func) {
-            await authenticateWithIdFunc(payload.id_func);
+            // Pass tipo_usuario from portal so role is set correctly
+            await authenticateWithIdFunc(payload.id_func, payload.tipo_usuario || payload.role);
           } else if (payload.id && payload.name) {
             // Direct trust (if Portal sends full data)
             const cleanUser: AuthUser = {
               id: payload.id,
               name: payload.name,
-              role: payload.role || 'User',
+              role: mapPortalRole(payload.tipo_usuario || payload.role),
               email: payload.email || 'educacao@sme.prefeitura.sp.gov.br',
-              idFunc: payload.id // Assuming ID is id_func
+              idFunc: payload.id
             };
             setAuthenticatedUser(cleanUser);
           }
@@ -140,7 +155,7 @@ const App: React.FC = () => {
     initApp();
   }, []);
 
-  const authenticateWithIdFunc = async (idFunc: string) => {
+  const authenticateWithIdFunc = async (idFunc: string, tipoUsuarioFromPortal?: string) => {
     try {
       // Fetch employee data
       const { data: funcData, error: funcError } = await supabase
@@ -151,11 +166,14 @@ const App: React.FC = () => {
 
       if (funcData && !funcError) {
         console.log("✅ Authenticated as:", funcData.nome_func);
-        // Update the user object with real data
+        // Prefer tipo_usuario from Portal payload; fallback to FUNCIONARIOS column
+        const tipoUsuario = tipoUsuarioFromPortal || funcData.tipo_usuario;
+        const role = mapPortalRole(tipoUsuario);
+        console.log(`🔑 Role resolved: tipo_usuario='${tipoUsuario}' → role='${role}'`);
         const cleanUser: AuthUser = {
           id: funcData.id_func,
           name: funcData.nome_func,
-          role: 'User', // Default role, can be enhanced logic later
+          role,
           email: funcData.email_edu || funcData.email_sme || 'educacao@sme.prefeitura.sp.gov.br',
           idFunc: funcData.id_func
         };
@@ -322,7 +340,7 @@ const App: React.FC = () => {
             <Route
               path="/student/new"
               element={
-                user.role === 'User' ? (
+                (user.role === 'User') ? (
                   <Navigate to="/" replace />
                 ) : (
                   <StudentCreate
@@ -349,7 +367,7 @@ const App: React.FC = () => {
             <Route
               path="/student/:id/edit"
               element={
-                user.role === 'User' ? (
+                (user.role === 'User') ? (
                   <Navigate to="/" replace />
                 ) : (
                   <StudentEdit
@@ -470,16 +488,16 @@ const App: React.FC = () => {
               }
             />
 
-            {/* Log do Sistema */}
+            {/* Log do Sistema — somente Admin */}
             <Route
               path="/logs"
               element={
-                user.role !== 'Admin' ? (
-                  <Navigate to="/" replace />
-                ) : (
+                user.role === 'Admin' ? (
                   <SystemLog
                     logs={logs}
                   />
+                ) : (
+                  <Navigate to="/" replace />
                 )
               }
             />

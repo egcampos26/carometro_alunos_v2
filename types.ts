@@ -67,7 +67,7 @@ export interface Student {
 export interface AuthUser {
   id: string;
   name: string;
-  role: 'Admin' | 'Manager' | 'Editor' | 'User';
+  role: 'Admin' | 'Manager' | 'Editor' | 'User' | 'Coordinator' | 'Director';
   email: string;
   idFunc?: string; // ID do funcionário vinculado
 }

@@ -37,6 +37,7 @@ const OccurrencesList: React.FC<OccurrencesListProps> = ({ students, occurrences
       );
 
       const mtachesDate = !hasDateFilter || occ.date === filterDate;
+      // User/Editor: veem apenas as próprias ocorrências. Manager/Admin/Coordinator/Director: veem todas.
       const matchesRole = (user.role === 'User' || user.role === 'Editor') ? occ.nomeFunc === user.name : true;
 
       return matchesText && mtachesDate && matchesRole;

@@ -57,7 +57,7 @@ const StudentCreate: React.FC<StudentCreateProps> = ({ onCreate, user, onToggleR
     const [uploading, setUploading] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
 
-    const hasPermission = user.role === 'Admin' || user.role === 'Manager' || user.role === 'Editor';
+    const hasPermission = user.role === 'Admin' || user.role === 'Manager' || user.role === 'Editor' || user.role === 'Coordinator' || user.role === 'Director';
 
     useEffect(() => {
         if (!hasPermission) {

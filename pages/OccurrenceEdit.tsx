@@ -43,7 +43,7 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
       setIsConfidential(occurrence.isConfidential || false);
 
       // Verificação de permissão
-      const canEdit = user.role === 'Admin' || user.role === 'Manager' || ((user.role === 'User' || user.role === 'Editor') && occurrence.nomeFunc === user.name);
+      const canEdit = user.role === 'Admin' || user.role === 'Manager' || user.role === 'Coordinator' || user.role === 'Director' || ((user.role === 'User' || user.role === 'Editor') && occurrence.nomeFunc === user.name);
       if (!canEdit) {
         navigate(`/occurrences/${id}`, { replace: true });
       }
