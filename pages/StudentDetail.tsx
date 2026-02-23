@@ -323,6 +323,13 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ students, occurrences, us
                           <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase shadow-sm text-white ${occ.category === 'Comportamental' ? 'bg-red-500' : 'bg-blue-500'}`}>
                             {occ.category}
                           </span>
+                          {occ.priority && (
+                            <span className={`w-2 h-2 rounded-full shrink-0 ${occ.priority === 'Urgente' ? 'bg-red-600 animate-pulse' :
+                              occ.priority === 'Alta' ? 'bg-orange-500' :
+                                occ.priority === 'Média' ? 'bg-blue-500' :
+                                  'bg-green-500'
+                              }`} title={`Prioridade: ${occ.priority}`} />
+                          )}
                           {occ.tipoViolencia && (
                             <span className="text-red-600 text-[11px] font-black uppercase tracking-tighter flex items-center gap-1">
                               ⚠ {occ.tipoViolencia}
