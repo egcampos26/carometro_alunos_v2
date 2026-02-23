@@ -19,6 +19,7 @@ export interface Occurrence {
   registeredBy?: string; // Keeping for compatibility during migration if needed, but should be removed eventually
   isConfidential?: boolean; // Indica se a ocorrência é sigilosa
   tipoViolencia?: string | null; // Mapa de Violências (nullable)
+  priority?: 'Urgente' | 'Alta' | 'Média' | 'Baixa'; // Prioridade da ocorrência
 }
 
 export interface LogEntry {

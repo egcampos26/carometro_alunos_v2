@@ -25,7 +25,8 @@ export const occurrenceService = {
             idFunc: row.id_func,
             groupId: row.group_id,
             isConfidential: row.is_confidential || false,
-            tipoViolencia: row.tipo_violencia || null
+            tipoViolencia: row.tipo_violencia || null,
+            priority: row.ocorr_prioridade_alunos || 'Média'
         }));
     },
 
@@ -40,7 +41,8 @@ export const occurrenceService = {
             id_func: occurrence.idFunc || null,
             group_id: occurrence.groupId || null,
             is_confidential: occurrence.isConfidential || false,
-            tipo_violencia: occurrence.tipoViolencia || null
+            tipo_violencia: occurrence.tipoViolencia || null,
+            ocorr_prioridade_alunos: occurrence.priority || 'Média'
         }).select().single();
 
         if (error) throw error;
@@ -56,7 +58,8 @@ export const occurrenceService = {
             idFunc: data.id_func,
             groupId: data.group_id,
             isConfidential: data.is_confidential || false,
-            tipoViolencia: data.tipo_violencia || null
+            tipoViolencia: data.tipo_violencia || null,
+            priority: data.ocorr_prioridade_alunos || 'Média'
         };
     },
 
@@ -70,7 +73,8 @@ export const occurrenceService = {
             id_func: occurrence.idFunc || null,
             group_id: occurrence.groupId || null,
             is_confidential: occurrence.isConfidential || false,
-            tipo_violencia: occurrence.tipoViolencia || null
+            tipo_violencia: occurrence.tipoViolencia || null,
+            ocorr_prioridade_alunos: occurrence.priority || 'Média'
         }).eq('id_ocorrencias', occurrence.id);
 
 

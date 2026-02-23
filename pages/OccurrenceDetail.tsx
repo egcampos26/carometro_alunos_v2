@@ -101,6 +101,18 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
                   Sigiloso
                 </span>
               )}
+
+              {occurrence.priority && (
+                <span className={`flex items-center gap-1.5 text-[10px] font-black text-white px-3 py-1.5 rounded-full uppercase shadow-sm mr-auto ml-2 ${occurrence.priority === 'Urgente' ? 'bg-red-600' :
+                  occurrence.priority === 'Alta' ? 'bg-orange-500' :
+                    occurrence.priority === 'Média' ? 'bg-blue-500' :
+                      'bg-green-500'
+                  }`}>
+                  {occurrence.priority === 'Urgente' ? '🚨' : occurrence.priority === 'Alta' ? '⚡' : occurrence.priority === 'Média' ? '🕒' : '✅'}
+                  {occurrence.priority}
+                </span>
+              )}
+
               <div className="flex items-center gap-2 text-[10px] text-gray-400 font-black uppercase tracking-widest">
                 <Clock size={14} className="text-[#3b5998]" />
                 {new Date(occurrence.date).toLocaleDateString('pt-BR')}

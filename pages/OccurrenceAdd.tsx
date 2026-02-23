@@ -26,6 +26,7 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAddOccurrence
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(today);
   const [category, setCategory] = useState<Occurrence['category']>('Comportamental');
+  const [priority, setPriority] = useState<Occurrence['priority']>('Média');
   const [isConfidential, setIsConfidential] = useState(false);
   const [tipoViolencia, setTipoViolencia] = useState<string>('');
   const [tiposViolencia, setTiposViolencia] = useState<string[]>([]);
@@ -81,7 +82,8 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAddOccurrence
         nomeFunc: user.name,
         idFunc: user.idFunc,
         isConfidential,
-        tipoViolencia: tipoViolencia || null
+        tipoViolencia: tipoViolencia || null,
+        priority
       };
       onAddOccurrence(newOcc);
     });
@@ -212,6 +214,29 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAddOccurrence
                     }`}
                 >
                   {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Prioridade</label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {(['Urgente', 'Alta', 'Média', 'Baixa'] as const).map((pri) => (
+                <button
+                  key={pri}
+                  type="button"
+                  onClick={() => setPriority(pri)}
+                  className={`py-3 px-2 rounded-xl text-xs font-black uppercase tracking-tight border-2 transition-all shadow-sm ${priority === pri
+                    ? pri === 'Urgente' ? 'bg-red-600 border-red-700 text-white' :
+                      pri === 'Alta' ? 'bg-orange-500 border-orange-600 text-white' :
+                        pri === 'Média' ? 'bg-blue-500 border-blue-600 text-white' :
+                          'bg-green-500 border-green-600 text-white'
+                    : 'bg-white border-gray-100 text-gray-400 hover:border-gray-200'
+                    }`}
+                >
+                  {pri === 'Urgente' ? '🚨 ' : pri === 'Alta' ? '⚡ ' : pri === 'Média' ? '🕒 ' : '✅ '}
+                  {pri}
                 </button>
               ))}
             </div>
