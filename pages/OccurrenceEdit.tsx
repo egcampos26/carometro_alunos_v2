@@ -23,7 +23,6 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
   const occurrence = occurrences.find(o => o.id === id);
   const student = occurrence ? students.find(s => s.id === occurrence.studentId) : null;
 
-  const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [category, setCategory] = useState<Occurrence['category']>('Comportamental');
@@ -47,7 +46,6 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
 
   useEffect(() => {
     if (occurrence) {
-      setTitle(occurrence.title);
       setDescription(occurrence.description);
       setDate(occurrence.date);
       setCategory(occurrence.category);
@@ -116,7 +114,10 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !description || !date) return;
+    if (!description || !date) return;
+
+    // Gerar título dinamicamente com base na categoria e item relacionado
+    const finalTitle = itemRelacionado ? `${category} - ${itemRelacionado}` : category;
 
     setIsSaving(true);
 
@@ -153,7 +154,7 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
       const updatedOcc: Occurrence = {
         ...occurrence,
         date,
-        title,
+        title: finalTitle,
         description,
         category,
         isConfidential,
@@ -178,7 +179,7 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
             studentId: newStudentId,
             groupId: groupId, // Must be defined if we are adding
             date: date,
-            title,
+            title: finalTitle,
             description,
             category,
             nomeFunc: user.name,
@@ -206,7 +207,7 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
         const updates = membersToUpdate.map(m => ({
           ...m,
           date,
-          title,
+          title: finalTitle,
           description,
           category,
           isConfidential,
@@ -608,17 +609,6 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
             )}
           </div>
 
-          <div className="space-y-2">
-            <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Assunto / Título</label>
-            <input
-              type="text"
-              className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:bg-white focus:border-[#3b5998] outline-none font-bold text-gray-800 transition-all"
-              placeholder="Ex: Falta de material, Conflito, Elogio..."
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-          </div>
 
           <div className="space-y-2">
             <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Relato Detalhado</label>

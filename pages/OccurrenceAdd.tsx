@@ -22,7 +22,6 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAddOccurrence
 
   const [selectedIds, setSelectedIds] = useState<string[]>(studentId ? [studentId] : []);
   const [studentSearch, setStudentSearch] = useState('');
-  const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(today);
   const [category, setCategory] = useState<Occurrence['category']>('Comportamental');
@@ -71,7 +70,10 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAddOccurrence
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedIds.length === 0 || !title || !description || !date) return;
+    if (selectedIds.length === 0 || !description || !date) return;
+
+    // Gerar título dinamicamente com base na categoria e item relacionado
+    const finalTitle = itemRelacionado ? `${category} - ${itemRelacionado}` : category;
 
     // Se houver mais de um aluno, criamos um groupId para vinculá-los
     const groupId = selectedIds.length > 1 ? `group-${Date.now()}` : undefined;
@@ -82,7 +84,7 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAddOccurrence
         studentId: id,
         groupId,
         date: date,
-        title,
+        title: finalTitle,
         description,
         category,
         nomeFunc: user.name,
@@ -459,17 +461,6 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAddOccurrence
             )}
           </div>
 
-          <div className="space-y-2">
-            <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Assunto / Título</label>
-            <input
-              type="text"
-              className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:bg-white focus:border-[#3b5998] outline-none font-bold text-gray-800 transition-all"
-              placeholder="Ex: Falta de material, Conflito, Elogio..."
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-          </div>
 
           <div className="space-y-2">
             <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Relato Detalhado</label>
