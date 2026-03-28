@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Student, Occurrence, OccurrenceResolution, AuthUser } from '../types';
-import { User, Clock, ChevronRight, Users, Trash2, AlertCircle, Edit3, X, AlertTriangle, EyeOff, ShieldAlert, ClipboardCheck } from 'lucide-react';
+import { User, Clock, ChevronRight, Users, Trash2, AlertCircle, Edit3, X, AlertTriangle, EyeOff, ShieldAlert, ClipboardCheck, Calendar } from 'lucide-react';
 import { NO_IMAGE_RIGHTS_URL } from '../constants';
 
 interface OccurrenceDetailProps {
@@ -84,9 +84,6 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
         </div>
 
         <div className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden">
-          <div className={`h-3 w-full ${occurrence.category === 'Comportamental' ? 'bg-red-500' :
-            occurrence.category === 'Pedagógica' ? 'bg-blue-500' : 'bg-orange-500'
-            }`} />
 
           <div className="p-6 sm:p-8 space-y-8">
             <div className="flex justify-between items-center border-b border-gray-50 pb-6">
@@ -114,9 +111,16 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
                 </span>
               )}
 
-              <div className="flex items-center gap-2 text-[10px] text-gray-400 font-black uppercase tracking-widest">
-                <Clock size={14} className="text-[#3b5998]" />
-                {new Date(occurrence.date).toLocaleDateString('pt-BR')}
+              <div className="flex flex-col items-end">
+                <div className="flex items-center gap-2 text-sm text-gray-800 font-black uppercase tracking-widest">
+                  <Clock size={16} className="text-[#3b5998]" />
+                  {new Date(occurrence.date).toLocaleDateString('pt-BR')}
+                </div>
+                {occurrence.horaOcorrencia && (
+                  <div className="flex items-center gap-1.5 text-[11px] text-[#3b5998]/80 font-bold uppercase tracking-widest mt-1">
+                    às {occurrence.horaOcorrencia}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -178,13 +182,35 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
             )}
 
             <div className="flex flex-col sm:flex-row justify-between items-center pt-8 border-t border-gray-50 gap-4">
-              <div className="flex items-center gap-4 self-start sm:self-auto">
-                <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-[#3b5998] border border-blue-100 shadow-sm">
-                  <User size={22} />
+              <div className="flex flex-wrap items-center gap-6 sm:gap-10 self-start sm:self-auto">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-[#3b5998] border border-blue-100 shadow-sm">
+                    <User size={22} />
+                  </div>
+                  <div>
+                    <p className="text-[9px] text-gray-400 font-black uppercase leading-none mb-1 tracking-widest">Registrado por</p>
+                    <p className="text-sm font-black text-gray-800 uppercase tracking-tight">{occurrence.nomeFunc}</p>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1 flex items-center gap-1.5">
+                      <Clock size={10} className="text-gray-300" />
+                      Registro: {new Date(occurrence.date).toLocaleDateString('pt-BR')}{occurrence.horaRegistro ? ` às ${occurrence.horaRegistro}` : ''}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[9px] text-gray-400 font-black uppercase leading-none mb-1 tracking-widest">Registrado por</p>
-                  <p className="text-sm font-black text-gray-800 uppercase tracking-tight">{occurrence.nomeFunc}</p>
+
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-500 border border-orange-100 shadow-sm">
+                    <Calendar size={22} />
+                  </div>
+                  <div>
+                    <p className="text-[9px] text-gray-400 font-black uppercase leading-none mb-1 tracking-widest">Data da Ocorrência</p>
+                    <p className="text-sm font-black text-gray-800 uppercase tracking-tight">{new Date(occurrence.date).toLocaleDateString('pt-BR')}</p>
+                    {occurrence.horaOcorrencia && (
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1 flex items-center gap-1.5">
+                        <Clock size={10} className="text-gray-300" />
+                        Hora: {occurrence.horaOcorrencia}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 
