@@ -21,6 +21,8 @@ export interface Occurrence {
   tipoViolencia?: string | null; // Mapa de Violências (nullable)
   priority?: 'Urgente' | 'Alta' | 'Média' | 'Baixa'; // Prioridade da ocorrência
   itemRelacionado?: string | null; // Item relacionado à categoria
+  horaOcorrencia?: string;
+  horaRegistro?: string;
 }
 
 export interface OccurrenceResolution {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Student, Occurrence, AuthUser } from '../types';
-import { UserCheck, Calendar, Save, Eye, EyeOff, Search, CheckCircle2, X, Users, ShieldAlert, Plus } from 'lucide-react';
+import { UserCheck, Calendar, Save, Eye, EyeOff, Search, CheckCircle2, X, Users, ShieldAlert, Plus, Clock } from 'lucide-react';
 import { NO_IMAGE_RIGHTS_URL } from '../constants';
 import { supabase } from '../services/supabase';
 
@@ -25,6 +25,8 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
 
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
+  const [horaOcorrencia, setHoraOcorrencia] = useState('');
+  const [horaRegistro, setHoraRegistro] = useState('');
   const [category, setCategory] = useState<Occurrence['category']>('Comportamental');
   const [priority, setPriority] = useState<Occurrence['priority']>('Média');
   const [isConfidential, setIsConfidential] = useState(false);
@@ -48,6 +50,9 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
     if (occurrence) {
       setDescription(occurrence.description);
       setDate(occurrence.date);
+      const currentTime = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      setHoraOcorrencia(occurrence.horaOcorrencia || currentTime);
+      setHoraRegistro(occurrence.horaRegistro || currentTime);
       setCategory(occurrence.category);
       setIsConfidential(occurrence.isConfidential || false);
       setTipoViolencia(occurrence.tipoViolencia || '');
@@ -154,6 +159,8 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
       const updatedOcc: Occurrence = {
         ...occurrence,
         date,
+        horaOcorrencia,
+        horaRegistro,
         title: finalTitle,
         description,
         category,
@@ -179,6 +186,8 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
             studentId: newStudentId,
             groupId: groupId, // Must be defined if we are adding
             date: date,
+            horaOcorrencia,
+            horaRegistro,
             title: finalTitle,
             description,
             category,
@@ -207,6 +216,8 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
         const updates = membersToUpdate.map(m => ({
           ...m,
           date,
+          horaOcorrencia,
+          horaRegistro,
           title: finalTitle,
           description,
           category,
@@ -335,25 +346,54 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
 
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Data da Ocorrência</label>
-              <div className="relative">
-                <input
-                  type="date"
-                  className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:bg-white focus:border-[#3b5998] outline-none font-bold text-gray-700 transition-all"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  required
-                />
-                <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" size={18} />
+            <div className="flex gap-3">
+              <div className="space-y-2 flex-1 relative">
+                <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Data da Ocorrência</label>
+                <div className="relative">
+                  <input
+                    type="date"
+                    className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:bg-white focus:border-[#3b5998] outline-none font-bold text-gray-700 transition-all"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    required
+                  />
+                  <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" size={18} />
+                </div>
+              </div>
+
+              <div className="space-y-2 w-1/3 min-w-[100px]">
+                <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Hora</label>
+                <div className="relative">
+                  <input
+                    type="time"
+                    className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:bg-white focus:border-[#3b5998] outline-none font-bold text-gray-700 transition-all"
+                    value={horaOcorrencia}
+                    onChange={(e) => setHoraOcorrencia(e.target.value)}
+                    required
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Autor do Registro</label>
-              <div className="flex items-center gap-3 p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-gray-400 font-bold italic">
-                <UserCheck size={18} className="text-gray-300" />
-                <span className="text-sm">{occurrence.nomeFunc}</span>
+            <div className="flex gap-3">
+              <div className="space-y-2 flex-1 min-w-0">
+                <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1 truncate block">Autor do Registro</label>
+                <div className="flex items-center gap-2 p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-gray-400 font-bold italic overflow-hidden">
+                  <UserCheck size={18} className="text-[#3b5998] shrink-0" />
+                  <span className="text-sm truncate">{occurrence.nomeFunc}</span>
+                </div>
+              </div>
+
+              <div className="space-y-2 w-1/3 min-w-[100px]">
+                <label className="text-gray-400 text-[10px] sm:text-xs font-black uppercase tracking-widest ml-1 truncate block mt-[2px]">Registro</label>
+                <div className="relative">
+                  <input
+                    type="time"
+                    className="w-full p-[17px] bg-gray-50 border-2 border-gray-100 rounded-2xl outline-none font-bold text-gray-400 transition-all cursor-not-allowed text-xs sm:text-sm"
+                    value={horaRegistro}
+                    disabled
+                  />
+                </div>
               </div>
             </div>
           </div>
