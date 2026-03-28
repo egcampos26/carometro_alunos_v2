@@ -125,6 +125,13 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
                 {occurrence.title}
               </h2>
 
+              {occurrence.itemRelacionado && (
+                <div className="inline-block mt-2 bg-blue-50/80 px-4 py-2 rounded-xl border border-blue-100">
+                  <p className="text-[10px] text-blue-400 font-black uppercase tracking-widest mb-0.5">Item Relacionado</p>
+                  <p className="text-sm font-black text-blue-900 uppercase tracking-tight">{occurrence.itemRelacionado}</p>
+                </div>
+              )}
+
               <div className="bg-gray-50/80 p-6 rounded-2xl border border-gray-100 min-h-[120px]">
                 <p className="text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-wrap font-medium">
                   {occurrence.description}

@@ -20,6 +20,7 @@ export interface Occurrence {
   isConfidential?: boolean; // Indica se a ocorrência é sigilosa
   tipoViolencia?: string | null; // Mapa de Violências (nullable)
   priority?: 'Urgente' | 'Alta' | 'Média' | 'Baixa'; // Prioridade da ocorrência
+  itemRelacionado?: string | null; // Item relacionado à categoria
 }
 
 export interface OccurrenceResolution {
