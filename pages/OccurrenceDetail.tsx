@@ -2,18 +2,19 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Layout from '../components/Layout';
-import { Student, Occurrence, AuthUser } from '../types';
-import { User, Clock, ChevronRight, Users, Trash2, AlertCircle, Edit3, X, AlertTriangle, EyeOff, ShieldAlert } from 'lucide-react';
+import { Student, Occurrence, OccurrenceResolution, AuthUser } from '../types';
+import { User, Clock, ChevronRight, Users, Trash2, AlertCircle, Edit3, X, AlertTriangle, EyeOff, ShieldAlert, ClipboardCheck } from 'lucide-react';
 import { NO_IMAGE_RIGHTS_URL } from '../constants';
 
 interface OccurrenceDetailProps {
   students: Student[];
   occurrences: Occurrence[];
+  resolutions: OccurrenceResolution[];
   user: AuthUser;
   onDelete: (id: string) => void;
 }
 
-const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrences, user, onDelete }) => {
+const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrences, resolutions, user, onDelete }) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -208,6 +209,20 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
             )}
           </div>
         </div>
+
+        {/* Botão Registrar Resolução — somente gestão */}
+        {['Admin', 'Manager', 'Coordinator', 'Director'].includes(user.role) && (() => {
+          const resCount = resolutions.filter(r => r.idOcorrencia === occurrence.id).length;
+          return (
+            <button
+              onClick={() => navigate(`/occurrences/${occurrence.id}/resolution`)}
+              className="w-full py-4 bg-[#3b5998] text-white rounded-3xl font-black uppercase tracking-widest hover:bg-[#2d4373] active:scale-95 transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#3b5998]/20 border-b-4 border-[#2d4373]"
+            >
+              <ClipboardCheck size={18} />
+              {resCount > 0 ? `Resolução · ${resCount} registro${resCount > 1 ? 's' : ''}` : 'Registrar Resolução'}
+            </button>
+          );
+        })()}
 
         {/* Botão Voltar */}
         <button

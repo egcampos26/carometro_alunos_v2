@@ -12,10 +12,12 @@ import OccurrenceAdd from './pages/OccurrenceAdd';
 import OccurrenceAddMulti from './pages/OccurrenceAddMulti';
 import OccurrenceDetail from './pages/OccurrenceDetail';
 import OccurrenceEdit from './pages/OccurrenceEdit';
+import OccurrenceResolutionPage from './pages/OccurrenceResolution';
 import SystemLog from './pages/SystemLog';
-import { Student, Occurrence, AuthUser, LogEntry } from './types';
+import { Student, Occurrence, OccurrenceResolution, AuthUser, LogEntry } from './types';
 import { studentService } from './services/studentService';
 import { occurrenceService } from './services/occurrenceService';
+import { resolutionService } from './services/resolutionService';
 import { logService } from './services/logService';
 import { supabase } from './services/supabase';
 import { detectStudentChanges, formatChangesForLog } from './utils/changeDetection';
@@ -49,6 +51,7 @@ const SIMULATABLE_ROLES: { label: string; role: AuthUser['role']; name?: string;
 const App: React.FC = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [occurrences, setOccurrences] = useState<Occurrence[]>([]);
+  const [resolutions, setResolutions] = useState<OccurrenceResolution[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -93,15 +96,17 @@ const App: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [studentsData, occurrencesData, logsData] = await Promise.all([
+      const [studentsData, occurrencesData, logsData, resolutionsData] = await Promise.all([
         studentService.fetchStudents(),
         occurrenceService.fetchOccurrences(),
-        logService.fetchLogs()
+        logService.fetchLogs(),
+        resolutionService.fetchAllResolutions()
       ]);
       setStudents(studentsData);
       setOccurrences(occurrencesData);
       setLogs(logsData);
-      console.log(`📊 App loaded: ${studentsData.length} students, ${occurrencesData.length} occurrences, ${logsData.length} logs`);
+      setResolutions(resolutionsData);
+      console.log(`📊 App loaded: ${studentsData.length} students, ${occurrencesData.length} occurrences, ${resolutionsData.length} resolutions, ${logsData.length} logs`);
     } catch (err) {
       console.error('Falha ao carregar dados:', err);
       setError('Não foi possível conectar ao banco de dados.');
@@ -293,6 +298,43 @@ const App: React.FC = () => {
     }
   };
 
+  // ─── Handlers de Resoluções ───────────────────────────────────────────────
+
+  const handleCreateResolution = async (resolution: Omit<OccurrenceResolution, 'id' | 'createdAt'>) => {
+    try {
+      const created = await resolutionService.createResolution(resolution);
+      setResolutions(prev => [created, ...prev]);
+      const occ = occurrences.find(o => o.id === resolution.idOcorrencia);
+      const student = occ ? students.find(s => s.id === occ.studentId) : null;
+      addLog('Nova Resolução de Ocorrência', `Intervenção [${resolution.statusOcorrencia}] registrada para ${student?.name ?? 'aluno'} por ${resolution.nomeResponsavel}.`);
+    } catch (err) {
+      console.error('Erro ao criar resolução:', err);
+      throw err;
+    }
+  };
+
+  const handleUpdateResolution = async (resolution: OccurrenceResolution) => {
+    try {
+      await resolutionService.updateResolution(resolution);
+      setResolutions(prev => prev.map(r => r.id === resolution.id ? resolution : r));
+      addLog('Edição de Resolução', `Registro de intervenção atualizado por ${resolution.nomeResponsavel}.`);
+    } catch (err) {
+      console.error('Erro ao atualizar resolução:', err);
+      throw err;
+    }
+  };
+
+  const handleDeleteResolution = async (id: string) => {
+    try {
+      await resolutionService.deleteResolution(id);
+      setResolutions(prev => prev.filter(r => r.id !== id));
+      addLog('Exclusão de Resolução', `Registro de intervenção excluído.`);
+    } catch (err) {
+      console.error('Erro ao excluir resolução:', err);
+      throw err;
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
@@ -461,6 +503,7 @@ const App: React.FC = () => {
                 <OccurrenceDetail
                   occurrences={occurrences}
                   students={students}
+                  resolutions={resolutions}
                   user={user}
                   onDelete={async (idToDelete) => {
                     try {
@@ -533,6 +576,26 @@ const App: React.FC = () => {
                 user.role === 'Admin' ? (
                   <SystemLog
                     logs={logs}
+                  />
+                ) : (
+                  <Navigate to="/" replace />
+                )
+              }
+            />
+
+            {/* Resolução de Ocorrência — somente gestão */}
+            <Route
+              path="/occurrences/:id/resolution"
+              element={
+                ['Admin', 'Manager', 'Coordinator', 'Director'].includes(user.role) ? (
+                  <OccurrenceResolutionPage
+                    occurrences={occurrences}
+                    students={students}
+                    resolutions={resolutions}
+                    user={user}
+                    onCreateResolution={handleCreateResolution}
+                    onUpdateResolution={handleUpdateResolution}
+                    onDeleteResolution={handleDeleteResolution}
                   />
                 ) : (
                   <Navigate to="/" replace />

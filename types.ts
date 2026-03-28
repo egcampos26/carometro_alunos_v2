@@ -22,6 +22,28 @@ export interface Occurrence {
   priority?: 'Urgente' | 'Alta' | 'Média' | 'Baixa'; // Prioridade da ocorrência
 }
 
+export interface OccurrenceResolution {
+  id: string;
+  idOcorrencia: string;
+  idFunc?: string;
+  nomeResponsavel: string;
+  statusOcorrencia: 'Em andamento' | 'Resolvido' | 'Encaminhado' | 'Cancelado';
+  dataAtendimento: string; // ISO string
+  tiposIntervencao: string[];
+  relatoResolucao?: string;
+  combinadosMetas?: string;
+  necessitaMonitoramento: boolean;
+  tempoMonitoramento?: string;
+  parecerGestao?: string;
+  encaminhamentoExterno: string[];
+  resultadoFinal?: 'Conciliado' | 'Penalidade Aplicada' | 'Em acompanhamento';
+  dataProximoFeedback?: string;
+  cienciaAluno: boolean;
+  cienciaFamilia: boolean;
+  urlDocumentos?: string;
+  createdAt: string;
+}
+
 export interface LogEntry {
   id: string;
   timestamp: string;
