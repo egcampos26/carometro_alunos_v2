@@ -482,7 +482,6 @@ const OccurrenceResolutionPage: React.FC<OccurrenceResolutionPageProps> = ({
 
               {/* ── SEÇÃO 1: Identificação ── */}
               <div className="space-y-4">
-                <SectionHeader icon={<User size={16} />} title="1. Identificação e Retorno" subtitle="Status, data e responsável pelo atendimento" />
 
                 {/* Status */}
                 <div>
@@ -532,7 +531,7 @@ const OccurrenceResolutionPage: React.FC<OccurrenceResolutionPageProps> = ({
 
               {/* ── SEÇÃO 2: Ações Tomadas ── */}
               <div className="space-y-3">
-                <SectionHeader icon={<ClipboardList size={16} />} title="2. Ações Tomadas" subtitle="Marque os tipos de intervenção realizados" />
+                <SectionHeader icon={<ClipboardList size={16} />} title="Ações Tomadas" subtitle="Marque os tipos de intervenção realizados" />
                 <div className="space-y-2">
                   {TIPOS_INTERVENCAO.map(t => (
                     <CheckItem
@@ -549,7 +548,6 @@ const OccurrenceResolutionPage: React.FC<OccurrenceResolutionPageProps> = ({
 
               {/* ── SEÇÃO 3: Detalhamento ── */}
               <div className="space-y-4">
-                <SectionHeader icon={<BookOpen size={16} />} title="3. Detalhamento e Encaminhamentos" subtitle="Descreva como foi a intervenção e os acordos firmados" />
 
                 <div>
                   <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Relato da Resolução</label>
@@ -607,7 +605,7 @@ const OccurrenceResolutionPage: React.FC<OccurrenceResolutionPageProps> = ({
 
               {/* ── SEÇÃO 4: Formalização ── */}
               <div className="space-y-4">
-                <SectionHeader icon={<ShieldCheck size={16} />} title="4. Formalização e Evidências" subtitle="Parecer final, encaminhamentos e ciência dos envolvidos" />
+
 
                 {/* Parecer */}
                 <div>
