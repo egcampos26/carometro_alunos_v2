@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Student, Occurrence, AuthUser } from '../types';
-import { UserCheck, Calendar, Search, X, Users, CheckCircle2, Eye, EyeOff, ShieldAlert } from 'lucide-react';
+import { UserCheck, Calendar, Search, X, Users, CheckCircle2, Eye, EyeOff, ShieldAlert, Plus } from 'lucide-react';
 import { supabase } from '../services/supabase';
 
 interface OccurrenceAddMultiProps {
@@ -19,9 +19,13 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [studentSearch, setStudentSearch] = useState('');
-  const [title, setTitle] = useState('');
+  const currentTime = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(today);
+  const [horaOcorrencia, setHoraOcorrencia] = useState(currentTime);
+  const dataRegistro = today;
+  const horaRegistro = currentTime;
   const [category, setCategory] = useState<Occurrence['category']>('Comportamental');
   const [priority, setPriority] = useState<Occurrence['priority']>('Média');
   const [isConfidential, setIsConfidential] = useState(false);
@@ -29,6 +33,13 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
   const [tiposViolencia, setTiposViolencia] = useState<string[]>([]);
   const [showNovoTipo, setShowNovoTipo] = useState(false);
   const [novoTipo, setNovoTipo] = useState('');
+
+  const [itemRelacionado, setItemRelacionado] = useState('');
+  const [customItems, setCustomItems] = useState<Record<string, string[]>>({
+    Comportamental: [], Pedagógica: [], Médica: [], Outros: []
+  });
+  const [showNovoItem, setShowNovoItem] = useState(false);
+  const [novoItemText, setNovoItemText] = useState('');
 
   useEffect(() => {
     supabase
@@ -68,7 +79,10 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedIds.length === 0 || !title || !description || !date) return;
+    if (selectedIds.length === 0 || !description || !date) return;
+
+    // Gerar título dinamicamente com base na categoria e item relacionado
+    const finalTitle = itemRelacionado ? `${category} - ${itemRelacionado}` : category;
 
     // Create a group ID to link these records
     const groupId = `group-${Date.now()}`;
@@ -80,13 +94,17 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
         studentId,
         groupId,
         date: date,
-        title,
+        horaOcorrencia,
+        dataRegistro,
+        horaRegistro,
+        title: finalTitle,
         description,
         category,
         nomeFunc: user.name,
         idFunc: user.idFunc,
         isConfidential,
         tipoViolencia: tipoViolencia || null,
+        itemRelacionado: itemRelacionado || null,
         priority
       };
       onAddOccurrence(newOcc);
@@ -174,25 +192,66 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
         <form onSubmit={handleSubmit} className="space-y-8">
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Data da Ocorrência</label>
-              <div className="relative">
-                <input
-                  type="date"
-                  className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:bg-white focus:border-[#3b5998] outline-none font-bold text-gray-700 transition-all"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  required
-                />
-                <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" size={18} />
+            <div className="flex gap-3">
+              <div className="space-y-2 flex-1 relative">
+                <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Data da Ocorrência</label>
+                <div className="relative">
+                  <input
+                    type="date"
+                    className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:bg-white focus:border-[#3b5998] outline-none font-bold text-gray-700 transition-all"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    required
+                  />
+                  <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" size={18} />
+                </div>
+              </div>
+              
+              <div className="space-y-2 w-1/3 min-w-[100px]">
+                <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Hora</label>
+                <div className="relative">
+                  <input
+                    type="time"
+                    className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:bg-white focus:border-[#3b5998] outline-none font-bold text-gray-700 transition-all"
+                    value={horaOcorrencia}
+                    onChange={(e) => setHoraOcorrencia(e.target.value)}
+                    required
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Registrado por</label>
-              <div className="flex items-center gap-3 p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-gray-500 font-bold">
-                <UserCheck size={18} className="text-[#3b5998]" />
-                <span className="text-sm">{user.name}</span>
+            <div className="flex gap-3 flex-wrap sm:flex-nowrap">
+              <div className="space-y-2 flex-1 min-w-[200px]">
+                <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1 truncate block">Registrado por</label>
+                <div className="flex items-center gap-2 p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-gray-500 font-bold overflow-hidden h-[58px]">
+                  <UserCheck size={18} className="text-[#3b5998] shrink-0" />
+                  <span className="text-sm truncate">{user.name}</span>
+                </div>
+              </div>
+
+              <div className="space-y-2 w-1/2 sm:w-[130px]">
+                <label className="text-gray-400 text-[10px] font-black uppercase tracking-widest ml-1 truncate block mt-[2px]">Data Reg.</label>
+                <div className="relative">
+                  <input
+                    type="date"
+                    className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl outline-none font-bold text-gray-400 cursor-not-allowed text-[11px] h-[58px]"
+                    value={dataRegistro}
+                    disabled
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2 w-1/2 sm:w-[110px]">
+                <label className="text-gray-400 text-[10px] font-black uppercase tracking-widest ml-1 truncate block mt-[2px]">Hora Reg.</label>
+                <div className="relative">
+                  <input
+                    type="time"
+                    className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl outline-none font-bold text-gray-400 cursor-not-allowed text-[11px] h-[58px]"
+                    value={horaRegistro}
+                    disabled
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -215,6 +274,126 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
               ))}
             </div>
           </div>
+
+          {/* Itens Relacionados */}
+          {(() => {
+            const ITENS_POR_CATEGORIA: Record<string, { label: string; itens: string[] }> = {
+              Comportamental: {
+                label: 'Convivência e normas da escola',
+                itens: [
+                  'Indisciplina em sala',
+                  'Conflito interpessoal',
+                  'Desrespeito a professor/funcionário',
+                  'Dano ao patrimônio',
+                  'Atraso / Saída antecipada',
+                  ...(customItems['Comportamental'] || []),
+                ],
+              },
+              'Pedagógica': {
+                label: 'Desempenho acadêmico e aprendizagem',
+                itens: [
+                  'Dificuldade de aprendizagem',
+                  'Falta de material',
+                  'Evolução positiva (Elogio)',
+                  'Não entrega de tarefas',
+                  'Abandono / Infrequência',
+                  ...(customItems['Pedagógica'] || []),
+                ],
+              },
+              'Médica': {
+                label: 'Saúde e bem-estar físico',
+                itens: [
+                  'Mal-estar súbito',
+                  'Primeiros socorros',
+                  'Administração de medicação',
+                  'Acompanhamento crônico',
+                  'Encaminhamento externo (hospital/pais)',
+                  ...(customItems['Médica'] || []),
+                ],
+              },
+              Outros: {
+                label: 'Outros motivos',
+                itens: [...(customItems['Outros'] || [])],
+              },
+            };
+
+            const grupo = ITENS_POR_CATEGORIA[category];
+            if (!grupo) return null;
+
+            return (
+              <div className="space-y-3">
+
+                <div className="flex flex-wrap gap-2">
+                  {grupo.itens.map((item) => (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => setItemRelacionado(prev => prev === item ? '' : item)}
+                      className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-tight border-2 transition-all active:scale-95 ${
+                        itemRelacionado === item
+                          ? 'bg-[#3b5998] border-[#3b5998] text-white shadow-md'
+                          : 'bg-white border-gray-100 text-gray-500 hover:border-[#3b5998]/30 hover:text-[#3b5998]'
+                      }`}
+                    >
+                      {item}
+                    </button>
+                  ))}
+
+                  {/* Botão Acrescentar */}
+                  {!showNovoItem && (
+                    <button
+                      type="button"
+                      onClick={() => setShowNovoItem(true)}
+                      className="px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-tight border-2 border-dashed border-gray-200 text-gray-400 hover:border-[#3b5998]/40 hover:text-[#3b5998] transition-all active:scale-95 flex items-center gap-1.5"
+                    >
+                      <Plus size={12} /> Acrescentar
+                    </button>
+                  )}
+                </div>
+
+                {/* Input novo item */}
+                {showNovoItem && (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Nome do novo item..."
+                      value={novoItemText}
+                      onChange={(e) => setNovoItemText(e.target.value)}
+                      className="flex-1 px-4 py-3 bg-white border-2 border-[#3b5998]/30 rounded-2xl outline-none font-bold text-gray-700 focus:border-[#3b5998] transition-all text-sm"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const txt = novoItemText.trim();
+                        if (!txt) return;
+                        setCustomItems(prev => ({
+                          ...prev,
+                          [category]: [...(prev[category] || []), txt],
+                        }));
+                        setItemRelacionado(txt);
+                        setNovoItemText('');
+                        setShowNovoItem(false);
+                      }}
+                      className="px-5 py-2 bg-[#3b5998] text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-blue-700 active:scale-95 transition-all"
+                    >
+                      Salvar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowNovoItem(false);
+                        setNovoItemText('');
+                      }}
+                      className="px-5 py-2 bg-gray-100 text-gray-500 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-gray-200 active:scale-95 transition-all"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           <div className="space-y-3">
             <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Prioridade</label>
@@ -321,17 +500,7 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
             )}
           </div>
 
-          <div className="space-y-2">
-            <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Assunto / Título</label>
-            <input
-              type="text"
-              className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:bg-white focus:border-[#3b5998] outline-none font-bold text-gray-800 transition-all"
-              placeholder="Ex: Conflito em grupo, Atividade coletiva..."
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-          </div>
+
 
           <div className="space-y-2">
             <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Relato Detalhado</label>
