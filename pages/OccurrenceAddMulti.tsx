@@ -19,6 +19,8 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [studentSearch, setStudentSearch] = useState('');
+  
+  const canViewRegistryFields = ['Admin', 'Manager', 'Coordinator', 'Director'].includes(user.role);
   const currentTime = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
   const [description, setDescription] = useState('');
@@ -221,39 +223,41 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
               </div>
             </div>
 
-            <div className="flex gap-3 flex-wrap sm:flex-nowrap">
-              <div className="space-y-2 flex-1 min-w-[200px]">
-                <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1 truncate block">Registrado por</label>
-                <div className="flex items-center gap-2 p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-gray-500 font-bold overflow-hidden h-[58px]">
-                  <UserCheck size={18} className="text-[#3b5998] shrink-0" />
-                  <span className="text-sm truncate">{user.name}</span>
+            {canViewRegistryFields && (
+              <div className="flex gap-3 flex-wrap sm:flex-nowrap">
+                <div className="space-y-2 flex-1 min-w-[200px]">
+                  <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1 truncate block">Registrado por</label>
+                  <div className="flex items-center gap-2 p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-gray-500 font-bold overflow-hidden h-[58px]">
+                    <UserCheck size={18} className="text-[#3b5998] shrink-0" />
+                    <span className="text-sm truncate">{user.name}</span>
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-2 w-1/2 sm:w-[130px]">
-                <label className="text-gray-400 text-[10px] font-black uppercase tracking-widest ml-1 truncate block mt-[2px]">Data Reg.</label>
-                <div className="relative">
-                  <input
-                    type="date"
-                    className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl outline-none font-bold text-gray-400 cursor-not-allowed text-[11px] h-[58px]"
-                    value={dataRegistro}
-                    disabled
-                  />
+                <div className="space-y-2 w-1/2 sm:w-[130px]">
+                  <label className="text-gray-400 text-[10px] font-black uppercase tracking-widest ml-1 truncate block mt-[2px]">Data Reg.</label>
+                  <div className="relative">
+                    <input
+                      type="date"
+                      className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl outline-none font-bold text-gray-400 cursor-not-allowed text-[11px] h-[58px]"
+                      value={dataRegistro}
+                      disabled
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-2 w-1/2 sm:w-[110px]">
-                <label className="text-gray-400 text-[10px] font-black uppercase tracking-widest ml-1 truncate block mt-[2px]">Hora Reg.</label>
-                <div className="relative">
-                  <input
-                    type="time"
-                    className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl outline-none font-bold text-gray-400 cursor-not-allowed text-[11px] h-[58px]"
-                    value={horaRegistro}
-                    disabled
-                  />
+                <div className="space-y-2 w-1/2 sm:w-[110px]">
+                  <label className="text-gray-400 text-[10px] font-black uppercase tracking-widest ml-1 truncate block mt-[2px]">Hora Reg.</label>
+                  <div className="relative">
+                    <input
+                      type="time"
+                      className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl outline-none font-bold text-gray-400 cursor-not-allowed text-[11px] h-[58px]"
+                      value={horaRegistro}
+                      disabled
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="space-y-3">
