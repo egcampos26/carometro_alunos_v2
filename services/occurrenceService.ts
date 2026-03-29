@@ -29,6 +29,7 @@ export const occurrenceService = {
             priority: row.ocorr_prioridade_alunos || 'Média',
             itemRelacionado: row.item_relacionado || null,
             horaOcorrencia: row.hora_ocorrencia || undefined,
+            dataRegistro: row.data_registro || undefined,
             horaRegistro: row.hora_registro || undefined,
         }));
     },
@@ -48,6 +49,7 @@ export const occurrenceService = {
             ocorr_prioridade_alunos: occurrence.priority || 'Média',
             item_relacionado: occurrence.itemRelacionado || null,
             hora_ocorrencia: occurrence.horaOcorrencia || null,
+            data_registro: occurrence.dataRegistro || null,
             hora_registro: occurrence.horaRegistro || null,
         }).select().single();
 
@@ -68,6 +70,7 @@ export const occurrenceService = {
             priority: data.ocorr_prioridade_alunos || 'Média',
             itemRelacionado: data.item_relacionado || null,
             horaOcorrencia: data.hora_ocorrencia || undefined,
+            dataRegistro: data.data_registro || undefined,
             horaRegistro: data.hora_registro || undefined,
         };
     },
@@ -86,6 +89,7 @@ export const occurrenceService = {
             ocorr_prioridade_alunos: occurrence.priority || 'Média',
             item_relacionado: occurrence.itemRelacionado || null,
             hora_ocorrencia: occurrence.horaOcorrencia || null,
+            data_registro: occurrence.dataRegistro || null,
             hora_registro: occurrence.horaRegistro || null,
         }).eq('id_ocorrencias', occurrence.id);
 

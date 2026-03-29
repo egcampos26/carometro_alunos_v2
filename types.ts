@@ -22,6 +22,7 @@ export interface Occurrence {
   priority?: 'Urgente' | 'Alta' | 'Média' | 'Baixa'; // Prioridade da ocorrência
   itemRelacionado?: string | null; // Item relacionado à categoria
   horaOcorrencia?: string;
+  dataRegistro?: string;
   horaRegistro?: string;
 }
 

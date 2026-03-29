@@ -26,6 +26,7 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAddOccurrence
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(today);
   const [horaOcorrencia, setHoraOcorrencia] = useState(currentTime);
+  const dataRegistro = today;
   const horaRegistro = currentTime;
   const [category, setCategory] = useState<Occurrence['category']>('Comportamental');
   const [priority, setPriority] = useState<Occurrence['priority']>('Média');
@@ -97,6 +98,7 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAddOccurrence
         itemRelacionado: itemRelacionado || null,
         priority,
         horaOcorrencia,
+        dataRegistro,
         horaRegistro,
       };
       onAddOccurrence(newOcc);
@@ -220,21 +222,33 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAddOccurrence
               </div>
             </div>
 
-            <div className="flex gap-3">
-              <div className="space-y-2 flex-1 min-w-0">
+            <div className="flex gap-3 flex-wrap sm:flex-nowrap">
+              <div className="space-y-2 flex-1 min-w-[200px]">
                 <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1 truncate block">Registrado por</label>
-                <div className="flex items-center gap-2 p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-gray-500 font-bold overflow-hidden">
+                <div className="flex items-center gap-2 p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-gray-500 font-bold overflow-hidden h-[58px]">
                   <UserCheck size={18} className="text-[#3b5998] shrink-0" />
                   <span className="text-sm truncate">{user.name}</span>
                 </div>
               </div>
 
-              <div className="space-y-2 w-1/3 min-w-[100px]">
-                <label className="text-gray-400 text-[10px] sm:text-xs font-black uppercase tracking-widest ml-1 truncate block mt-[2px]">Registro</label>
+              <div className="space-y-2 w-1/2 sm:w-[130px]">
+                <label className="text-gray-400 text-[10px] font-black uppercase tracking-widest ml-1 truncate block mt-[2px]">Data Reg.</label>
+                <div className="relative">
+                  <input
+                    type="date"
+                    className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl outline-none font-bold text-gray-400 cursor-not-allowed text-[11px] h-[58px]"
+                    value={dataRegistro}
+                    disabled
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2 w-1/2 sm:w-[110px]">
+                <label className="text-gray-400 text-[10px] font-black uppercase tracking-widest ml-1 truncate block mt-[2px]">Hora Reg.</label>
                 <div className="relative">
                   <input
                     type="time"
-                    className="w-full p-[17px] bg-gray-50 border-2 border-gray-100 rounded-2xl outline-none font-bold text-gray-400 transition-all cursor-not-allowed text-xs sm:text-sm"
+                    className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl outline-none font-bold text-gray-400 cursor-not-allowed text-[11px] h-[58px]"
                     value={horaRegistro}
                     disabled
                   />

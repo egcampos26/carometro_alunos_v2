@@ -114,7 +114,7 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
               <div className="flex flex-col items-end">
                 <div className="flex items-center gap-2 text-sm text-gray-800 font-black uppercase tracking-widest">
                   <Clock size={16} className="text-[#3b5998]" />
-                  {new Date(occurrence.date).toLocaleDateString('pt-BR')}
+                  {new Date(occurrence.date).toLocaleDateString('pt-BR', { timeZone: 'UTC'})}
                 </div>
                 {occurrence.horaOcorrencia && (
                   <div className="flex items-center gap-1.5 text-[11px] text-[#3b5998]/80 font-bold uppercase tracking-widest mt-1">
@@ -192,7 +192,7 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
                     <p className="text-sm font-black text-gray-800 uppercase tracking-tight">{occurrence.nomeFunc}</p>
                     <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1 flex items-center gap-1.5">
                       <Clock size={10} className="text-gray-300" />
-                      Registro: {new Date(occurrence.date).toLocaleDateString('pt-BR')}{occurrence.horaRegistro ? ` às ${occurrence.horaRegistro}` : ''}
+                      Registro: {new Date(occurrence.dataRegistro || occurrence.date || new Date().toISOString()).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}{occurrence.horaRegistro ? ` às ${occurrence.horaRegistro}` : ''}
                     </p>
                   </div>
                 </div>
@@ -203,7 +203,7 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
                   </div>
                   <div>
                     <p className="text-[9px] text-gray-400 font-black uppercase leading-none mb-1 tracking-widest">Data da Ocorrência</p>
-                    <p className="text-sm font-black text-gray-800 uppercase tracking-tight">{new Date(occurrence.date).toLocaleDateString('pt-BR')}</p>
+                    <p className="text-sm font-black text-gray-800 uppercase tracking-tight">{new Date(occurrence.date).toLocaleDateString('pt-BR', { timeZone: 'UTC'})}</p>
                     {occurrence.horaOcorrencia && (
                       <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1 flex items-center gap-1.5">
                         <Clock size={10} className="text-gray-300" />
