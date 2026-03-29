@@ -482,10 +482,7 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
 
             return (
               <div className="space-y-3">
-                <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">
-                  Item Relacionado
-                  <span className="text-gray-400 font-semibold normal-case tracking-normal ml-2 text-[10px]">— {grupo.label}</span>
-                </label>
+
                 <div className="flex flex-wrap gap-2">
                   {grupo.itens.map((item) => (
                     <button
