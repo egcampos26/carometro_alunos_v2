@@ -8,6 +8,7 @@ import { NO_IMAGE_RIGHTS_URL } from '../constants';
 import { compressToWebP } from '../utils/imageUtils';
 import { uploadStudentPhoto } from '../services/photoService';
 import { maskRG, maskCPF, maskPhone } from '../utils/maskUtils';
+import CameraModal from '../components/CameraModal';
 
 interface StudentEditProps {
   students: Student[];
@@ -42,6 +43,7 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
   const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [showCustomCamera, setShowCustomCamera] = useState(false);
 
   const hasPermission = user.role === 'Admin' || user.role === 'Manager' || user.role === 'Editor' || user.role === 'Coordinator' || user.role === 'Director';
 
@@ -140,6 +142,22 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
 
     // Reseta o input para permitir selecionar o mesmo arquivo novamente
     e.target.value = '';
+  };
+
+  const handleCameraCapture = async (blob: Blob) => {
+    try {
+      // Revoga o objectURL anterior para liberar memória
+      if (localPreviewUrl) URL.revokeObjectURL(localPreviewUrl);
+
+      const previewUrl = URL.createObjectURL(blob);
+      setPendingPhotoBlob(blob);
+      setLocalPreviewUrl(previewUrl);
+      setShowCustomCamera(false);
+      setShowSourceModal(false);
+    } catch (err) {
+      console.error('Erro ao processar captura da câmera:', err);
+      alert('Não foi possível processar a foto. Tente novamente.');
+    }
   };
 
   const headerTitle = (
@@ -529,7 +547,10 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
 
             <div className="grid grid-cols-2 gap-4 pb-4">
               <button
-                onClick={() => cameraInputRef.current?.click()}
+                onClick={() => {
+                  setShowCustomCamera(true);
+                  setShowSourceModal(false);
+                }}
                 className="flex flex-col items-center justify-center p-8 bg-blue-50 rounded-[32px] border-2 border-blue-100 active:bg-blue-100 active:scale-95 transition-all group"
               >
                 <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-3 group-active:shadow-inner">
@@ -554,6 +575,13 @@ const StudentEdit: React.FC<StudentEditProps> = ({ students, onUpdate, user, onT
             </button>
           </div>
         </div>
+      )}
+
+      {showCustomCamera && (
+        <CameraModal 
+          onCapture={handleCameraCapture} 
+          onClose={() => setShowCustomCamera(false)} 
+        />
       )}
     </Layout>
   );

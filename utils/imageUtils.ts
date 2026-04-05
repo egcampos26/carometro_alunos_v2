@@ -17,13 +17,14 @@ export async function compressToWebP(file: File): Promise<Blob> {
             let srcX = 0, srcY = 0, srcW = img.width, srcH = img.height;
 
             if (srcRatio > 1) {
-                // Imagem mais larga que alta: recorta largura
+                // Imagem mais larga que alta: recorta largura (centralizado)
                 srcW = img.height;
                 srcX = (img.width - srcW) / 2;
             } else {
-                // Imagem mais alta que larga: recorta altura
+                // Imagem mais alta que larga: recorta altura (favorecendo o topo - 15%)
                 srcH = img.width;
-                srcY = (img.height - srcH) / 2;
+                // Em vez de centralizar (/ 2), usamos 15% da sobra para o topo
+                srcY = (img.height - srcH) * 0.15;
             }
 
             const canvas = document.createElement('canvas');
