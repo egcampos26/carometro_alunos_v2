@@ -51,11 +51,12 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({ image, onConfirm,
           image={image}
           crop={crop}
           zoom={zoom}
-          aspect={1}
+          aspect={3 / 4}
           onCropChange={setCrop}
           onCropComplete={onCropComplete}
           onZoomChange={setZoom}
           showGrid={true}
+          minZoom={0.1}
           style={{
             containerStyle: { background: '#09090b', cursor: 'move' },
             cropAreaStyle: { 
