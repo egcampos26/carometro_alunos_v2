@@ -25,22 +25,57 @@ const CameraModal: React.FC<CameraModalProps> = ({ onCapture, onClose }) => {
     const startCamera = async () => {
         try {
             setError(null);
-            const mediaStream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: 'environment', // Preferência pela câmera traseira
-                    width: { ideal: 1024 },
-                    height: { ideal: 1024 }
-                },
-                audio: false
-            });
+            
+            // 1. Verificação de contexto seguro
+            if (!window.isSecureContext) {
+                setError("O acesso à câmera requer uma conexão segura (HTTPS) ou localhost. Verique o endereço no navegador.");
+                return;
+            }
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                setError("Seu navegador não suporta acesso à câmera ou a funcionalidade está bloqueada.");
+                return;
+            }
+
+            // 2. Tentar primeiro a câmera traseira (environment) com constraints ideais
+            let mediaStream: MediaStream;
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: { ideal: 'environment' },
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
+                });
+            } catch (firstErr) {
+                console.warn("Falha ao abrir câmera traseira, tentando qualquer câmera disponível:", firstErr);
+                // 3. Fallback: Qualquer câmera de vídeo disponível
+                mediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: false
+                });
+            }
+
             setStream(mediaStream);
             if (videoRef.current) {
                 videoRef.current.srcObject = mediaStream;
             }
             setIsCameraReady(true);
-        } catch (err) {
+        } catch (err: any) {
             console.error("Erro ao acessar câmera:", err);
-            setError("Não foi possível acessar a câmera. Verifique as permissões do navegador.");
+            
+            // 4. Mapeamento de erros comuns em português
+            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                setError("Permissão negada. Por favor, autorize o uso da câmera nas configurações do navegador.");
+            } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+                setError("Nenhuma câmera foi encontrada no seu dispositivo.");
+            } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+                setError("A câmera está sendo usada por outro aplicativo ou aba.");
+            } else {
+                setError(`Erro ao acessar câmera: ${err.message || 'Verifique as permissões do navegador.'}`);
+            }
+            setIsCameraReady(false);
         }
     };
 
@@ -129,9 +164,16 @@ const CameraModal: React.FC<CameraModalProps> = ({ onCapture, onClose }) => {
                         )}
 
                         {error && (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-zinc-900">
+                            <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-zinc-900/95 backdrop-blur-sm z-30">
                                 <AlertTriangle className="text-amber-500 mb-4" size={48} />
-                                <p className="text-white font-bold text-sm">{error}</p>
+                                <p className="text-white font-bold text-sm mb-6">{error}</p>
+                                <button 
+                                    onClick={startCamera}
+                                    className="px-6 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full text-white text-xs font-black uppercase tracking-widest transition-colors flex items-center gap-2"
+                                >
+                                    <RefreshCw size={14} />
+                                    Tentar Novamente
+                                </button>
                             </div>
                         )}
                     </>
