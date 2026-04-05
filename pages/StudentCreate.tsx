@@ -8,7 +8,7 @@ import { NO_IMAGE_RIGHTS_URL } from '../constants';
 import { compressToWebP } from '../utils/imageUtils';
 import { uploadStudentPhoto } from '../services/photoService';
 import { maskRG, maskCPF, maskPhone } from '../utils/maskUtils';
-// Versão revertida para câmera nativa
+import ImageCropperModal from '../components/ImageCropperModal';
 
 interface StudentCreateProps {
     students: Student[];
@@ -59,6 +59,8 @@ const StudentCreate: React.FC<StudentCreateProps> = ({ onCreate, user, onToggleR
     const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
     const [uploading, setUploading] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
+    const [rawImage, setRawImage] = useState<string | null>(null);
+    const [showCropper, setShowCropper] = useState(false);
 
     const hasPermission = user.role === 'Admin' || user.role === 'Manager' || user.role === 'Editor' || user.role === 'Coordinator' || user.role === 'Director';
 
@@ -115,22 +117,27 @@ const StudentCreate: React.FC<StudentCreateProps> = ({ onCreate, user, onToggleR
         navigate('/');
     };
 
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        try {
-            const blob = await compressToWebP(file);
-            if (localPreviewUrl) URL.revokeObjectURL(localPreviewUrl);
-            const previewUrl = URL.createObjectURL(blob);
-            setPendingPhotoBlob(blob);
-            setLocalPreviewUrl(previewUrl);
+        const reader = new FileReader();
+        reader.onload = () => {
+            setRawImage(reader.result as string);
+            setShowCropper(true);
             setShowSourceModal(false);
-        } catch (err) {
-            console.error('Erro ao comprimir imagem:', err);
-            alert('Não foi possível processar a imagem. Tente outro arquivo.');
-        }
+        };
+        reader.readAsDataURL(file);
         e.target.value = '';
+    };
+
+    const handleCropConfirm = (blob: Blob) => {
+        if (localPreviewUrl) URL.revokeObjectURL(localPreviewUrl);
+        const previewUrl = URL.createObjectURL(blob);
+        setPendingPhotoBlob(blob);
+        setLocalPreviewUrl(previewUrl);
+        setShowCropper(false);
+        setRawImage(null);
     };
 
 
@@ -568,6 +575,16 @@ const StudentCreate: React.FC<StudentCreateProps> = ({ onCreate, user, onToggleR
                         </button>
                     </div>
                 </div>
+            )}
+            {showCropper && rawImage && (
+                <ImageCropperModal
+                    image={rawImage}
+                    onConfirm={handleCropConfirm}
+                    onCancel={() => {
+                        setShowCropper(false);
+                        setRawImage(null);
+                    }}
+                />
             )}
         </Layout>
     );

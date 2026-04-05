@@ -60,3 +60,56 @@ export async function compressToWebP(file: File): Promise<Blob> {
         img.src = objectUrl;
     });
 }
+
+/**
+ * Cria um Blob WebP a partir de uma imagem e coordenadas de corte.
+ * Utilizado pelo componente de ajuste manual.
+ */
+export async function getCroppedImg(
+    imageSrc: string,
+    pixelCrop: { x: number; y: number; width: number; height: number }
+): Promise<Blob> {
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const img = new Image();
+        img.addEventListener('load', () => resolve(img));
+        img.addEventListener('error', (err) => reject(err));
+        img.src = imageSrc;
+    });
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+        throw new Error('Canvas 2D context não disponível');
+    }
+
+    const TARGET_SIZE = 400;
+    canvas.width = TARGET_SIZE;
+    canvas.height = TARGET_SIZE;
+
+    ctx.drawImage(
+        image,
+        pixelCrop.x,
+        pixelCrop.y,
+        pixelCrop.width,
+        pixelCrop.height,
+        0,
+        0,
+        TARGET_SIZE,
+        TARGET_SIZE
+    );
+
+    return new Promise((resolve, reject) => {
+        canvas.toBlob(
+            (blob) => {
+                if (blob) {
+                    resolve(blob);
+                } else {
+                    reject(new Error('Falha ao gerar o blob de corte'));
+                }
+            },
+            'image/webp',
+            0.78
+        );
+    });
+}
