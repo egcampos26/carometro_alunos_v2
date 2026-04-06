@@ -11,9 +11,14 @@ interface StudentSyncProps {
   onToggleRole: () => void;
 }
 
+interface UpdateDetail {
+  student: Student;
+  changes: string[];
+}
+
 interface SyncSummary {
   inserts: Student[];
-  updates: Student[];
+  updates: UpdateDetail[];
   inactivations: Student[];
   unchanged: number;
 }
@@ -25,6 +30,7 @@ const StudentSync: React.FC<StudentSyncProps> = ({ user, onToggleRole }) => {
   const [file, setFile] = useState<File | null>(null);
   const [parsing, setParsing] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   const [currentStudents, setCurrentStudents] = useState<Student[]>([]);
   const [summary, setSummary] = useState<SyncSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -97,7 +103,7 @@ const StudentSync: React.FC<StudentSyncProps> = ({ user, onToggleRole }) => {
           }
 
           const inserts: Student[] = [];
-          const updates: Student[] = [];
+          const updates: UpdateDetail[] = [];
           const inactivations: Student[] = [];
           let unchangedCount = 0;
 
@@ -115,14 +121,17 @@ const StudentSync: React.FC<StudentSyncProps> = ({ user, onToggleRole }) => {
             const csvMatch = csvStudentsMap.get(dbStudent.registrationNumber);
             if (csvMatch) {
               // Found in both. Check if changed.
-              const hasChanged = 
-                dbStudent.name !== csvMatch.name ||
-                dbStudent.grade !== csvMatch.grade ||
-                dbStudent.studentStatus !== csvMatch.studentStatus ||
-                dbStudent.shift !== csvMatch.shift;
+              const changes: string[] = [];
+              if (dbStudent.name !== csvMatch.name) changes.push(`Nome: ${dbStudent.name} ➔ ${csvMatch.name}`);
+              if (dbStudent.grade !== csvMatch.grade) changes.push(`Turma: ${dbStudent.grade} ➔ ${csvMatch.grade}`);
+              if (dbStudent.studentStatus !== csvMatch.studentStatus) changes.push(`Situação: ${dbStudent.studentStatus} ➔ ${csvMatch.studentStatus}`);
+              if (dbStudent.shift !== csvMatch.shift) changes.push(`Período: ${dbStudent.shift} ➔ ${csvMatch.shift}`);
               
-              if (hasChanged) {
-                updates.push({ ...dbStudent, ...csvMatch } as Student);
+              if (changes.length > 0) {
+                updates.push({ 
+                  student: { ...dbStudent, ...csvMatch } as Student,
+                  changes
+                });
               } else {
                 unchangedCount++;
               }
@@ -168,7 +177,10 @@ const StudentSync: React.FC<StudentSyncProps> = ({ user, onToggleRole }) => {
     setError(null);
     setSuccessMsg(null);
 
-    const allUpdates = [...summary.updates, ...summary.inactivations];
+    const allUpdates = [
+      ...summary.updates.map(u => u.student),
+      ...summary.inactivations
+    ];
 
     try {
       const result = await studentService.syncStudents(summary.inserts, allUpdates);
@@ -283,6 +295,36 @@ const StudentSync: React.FC<StudentSyncProps> = ({ user, onToggleRole }) => {
               <p className="text-sm text-gray-500 font-medium bg-gray-50 p-3 rounded-lg text-center">
                 Existem <b>{summary.unchanged}</b> alunos no arquivo que não possuem alterações em relação ao banco atual.
               </p>
+
+              {summary.updates.length > 0 && (
+                <div className="border border-blue-100 rounded-2xl overflow-hidden mt-4">
+                  <button 
+                    onClick={() => setShowDetails(!showDetails)}
+                    className="w-full bg-blue-50/50 p-4 text-left font-black text-blue-800 uppercase text-xs tracking-widest flex items-center justify-between hover:bg-blue-50 transition-colors"
+                  >
+                    Ver detalhes das atualizações ({summary.updates.length})
+                    <span className="text-xl leading-none">{showDetails ? '-' : '+'}</span>
+                  </button>
+                  
+                  {showDetails && (
+                    <div className="p-4 bg-white max-h-60 overflow-y-auto custom-scrollbar space-y-3">
+                      {summary.updates.map((update, idx) => (
+                        <div key={idx} className="border-b border-gray-100 pb-3 last:border-0 last:pb-0">
+                          <span className="block font-black text-gray-800 text-sm mb-1">{update.student.name}</span>
+                          <ul className="space-y-1">
+                            {update.changes.map((change, cIdx) => (
+                              <li key={cIdx} className="text-xs text-gray-600 font-medium flex items-start gap-2">
+                                <span className="text-blue-500 mt-0.5">•</span>
+                                {change}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {error && (
                 <div className="p-4 bg-red-50 text-red-600 rounded-2xl flex items-center gap-3 text-sm font-bold border border-red-100">
