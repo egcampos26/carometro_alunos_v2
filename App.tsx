@@ -14,6 +14,7 @@ import OccurrenceDetail from './pages/OccurrenceDetail';
 import OccurrenceEdit from './pages/OccurrenceEdit';
 import OccurrenceResolutionPage from './pages/OccurrenceResolution';
 import SystemLog from './pages/SystemLog';
+import StudentSync from './pages/StudentSync';
 import { Student, Occurrence, OccurrenceResolution, AuthUser, LogEntry } from './types';
 import { studentService } from './services/studentService';
 import { occurrenceService } from './services/occurrenceService';
@@ -577,6 +578,18 @@ const App: React.FC = () => {
                   <SystemLog
                     logs={logs}
                   />
+                ) : (
+                  <Navigate to="/" replace />
+                )
+              }
+            />
+
+            {/* Sincronização CSV — Admin/Manager */}
+            <Route
+              path="/sync"
+              element={
+                ['Admin', 'Manager'].includes(user.role) ? (
+                  <StudentSync user={user} onToggleRole={handleToggleRole} />
                 ) : (
                   <Navigate to="/" replace />
                 )

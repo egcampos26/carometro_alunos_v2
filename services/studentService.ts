@@ -200,5 +200,36 @@ export const studentService = {
         }
         const { error } = await supabase.from('ALUNOS').delete().eq('id_aluno', numericId);
         if (error) throw error;
+    },
+
+    // Executa operações de inserção/atualização em lote a partir do CSV
+    async syncStudents(inserts: Student[], updates: Student[]): Promise<{ success: boolean; errors: any[] }> {
+        const errors: any[] = [];
+        
+        // Chunk sizes for performance? Actually standard loop with await is fine for < 1000 records
+        for (const student of inserts) {
+            try {
+                // Remove ID if present to ensure a clean insert
+                const { id, ...studentPayload } = student;
+                await this.createStudent(studentPayload as Student);
+            } catch (err) {
+                console.error(`Erro ao inserir aluno ${student.name}:`, err);
+                errors.push({ type: 'INSERT', student: student.name, error: err });
+            }
+        }
+
+        for (const student of updates) {
+            try {
+                await this.updateStudent(student);
+            } catch (err) {
+                console.error(`Erro ao atualizar aluno ${student.name}:`, err);
+                errors.push({ type: 'UPDATE', student: student.name, error: err });
+            }
+        }
+
+        return {
+            success: errors.length === 0,
+            errors
+        };
     }
 };

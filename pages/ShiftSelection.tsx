@@ -93,6 +93,16 @@ const ShiftSelection: React.FC<ShiftSelectionProps> = ({ user, onToggleRole }) =
             </button>
           )}
 
+          {['Admin', 'Manager'].includes(user.role) && (
+            <button
+              onClick={() => navigate('/sync')}
+              className="w-full bg-[#f8f9fa] text-gray-700 py-5 rounded-3xl font-black text-sm sm:text-base shadow-sm border-2 border-gray-200 flex items-center justify-center gap-3 hover:bg-gray-100 active:scale-95 transition-all uppercase tracking-widest"
+            >
+              <ClipboardList size={22} className="text-[#3b5998]" />
+              Sincronizar Base
+            </button>
+          )}
+
           {user.role === 'Admin' && (
             <button
               onClick={() => navigate('/logs')}
