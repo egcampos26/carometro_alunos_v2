@@ -192,7 +192,9 @@ const StudentSync: React.FC<StudentSyncProps> = ({ user, onToggleRole }) => {
         const newData = await studentService.fetchStudents();
         setCurrentStudents(newData);
       } else {
-        setError(`Ocorreram erros durante a sincronização. Verifique os logs do console.`);
+        const firstErr = result.errors[0];
+        const errorMsg = firstErr?.error?.message || firstErr?.error?.details || JSON.stringify(firstErr?.error) || 'Erro desconhecido';
+        setError(`Falha ao inserir/atualizar: "${firstErr?.student}". Detalhe: ${errorMsg}`);
       }
     } catch (err: any) {
       setError(`Erro de rede ou servidor: ${err.message}`);
