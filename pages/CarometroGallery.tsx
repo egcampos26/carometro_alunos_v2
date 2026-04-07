@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Student, Shift, AuthUser } from '../types';
-import { Search, UserCircle2, CameraOff } from 'lucide-react';
+import { Search, UserCircle2, CameraOff, Filter } from 'lucide-react';
 import { NO_IMAGE_RIGHTS_URL } from '../constants';
 
 interface CarometroGalleryProps {
@@ -16,6 +16,11 @@ const CarometroGallery: React.FC<CarometroGalleryProps> = ({ students, user, onT
   const { shift, grade } = useParams<{ shift: string; grade: string }>();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('Ativo'); // Default para mostrar só ativos
+
+  // Define se o usuário atual pode ver e alterar os filtros de situação
+  const isAllStudentsPage = (shift === Shift.ALL || shift === 'Todos');
+  const canFilterStatus = user.role === 'Admin' && isAllStudentsPage;
 
   const filteredStudents = students.filter(s => {
     const isAllShifts = shift === Shift.ALL || shift === 'Todos';
@@ -24,8 +29,15 @@ const CarometroGallery: React.FC<CarometroGalleryProps> = ({ students, user, onT
     const matchesShift = isAllShifts || s.shift === shift;
     const matchesGrade = isAllGrades || s.grade === grade;
     const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Filtro de status:
+    // Se não puder filtrar, fixa em 'Ativo'. 
+    // Se puder, obedece o `statusFilter` (se for 'Todos', não filtra o status).
+    const isStatusFiltered = canFilterStatus 
+      ? (statusFilter === 'Todos' ? true : s.studentStatus === statusFilter)
+      : s.studentStatus === 'Ativo';
 
-    return matchesShift && matchesGrade && matchesSearch;
+    return matchesShift && matchesGrade && matchesSearch && isStatusFiltered;
   });
 
   const displayTitle = (
@@ -42,16 +54,37 @@ const CarometroGallery: React.FC<CarometroGalleryProps> = ({ students, user, onT
       onBack={() => navigate(`/turnos/${shift}`)}
     >
       <div className="p-4 sm:p-8 2xl:px-12 max-w-[1920px] mx-auto w-full">
-        {/* Search Bar */}
-        <div className="relative mb-10 max-w-xl mx-auto">
-          <input
-            type="text"
-            placeholder="Buscar aluno por nome..."
-            className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-2xl outline-none shadow-sm text-base font-medium transition-all"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+        {/* Search Bar & Filters */}
+        <div className="flex flex-col sm:flex-row items-center gap-4 mb-10 max-w-3xl mx-auto">
+          <div className="relative flex-1 w-full">
+            <input
+              type="text"
+              placeholder="Buscar aluno por nome..."
+              className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-[#3b5998] rounded-2xl outline-none shadow-sm text-base font-medium transition-all"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+          </div>
+
+          {canFilterStatus && (
+            <div className="relative w-full sm:w-auto shrink-0">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full sm:w-48 appearance-none bg-white border-2 border-gray-200 focus:border-[#3b5998] text-gray-700 font-bold py-4 pl-12 pr-8 rounded-2xl shadow-sm outline-none transition-all cursor-pointer"
+              >
+                <option value="Todos">Todas as Situações</option>
+                <option value="Ativo">Ativos</option>
+                <option value="Inativo">Inativos</option>
+                <option value="Transferido">Transferidos</option>
+              </select>
+              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-[#3b5998]" size={18} />
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
+              </div>
+            </div>
+          )}
         </div>
 
         {filteredStudents.length > 0 ? (

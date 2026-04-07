@@ -18,9 +18,9 @@ const ClassSelection: React.FC<ClassSelectionProps> = ({ students, user, onToggl
   // Obtém as turmas específicas do período ou um array vazio se não houver correspondência
   const gradesForShift = shift ? SHIFT_GRADES[shift] || [] : [];
 
-  // Filtra apenas as turmas que realmente têm alunos cadastrados
+  // Filtra apenas as turmas que realmente têm alunos ativos cadastrados
   const availableGrades = gradesForShift.filter(grade =>
-    students.some(s => s.shift === shift && s.grade === grade)
+    students.some(s => s.shift === shift && s.grade === grade && s.studentStatus === 'Ativo')
   );
 
   const headerTitle = (
