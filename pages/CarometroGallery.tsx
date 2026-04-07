@@ -30,12 +30,11 @@ const CarometroGallery: React.FC<CarometroGalleryProps> = ({ students, user, onT
     const matchesGrade = isAllGrades || s.grade === grade;
     const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase());
     
-    // Filtro de status:
-    // Se não puder filtrar, fixa em 'Ativo'. 
-    // Se puder, obedece o `statusFilter` (se for 'Todos', não filtra o status).
+    // Filtro de status case-insensitive:
+    const safeStudentStatus = (s.studentStatus || '').toLowerCase();
     const isStatusFiltered = canFilterStatus 
-      ? (statusFilter === 'Todos' ? true : s.studentStatus === statusFilter)
-      : s.studentStatus === 'Ativo';
+      ? (statusFilter === 'Todos' ? true : safeStudentStatus === statusFilter.toLowerCase())
+      : safeStudentStatus === 'ativo';
 
     return matchesShift && matchesGrade && matchesSearch && isStatusFiltered;
   });

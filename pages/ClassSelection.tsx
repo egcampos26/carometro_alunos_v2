@@ -20,7 +20,7 @@ const ClassSelection: React.FC<ClassSelectionProps> = ({ students, user, onToggl
 
   // Filtra apenas as turmas que realmente têm alunos ativos cadastrados
   const availableGrades = gradesForShift.filter(grade =>
-    students.some(s => s.shift === shift && s.grade === grade && s.studentStatus === 'Ativo')
+    students.some(s => s.shift === shift && s.grade === grade && (s.studentStatus || '').toLowerCase() === 'ativo')
   );
 
   const headerTitle = (
