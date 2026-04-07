@@ -16,11 +16,18 @@ const CarometroGallery: React.FC<CarometroGalleryProps> = ({ students, user, onT
   const { shift, grade } = useParams<{ shift: string; grade: string }>();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('Ativo'); // Default para mostrar só ativos
+  const [statusFilter, setStatusFilter] = useState<string>('ativo'); // Default em lowercase
 
   // Define se o usuário atual pode ver e alterar os filtros de situação
   const isAllStudentsPage = (shift === Shift.ALL || shift === 'Todos');
   const canFilterStatus = user.role === 'Admin' && isAllStudentsPage;
+
+  // Extrai todas as situações únicas presentes no banco
+  const uniqueStatuses: string[] = Array.from(
+    new Set<string>(students.map(s => (s.studentStatus ? String(s.studentStatus).trim().toLowerCase() : 'desconhecido')))
+  ).sort();
+
+  const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 
   const filteredStudents = students.filter(s => {
     const isAllShifts = shift === Shift.ALL || shift === 'Todos';
@@ -33,7 +40,7 @@ const CarometroGallery: React.FC<CarometroGalleryProps> = ({ students, user, onT
     // Filtro de status case-insensitive:
     const safeStudentStatus = (s.studentStatus || '').toLowerCase();
     const isStatusFiltered = canFilterStatus 
-      ? (statusFilter === 'Todos' ? true : safeStudentStatus === statusFilter.toLowerCase())
+      ? (statusFilter === 'todos' ? true : safeStudentStatus === statusFilter)
       : safeStudentStatus === 'ativo';
 
     return matchesShift && matchesGrade && matchesSearch && isStatusFiltered;
@@ -71,12 +78,14 @@ const CarometroGallery: React.FC<CarometroGalleryProps> = ({ students, user, onT
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full sm:w-48 appearance-none bg-white border-2 border-gray-200 focus:border-[#3b5998] text-gray-700 font-bold py-4 pl-12 pr-8 rounded-2xl shadow-sm outline-none transition-all cursor-pointer"
+                className="w-full sm:w-48 appearance-none bg-white border-2 border-gray-200 focus:border-[#3b5998] text-gray-700 font-bold py-4 pl-12 pr-8 rounded-2xl shadow-sm outline-none transition-all cursor-pointer capitalize"
               >
-                <option value="Todos">Todas as Situações</option>
-                <option value="Ativo">Ativos</option>
-                <option value="Inativo">Inativos</option>
-                <option value="Transferido">Transferidos</option>
+                <option value="todos" className="capitalize">Todas as Situações</option>
+                {uniqueStatuses.map(status => (
+                  <option key={status} value={status} className="capitalize">
+                    {capitalize(status)}
+                  </option>
+                ))}
               </select>
               <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-[#3b5998]" size={18} />
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">

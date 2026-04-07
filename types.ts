@@ -85,7 +85,7 @@ export interface Student {
   obsTelefone4: string; // Observação Telefone 4
   birthDate: string;
   departureMethod: DepartureMethod; // como_vai_embora
-  studentStatus: 'Ativo' | 'Inativo' | 'Transferido';
+  studentStatus: string; // Ex: 'Ativo', 'Inativo', 'Transferido', 'Vínculo Indevido', etc.
   imageRightsSigned?: 'Sim' | 'Não'; // Novo campo: Direito de Imagem
   generoAluno?: 'Masculino' | 'Feminino' | null; // Gênero do aluno
   // Mantendo para compatibilidade caso existam referências
