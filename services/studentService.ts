@@ -75,9 +75,28 @@ export const studentService = {
         let idVal: number | undefined;
         if (student.id) {
             const parsed = parseInt(student.id);
-            if (!isNaN(parsed)) {
+            if (!isNaN(parsed) && parsed !== 0) {
                 idVal = parsed;
             }
+        }
+
+        if (idVal === undefined) {
+            // Se o ID não foi informado (ou se for 0, vindo do formulário genérico), 
+            // precisamos gerar o próximo ID para evitar a violação de 'not-null constraint' 
+            // caso o Supabase não esteja com a coluna id_aluno marcada como auto-increment(IDENTITY).
+            const { data, error: maxError } = await supabase
+                .from('ALUNOS')
+                .select('id_aluno')
+                .order('id_aluno', { ascending: false })
+                .limit(1);
+            
+            if (maxError) {
+                console.error("Erro ao buscar último ID:", maxError);
+                throw maxError;
+            }
+
+            const maxId = data && data.length > 0 ? Number(data[0].id_aluno) : 0;
+            idVal = maxId + 1;
         }
 
         // Split grade
