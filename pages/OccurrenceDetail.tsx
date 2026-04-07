@@ -214,8 +214,8 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
                 </div>
               </div>
 
-              {canModify && (
-                <div className="flex flex-row w-full sm:w-auto gap-3">
+              <div className="flex flex-row w-full sm:w-auto gap-3">
+                {canModify && (
                   <button
                     onClick={() => navigate(`/occurrences/${occurrence.id}/edit`, { state: location.state })}
                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-50 text-[#3b5998] px-6 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest shadow-sm border border-blue-100 hover:bg-blue-100 active:scale-95 transition-all"
@@ -223,6 +223,8 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
                     <Edit3 size={16} />
                     Editar
                   </button>
+                )}
+                {user.role === 'Admin' && (
                   <button
                     onClick={() => setShowDeleteModal(true)}
                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-red-50 text-red-600 px-6 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest shadow-sm border border-red-100 hover:bg-red-100 active:scale-95 transition-all"
@@ -230,8 +232,8 @@ const OccurrenceDetail: React.FC<OccurrenceDetailProps> = ({ students, occurrenc
                     <Trash2 size={16} />
                     Excluir
                   </button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {!canModify && (

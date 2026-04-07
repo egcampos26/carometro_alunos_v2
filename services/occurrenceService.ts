@@ -101,6 +101,13 @@ export const occurrenceService = {
     },
 
     async deleteOccurrence(id: string): Promise<void> {
+        // Exclui todas as resoluções vinculadas primeiro (garante exclusão em cascata caso o ON DELETE CASCADE do Postgres não esteja ativo)
+        const { error: resError } = await supabase.from('RESOLUCOES_OCORRENCIAS').delete().eq('id_ocorrencia', id);
+        if (resError) {
+            console.error('Error deleting related resolutions:', resError);
+            throw resError;
+        }
+
         const { error } = await supabase.from('OCORRENCIAS_ALUNOS').delete().eq('id_ocorrencias', id);
         if (error) throw error;
     }
