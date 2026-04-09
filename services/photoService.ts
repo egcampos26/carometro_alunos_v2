@@ -50,7 +50,7 @@ export async function uploadStudentPhoto(
     }
 
     const { data } = supabase.storage.from(BUCKET).getPublicUrl(filePath);
-    return data.publicUrl;
+    return `${data.publicUrl}?t=${Date.now()}`;
 }
 
 /**

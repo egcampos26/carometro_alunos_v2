@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Student, AuthUser, DepartureMethod, Shift } from '../types';
 import { Camera, Image as ImageIcon, UserCircle2, X, Lock, Loader2 } from 'lucide-react';
-import { NO_IMAGE_RIGHTS_URL } from '../constants';
+import { NO_IMAGE_RIGHTS_URL, DEFAULT_STUDENT_PHOTO_URL } from '../constants';
 import { compressToWebP } from '../utils/imageUtils';
 import { uploadStudentPhoto } from '../services/photoService';
 import { maskRG, maskCPF, maskPhone } from '../utils/maskUtils';
@@ -32,7 +32,7 @@ const StudentCreate: React.FC<StudentCreateProps> = ({ onCreate, user, onToggleR
         roomNumber: '',
         shift: Shift.MORNING,
         grade: '',
-        photoUrl: '',
+        photoUrl: DEFAULT_STUDENT_PHOTO_URL,
         birthDate: '',
         departureMethod: 'Responsável',
         studentStatus: 'Ativo',
