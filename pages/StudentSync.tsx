@@ -298,31 +298,77 @@ const StudentSync: React.FC<StudentSyncProps> = ({ user, onToggleRole }) => {
                 Existem <b>{summary.unchanged}</b> alunos no arquivo que não possuem alterações em relação ao banco atual.
               </p>
 
-              {summary.updates.length > 0 && (
-                <div className="border border-blue-100 rounded-2xl overflow-hidden mt-4">
+              {(summary.updates.length > 0 || summary.inserts.length > 0 || summary.inactivations.length > 0) && (
+                <div className="border border-[#3b5998]/20 rounded-2xl overflow-hidden mt-4 shadow-inner bg-gray-50/30">
                   <button 
                     onClick={() => setShowDetails(!showDetails)}
-                    className="w-full bg-blue-50/50 p-4 text-left font-black text-blue-800 uppercase text-xs tracking-widest flex items-center justify-between hover:bg-blue-50 transition-colors"
+                    className="w-full bg-[#3b5998]/5 p-4 text-left font-black text-[#3b5998] uppercase text-xs tracking-widest flex items-center justify-between hover:bg-[#3b5998]/10 transition-colors"
                   >
-                    Ver detalhes das atualizações ({summary.updates.length})
+                    Ver detalhes das alterações ({summary.updates.length + summary.inserts.length + summary.inactivations.length})
                     <span className="text-xl leading-none">{showDetails ? '-' : '+'}</span>
                   </button>
                   
                   {showDetails && (
-                    <div className="p-4 bg-white max-h-60 overflow-y-auto custom-scrollbar space-y-3">
-                      {summary.updates.map((update, idx) => (
-                        <div key={idx} className="border-b border-gray-100 pb-3 last:border-0 last:pb-0">
-                          <span className="block font-black text-gray-800 text-sm mb-1">{update.student.name}</span>
-                          <ul className="space-y-1">
-                            {update.changes.map((change, cIdx) => (
-                              <li key={cIdx} className="text-xs text-gray-600 font-medium flex items-start gap-2">
-                                <span className="text-blue-500 mt-0.5">•</span>
-                                {change}
-                              </li>
+                    <div className="p-4 bg-white max-h-80 overflow-y-auto custom-scrollbar space-y-6">
+                      
+                      {/* NOVOS ALUNOS */}
+                      {summary.inserts.length > 0 && (
+                        <div className="space-y-3">
+                          <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-green-600 flex items-center gap-2 px-1">
+                            <span className="w-2 h-2 rounded-full bg-green-500" /> Novos Alunos ({summary.inserts.length})
+                          </h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {summary.inserts.map((stu, idx) => (
+                              <div key={idx} className="p-3 rounded-xl bg-green-50/50 border border-green-100/50">
+                                <span className="block font-black text-gray-800 text-xs truncate">{stu.name}</span>
+                                <span className="text-[9px] font-bold text-green-700 uppercase tracking-tighter">{stu.grade}</span>
+                              </div>
                             ))}
-                          </ul>
+                          </div>
                         </div>
-                      ))}
+                      )}
+
+                      {/* ATUALIZAÇÕES */}
+                      {summary.updates.length > 0 && (
+                        <div className="space-y-3">
+                          <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 flex items-center gap-2 px-1">
+                            <span className="w-2 h-2 rounded-full bg-blue-500" /> Atualizações ({summary.updates.length})
+                          </h4>
+                          <div className="space-y-2">
+                            {summary.updates.map((update, idx) => (
+                              <div key={idx} className="p-3 rounded-xl bg-blue-50/30 border border-blue-100/50">
+                                <span className="block font-black text-gray-800 text-xs mb-1">{update.student.name}</span>
+                                <ul className="space-y-1 pl-1">
+                                  {update.changes.map((change, cIdx) => (
+                                    <li key={cIdx} className="text-[10px] text-gray-600 font-medium flex items-start gap-2">
+                                      <span className="text-blue-400 mt-1">•</span>
+                                      {change}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* INATIVAÇÕES */}
+                      {summary.inactivations.length > 0 && (
+                        <div className="space-y-3">
+                          <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-red-600 flex items-center gap-2 px-1">
+                            <span className="w-2 h-2 rounded-full bg-red-500" /> Alunos a Inativar ({summary.inactivations.length})
+                          </h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {summary.inactivations.map((stu, idx) => (
+                              <div key={idx} className="p-3 rounded-xl bg-red-50/50 border border-red-100/50">
+                                <span className="block font-black text-gray-800 text-xs truncate">{stu.name}</span>
+                                <span className="text-[9px] font-bold text-red-700 uppercase tracking-tighter">Status: Ativo ➔ Inativo</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                     </div>
                   )}
                 </div>
