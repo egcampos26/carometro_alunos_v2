@@ -59,7 +59,7 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
     : students.filter(s =>
       s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
       s.registrationNumber.toLowerCase().includes(studentSearch.toLowerCase())
-    ).slice(0, 5); // Limit suggestions to avoid clutter
+    ).sort((a, b) => a.name.localeCompare(b.name)).slice(0, 5); // Limit suggestions to avoid clutter
 
   const toggleStudent = (id: string) => {
     if (selectedIds.includes(id)) {

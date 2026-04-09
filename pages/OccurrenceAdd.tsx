@@ -63,7 +63,7 @@ const OccurrenceAdd: React.FC<OccurrenceAddProps> = ({ students, onAddOccurrence
       (s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
         s.registrationNumber.toLowerCase().includes(studentSearch.toLowerCase())) &&
       !selectedIds.includes(s.id) // Não mostrar quem já foi selecionado
-    ).slice(0, 5);
+    ).sort((a, b) => a.name.localeCompare(b.name)).slice(0, 5);
 
   const toggleAdditionalStudent = (id: string) => {
     setSelectedIds(prev =>

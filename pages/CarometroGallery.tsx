@@ -44,7 +44,7 @@ const CarometroGallery: React.FC<CarometroGalleryProps> = ({ students, user, onT
       : safeStudentStatus === 'ativo';
 
     return matchesShift && matchesGrade && matchesSearch && isStatusFiltered;
-  });
+  }).sort((a, b) => a.name.localeCompare(b.name));
 
   const displayTitle = (
     <div className="flex flex-col items-center justify-center leading-tight">

@@ -8,7 +8,8 @@ export const studentService = {
             .select(`
         *,
         DADOS_ALUNOS (*)
-      `);
+      `)
+            .order('nome_aluno', { ascending: true });
 
         if (error) {
             console.error('Error fetching students:', error);
