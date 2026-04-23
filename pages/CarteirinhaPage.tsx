@@ -27,12 +27,12 @@ const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
 
   // Tamanho da foto circular — ~52% da largura do card (maior)
   const photoSize = Math.round(CARD_WIDTH * 0.52); // ~125px
-  // Posição da foto: centrada horizontalmente, topo em ~31% da altura (descida)
-  const photoTop = Math.round(CARD_HEIGHT * 0.31);   // ~157px
+  // Posição da foto: centrada horizontalmente, topo em ~35% da altura (mais baixo)
+  const photoTop = Math.round(CARD_HEIGHT * 0.35);   // ~177px
   const photoLeft = Math.round((CARD_WIDTH - photoSize) / 2); // centralizado
 
   // Posições dos textos (em px a partir do topo)
-  const nameTop = Math.round(CARD_HEIGHT * 0.725);   // ~367px  — "ANA COSTA"
+  const nameTop = Math.round(CARD_HEIGHT * 0.755);   // ~382px  — nome (descido)
   const gradeTop = Math.round(CARD_HEIGHT * 0.800);  // ~404px  — "Turma: 4º Ano B" (subido)
   const anoTop = Math.round(CARD_HEIGHT * 0.860);    // ~435px  — Ano letivo (subido)
 
@@ -93,10 +93,10 @@ const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
         style={{
           position: 'absolute',
           top: `${nameTop}px`,
-          left: 0,
-          right: 0,
+          left: '26px',
+          right: '26px',
           textAlign: 'center',
-          padding: '0 10px',
+          padding: '0',
         }}
       >
         <span
@@ -120,10 +120,10 @@ const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
         style={{
           position: 'absolute',
           top: `${gradeTop}px`,
-          left: 0,
-          right: 0,
+          left: '20px',
+          right: '20px',
           textAlign: 'center',
-          padding: '0 10px',
+          padding: '0',
         }}
       >
         <span
@@ -135,7 +135,7 @@ const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
             letterSpacing: '0.02em',
           }}
         >
-          Turma: {student.grade}
+          {student.grade}
         </span>
       </div>
 
