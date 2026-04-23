@@ -1,5 +1,5 @@
 
-import React, { useRef } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Student, AuthUser } from '../types';
@@ -14,10 +14,9 @@ interface CarteirinhaPageProps {
 
 const ANO_LETIVO = '2026';
 
-// A imagem Carteirinha.png tem proporção aproximada de 507x1070 (ratio ~0.474)
-// Usamos uma largura fixa de 240px → altura = 240 / 0.474 ≈ 506px
-const CARD_WIDTH = 240;
-const CARD_HEIGHT = Math.round(CARD_WIDTH / 0.474); // ~506px
+// Cartão na tela: proporção 55:85 (igual ao tamanho de impressão)
+const CARD_W = 207;
+const CARD_H = 320;
 
 const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
   const hasImageRights = student.imageRightsSigned !== 'Não';
@@ -25,50 +24,49 @@ const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
     ? (student.photoUrl || DEFAULT_STUDENT_PHOTO_URL)
     : NO_IMAGE_RIGHTS_URL;
 
-  // Tamanho da foto circular — ~59% da largura do card (maior)
-  const photoSize = Math.round(CARD_WIDTH * 0.59); // ~142px
-  // Posição da foto: centrada horizontalmente, topo em ~32% da altura (subido)
-  const photoTop = Math.round(CARD_HEIGHT * 0.32);   // ~162px
-  const photoLeft = Math.round((CARD_WIDTH - photoSize) / 2); // centralizado
-
-  // Posições dos textos (em px a partir do topo)
-  const nameTop = Math.round(CARD_HEIGHT * 0.745);   // ~377px  — nome (descido para distanciar do DO AMARAL)
-  const gradeTop = Math.round(CARD_HEIGHT * 0.800);  // ~404px  — ANO/TURMA (posição mantida)
-  const anoTop = Math.round(CARD_HEIGHT * 0.860);    // ~435px  — Ano letivo (posição mantida)
-
   return (
     <div
       className="carteirinha-card"
       style={{
         position: 'relative',
-        width: `${CARD_WIDTH}px`,
-        height: `${CARD_HEIGHT}px`,
+        width: `${CARD_W}px`,
+        height: `${CARD_H}px`,
         flexShrink: 0,
-        pageBreakInside: 'avoid',
-        breakInside: 'avoid',
-        margin: '8px',
-        // Imagem de fundo = a carteirinha PNG
-        backgroundImage: 'url(/Carteirinha.png)',
-        backgroundSize: '100% 100%',
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'center',
-        borderRadius: '18px',
+        borderRadius: '14px',
         overflow: 'hidden',
-        boxShadow: '0 6px 24px rgba(0,0,0,0.18)',
-        fontFamily: "'Arial Black', 'Segoe UI', Arial, sans-serif",
+        boxShadow: '0 6px 20px rgba(0,0,0,0.18)',
+        margin: '8px',
+        fontFamily: "'Arial Black', Arial, sans-serif",
       }}
     >
-      {/* ── Foto circular do aluno ── */}
+      {/* Background: imagem real (imprime corretamente) */}
+      <img
+        src="/Carteirinha.png"
+        alt=""
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'fill',
+          display: 'block',
+          zIndex: 0,
+        }}
+      />
+
+      {/* Foto circular do aluno — posição em % */}
       <div
         style={{
           position: 'absolute',
-          top: `${photoTop}px`,
-          left: `${photoLeft}px`,
-          width: `${photoSize}px`,
-          height: `${photoSize}px`,
+          zIndex: 1,
+          top: '27%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '52%',
+          aspectRatio: '1',
           borderRadius: '50%',
           overflow: 'hidden',
-          // Sem borda própria — o círculo cinza/branco da imagem já faz a borda
         }}
       >
         <img
@@ -82,83 +80,72 @@ const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
             display: 'block',
             filter: hasImageRights ? 'none' : 'grayscale(100%) opacity(0.5)',
           }}
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = DEFAULT_STUDENT_PHOTO_URL;
-          }}
+          onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_STUDENT_PHOTO_URL; }}
         />
       </div>
 
-      {/* ── Nome do aluno ── */}
+      {/* Nome do aluno */}
       <div
         style={{
           position: 'absolute',
-          top: `${nameTop}px`,
-          left: '36px',
-          right: '36px',
+          zIndex: 2,
+          top: '74%',
+          left: '17%',
+          right: '17%',
           textAlign: 'center',
-          padding: '0',
         }}
       >
-        <span
-          style={{
-            fontSize: '12px',
-            fontWeight: 900,
-            color: '#1a3a7a',
-            textTransform: 'uppercase',
-            lineHeight: 1.1,
-            display: 'block',
-            letterSpacing: '0.01em',
-            wordBreak: 'break-word',
-          }}
-        >
+        <span style={{
+          fontSize: '11px',
+          fontWeight: 900,
+          color: '#1a3a7a',
+          textTransform: 'uppercase',
+          lineHeight: 1.15,
+          display: 'block',
+          wordBreak: 'break-word',
+        }}>
           {student.name}
         </span>
       </div>
 
-      {/* ── Turma ── */}
+      {/* Turma (ANO/TURMA) */}
       <div
         style={{
           position: 'absolute',
-          top: `${gradeTop}px`,
-          left: '20px',
-          right: '20px',
+          zIndex: 2,
+          top: '84%',
+          left: '10%',
+          right: '10%',
           textAlign: 'center',
-          padding: '0',
         }}
       >
-        <span
-          style={{
-            fontSize: '13px',
-            fontWeight: 700,
-            color: '#1a3a7a',
-            display: 'block',
-            letterSpacing: '0.02em',
-          }}
-        >
+        <span style={{
+          fontSize: '12px',
+          fontWeight: 700,
+          color: '#1a3a7a',
+          display: 'block',
+        }}>
           {student.grade}
         </span>
       </div>
 
-      {/* ── Ano Letivo ── */}
+      {/* Ano Letivo */}
       <div
         style={{
           position: 'absolute',
-          top: `${anoTop}px`,
+          zIndex: 2,
+          top: '91%',
           left: 0,
           right: 0,
           textAlign: 'center',
-          padding: '0 10px',
         }}
       >
-        <span
-          style={{
-            fontSize: '11px',
-            fontWeight: 600,
-            color: '#3b6ab5',
-            display: 'block',
-            letterSpacing: '0.02em',
-          }}
-        >
+        <span style={{
+          fontSize: '9px',
+          fontWeight: 600,
+          color: '#3b6ab5',
+          display: 'block',
+        }}>
           Ano Letivo {ANO_LETIVO}
         </span>
       </div>
@@ -169,21 +156,11 @@ const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
 const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onToggleRole }) => {
   const { grade } = useParams<{ grade: string }>();
   const navigate = useNavigate();
-  const printRef = useRef<HTMLDivElement>(null);
-
   const isAll = grade === 'Todos';
 
   const filteredStudents = students
-    .filter(s => {
-      const matchesGrade = isAll || s.grade === grade;
-      const isAtivo = (s.studentStatus || '').toLowerCase() === 'ativo';
-      return matchesGrade && isAtivo;
-    })
+    .filter(s => (isAll || s.grade === grade) && (s.studentStatus || '').toLowerCase() === 'ativo')
     .sort((a, b) => a.name.localeCompare(b.name));
-
-  const handlePrint = () => {
-    window.print();
-  };
 
   const displayGrade = isAll ? 'TODAS AS TURMAS' : grade;
 
@@ -196,61 +173,66 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
 
   return (
     <>
-      {/* Estilos de impressão — A4, 3 colunas x 3 linhas, 5,5cm x 8,5cm por carteirinha */}
       <style>{`
         @media print {
-          body * { visibility: hidden !important; }
-          #carteirinha-print-area, #carteirinha-print-area * { visibility: visible !important; }
+          /* Esconde tudo exceto a área de impressão */
+          body > * { display: none !important; }
+          #carteirinha-print-root { display: block !important; }
 
-          #carteirinha-print-area {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 210mm !important;
-            min-height: 297mm !important;
-            padding: 8mm 9.5mm !important;
-            background: white !important;
+          #carteirinha-print-root {
+            position: fixed;
+            inset: 0;
+            background: white;
+            padding: 8mm 9mm;
+            box-sizing: border-box;
+          }
+
+          /* Grid: 3 colunas × 3 linhas, cada célula 55mm × 85mm */
+          #carteirinha-grid {
             display: grid !important;
             grid-template-columns: repeat(3, 55mm) !important;
             gap: 5mm 6mm !important;
             align-content: start !important;
-            justify-content: start !important;
-            box-sizing: border-box !important;
           }
 
+          /* Cada card imprime em 55mm × 85mm */
           .carteirinha-card {
-            /* Tamanho real na folha: 5,5cm x 8,5cm */
             width: 55mm !important;
             height: 85mm !important;
             margin: 0 !important;
-            flex-shrink: 0 !important;
             box-shadow: none !important;
-            border-radius: 3.5mm !important;
+            border-radius: 3mm !important;
             overflow: hidden !important;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
-            /* O card em tela é 240px. 55mm a 96dpi ≈ 208px.
-               Fator de escala: 208/240 ≈ 0.867
-               Mas usamos transform + origin para escalar todos os
-               elementos internos (foto, textos) proporcionalmente. */
-            transform: scale(0.867) !important;
-            transform-origin: top left !important;
             position: relative !important;
           }
 
-          @page {
-            size: A4 portrait;
-            margin: 0;
+          /* Garante que imagens de fundo (img tag) imprimem */
+          .carteirinha-card img {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
+
+          @page { size: A4 portrait; margin: 0; }
+        }
+
+        /* Esconde o root de impressão na tela */
+        @media screen {
+          #carteirinha-print-root { display: none; }
         }
       `}</style>
 
-      <Layout
-        title={headerTitle}
-        user={user}
-        onToggleRole={onToggleRole}
-        onBack={() => navigate('/carteirinhas')}
-      >
+      {/* Área exclusiva para impressão (invisível na tela) */}
+      <div id="carteirinha-print-root">
+        <div id="carteirinha-grid">
+          {filteredStudents.map((student) => (
+            <CarteirinhaCard key={student.id} student={student} />
+          ))}
+        </div>
+      </div>
+
+      <Layout title={headerTitle} user={user} onToggleRole={onToggleRole} onBack={() => navigate('/carteirinhas')}>
         <div className="p-4 sm:p-6 max-w-[1920px] mx-auto w-full">
 
           {/* Cabeçalho + botão imprimir */}
@@ -262,7 +244,7 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
               <p className="text-gray-400 text-sm font-medium">Carteirinhas — Ano Letivo {ANO_LETIVO}</p>
             </div>
             <button
-              onClick={handlePrint}
+              onClick={() => window.print()}
               className="flex items-center gap-3 bg-[#3b5998] text-white px-6 py-3 rounded-2xl font-black text-sm uppercase tracking-widest shadow-md hover:bg-blue-700 active:scale-95 transition-all border-b-4 border-blue-900"
             >
               <Printer size={20} />
@@ -270,28 +252,16 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
             </button>
           </div>
 
-          {/* Grade de carteirinhas */}
+          {/* Preview na tela */}
           {filteredStudents.length > 0 ? (
-            <div
-              id="carteirinha-print-area"
-              ref={printRef}
-              style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '12px',
-                justifyContent: 'flex-start',
-                alignItems: 'flex-start',
-              }}
-            >
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
               {filteredStudents.map((student) => (
                 <CarteirinhaCard key={student.id} student={student} />
               ))}
             </div>
           ) : (
             <div className="text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-100">
-              <p className="text-gray-400 font-bold uppercase tracking-widest text-sm">
-                Nenhum aluno ativo encontrado para esta turma
-              </p>
+              <p className="text-gray-400 font-bold uppercase tracking-widest text-sm">Nenhum aluno ativo encontrado</p>
             </div>
           )}
         </div>
