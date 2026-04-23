@@ -3,7 +3,7 @@ import React, { useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Student, AuthUser } from '../types';
-import { Printer, ArrowLeft } from 'lucide-react';
+import { Printer } from 'lucide-react';
 import { NO_IMAGE_RIGHTS_URL, DEFAULT_STUDENT_PHOTO_URL } from '../constants';
 
 interface CarteirinhaPageProps {
@@ -12,9 +12,12 @@ interface CarteirinhaPageProps {
   onToggleRole: () => void;
 }
 
-// Escola fixa
-const SCHOOL_NAME = 'TARSILA DO AMARAL - DRE BT';
 const ANO_LETIVO = '2026';
+
+// A imagem Carteirinha.png tem proporção aproximada de 507x1070 (ratio ~0.474)
+// Usamos uma largura fixa de 240px → altura = 240 / 0.474 ≈ 506px
+const CARD_WIDTH = 240;
+const CARD_HEIGHT = Math.round(CARD_WIDTH / 0.474); // ~506px
 
 const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
   const hasImageRights = student.imageRightsSigned !== 'Não';
@@ -22,191 +25,143 @@ const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
     ? (student.photoUrl || DEFAULT_STUDENT_PHOTO_URL)
     : NO_IMAGE_RIGHTS_URL;
 
+  // Tamanho da foto circular — ~44% da largura do card
+  const photoSize = Math.round(CARD_WIDTH * 0.44); // ~106px
+  // Posição da foto: centrada horizontalmente, topo em ~28% da altura
+  const photoTop = Math.round(CARD_HEIGHT * 0.28);   // ~142px
+  const photoLeft = Math.round((CARD_WIDTH - photoSize) / 2); // centralizado
+
+  // Posições dos textos (em px a partir do topo)
+  const nameTop = Math.round(CARD_HEIGHT * 0.725);   // ~367px  — "ANA COSTA"
+  const gradeTop = Math.round(CARD_HEIGHT * 0.825);  // ~417px  — "Turma: 4º Ano B"
+  const anoTop = Math.round(CARD_HEIGHT * 0.895);    // ~453px  — Ano letivo
+
   return (
     <div
       className="carteirinha-card"
       style={{
-        width: '230px',
-        minHeight: '340px',
-        borderRadius: '18px',
-        overflow: 'hidden',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
-        display: 'flex',
-        flexDirection: 'column',
-        fontFamily: "'Segoe UI', Arial, sans-serif",
+        position: 'relative',
+        width: `${CARD_WIDTH}px`,
+        height: `${CARD_HEIGHT}px`,
+        flexShrink: 0,
         pageBreakInside: 'avoid',
         breakInside: 'avoid',
         margin: '8px',
-        flexShrink: 0,
+        // Imagem de fundo = a carteirinha PNG
+        backgroundImage: 'url(/Carteirinha.png)',
+        backgroundSize: '100% 100%',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+        borderRadius: '18px',
+        overflow: 'hidden',
+        boxShadow: '0 6px 24px rgba(0,0,0,0.18)',
+        fontFamily: "'Arial Black', 'Segoe UI', Arial, sans-serif",
       }}
     >
-      {/* Top mosaic area */}
+      {/* ── Foto circular do aluno ── */}
       <div
         style={{
-          position: 'relative',
-          background: 'linear-gradient(135deg, #1a4fa0 0%, #1e6fb5 25%, #2196a0 40%, #4caf7a 60%, #f5c842 80%, #1a4fa0 100%)',
-          padding: '16px 12px 0px 12px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          minHeight: '210px',
-        }}
-      >
-        {/* Mosaic tile overlay (CSS grid pattern) */}
-        <MosaicOverlay />
-
-        {/* Bird decoration (top right) */}
-        <div style={{
-          position: 'absolute', top: '8px', right: '10px', zIndex: 2,
-          fontSize: '22px', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.4))'
-        }}>
-          🦜
-        </div>
-
-        {/* School name at top */}
-        <div style={{
-          zIndex: 2,
-          textAlign: 'center',
-          width: '100%',
-          marginBottom: '10px',
-        }}>
-          <span style={{
-            display: 'block',
-            fontSize: '10px',
-            fontWeight: 900,
-            color: '#fff',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            textShadow: '0 1px 4px rgba(0,0,0,0.5)',
-            lineHeight: 1.3,
-          }}>
-            {SCHOOL_NAME}
-          </span>
-        </div>
-
-        {/* Circular photo */}
-        <div style={{
-          zIndex: 2,
-          width: '120px',
-          height: '120px',
+          position: 'absolute',
+          top: `${photoTop}px`,
+          left: `${photoLeft}px`,
+          width: `${photoSize}px`,
+          height: `${photoSize}px`,
           borderRadius: '50%',
           overflow: 'hidden',
-          border: '5px solid #fff',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
-          background: '#e0e8f0',
-          marginBottom: '12px',
-          flexShrink: 0,
-        }}>
-          <img
-            src={photoUrl}
-            alt={student.name}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              display: 'block',
-              filter: hasImageRights ? 'none' : 'grayscale(100%) opacity(0.6)',
-            }}
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = DEFAULT_STUDENT_PHOTO_URL;
-            }}
-          />
-        </div>
+          // Sem borda própria — o círculo cinza/branco da imagem já faz a borda
+        }}
+      >
+        <img
+          src={photoUrl}
+          alt={student.name}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'center top',
+            display: 'block',
+            filter: hasImageRights ? 'none' : 'grayscale(100%) opacity(0.5)',
+          }}
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = DEFAULT_STUDENT_PHOTO_URL;
+          }}
+        />
       </div>
 
-      {/* Bottom info area */}
-      <div style={{
-        background: '#f5f0e0',
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '16px 10px 14px 10px',
-        gap: '4px',
-      }}>
-        {/* Student Name */}
-        <span style={{
-          fontSize: '17px',
-          fontWeight: 900,
-          color: '#1a3a7a',
-          textTransform: 'uppercase',
+      {/* ── Nome do aluno ── */}
+      <div
+        style={{
+          position: 'absolute',
+          top: `${nameTop}px`,
+          left: 0,
+          right: 0,
           textAlign: 'center',
-          lineHeight: 1.15,
-          letterSpacing: '0.01em',
-          wordBreak: 'break-word',
-        }}>
+          padding: '0 10px',
+        }}
+      >
+        <span
+          style={{
+            fontSize: '15px',
+            fontWeight: 900,
+            color: '#1a3a7a',
+            textTransform: 'uppercase',
+            lineHeight: 1.1,
+            display: 'block',
+            letterSpacing: '0.01em',
+            wordBreak: 'break-word',
+          }}
+        >
           {student.name}
         </span>
+      </div>
 
-        {/* Grade/Turma */}
-        <span style={{
-          fontSize: '13px',
-          fontWeight: 700,
-          color: '#1a3a7a',
-          textTransform: 'uppercase',
+      {/* ── Turma ── */}
+      <div
+        style={{
+          position: 'absolute',
+          top: `${gradeTop}px`,
+          left: 0,
+          right: 0,
           textAlign: 'center',
-          letterSpacing: '0.03em',
-          marginTop: '2px',
-        }}>
+          padding: '0 10px',
+        }}
+      >
+        <span
+          style={{
+            fontSize: '13px',
+            fontWeight: 700,
+            color: '#1a3a7a',
+            display: 'block',
+            letterSpacing: '0.02em',
+          }}
+        >
           Turma: {student.grade}
         </span>
+      </div>
 
-        {/* Ano letivo */}
-        <span style={{
-          fontSize: '12px',
-          fontWeight: 600,
-          color: '#3b6ab5',
+      {/* ── Ano Letivo ── */}
+      <div
+        style={{
+          position: 'absolute',
+          top: `${anoTop}px`,
+          left: 0,
+          right: 0,
           textAlign: 'center',
-          letterSpacing: '0.02em',
-          marginTop: '1px',
-        }}>
+          padding: '0 10px',
+        }}
+      >
+        <span
+          style={{
+            fontSize: '11px',
+            fontWeight: 600,
+            color: '#3b6ab5',
+            display: 'block',
+            letterSpacing: '0.02em',
+          }}
+        >
           Ano Letivo {ANO_LETIVO}
         </span>
       </div>
-    </div>
-  );
-};
-
-// Mosaic tile overlay using a CSS pattern
-const MosaicOverlay: React.FC = () => {
-  const TILE_COLORS = [
-    '#1565c0', '#1976d2', '#0288d1', '#0097a7', '#00897b',
-    '#43a047', '#7cb342', '#f9a825', '#f57f17', '#1e88e5',
-    '#26a69a', '#66bb6a', '#fdd835', '#039be5', '#00acc1',
-    '#2e7d32', '#1b5e20', '#0d47a1', '#01579b', '#006064',
-  ];
-  const tiles: React.ReactNode[] = [];
-  const rows = 8;
-  const cols = 10;
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const idx = (r * cols + c + r * 3) % TILE_COLORS.length;
-      tiles.push(
-        <div
-          key={`${r}-${c}`}
-          style={{
-            background: TILE_COLORS[idx],
-            borderRadius: '2px',
-            opacity: 0.55,
-          }}
-        />
-      );
-    }
-  }
-  return (
-    <div style={{
-      position: 'absolute',
-      inset: 0,
-      display: 'grid',
-      gridTemplateColumns: `repeat(${10}, 1fr)`,
-      gridTemplateRows: `repeat(${rows}, 1fr)`,
-      gap: '2px',
-      padding: '2px',
-      zIndex: 1,
-      pointerEvents: 'none',
-    }}>
-      {tiles}
     </div>
   );
 };
@@ -241,7 +196,7 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
 
   return (
     <>
-      {/* Print-only styles */}
+      {/* Estilos de impressão */}
       <style>{`
         @media print {
           body * { visibility: hidden !important; }
@@ -252,8 +207,8 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
             background: white !important;
             display: flex !important;
             flex-wrap: wrap !important;
-            gap: 12px !important;
-            padding: 16px !important;
+            gap: 10px !important;
+            padding: 10mm !important;
             align-content: flex-start !important;
             justify-content: flex-start !important;
           }
@@ -261,7 +216,7 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
             page-break-inside: avoid !important;
             break-inside: avoid !important;
           }
-          @page { margin: 10mm; size: A4; }
+          @page { margin: 0; size: A4; }
         }
       `}</style>
 
@@ -273,7 +228,7 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
       >
         <div className="p-4 sm:p-6 max-w-[1920px] mx-auto w-full">
 
-          {/* Header Actions */}
+          {/* Cabeçalho + botão imprimir */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
             <div>
               <h2 className="text-[#3b5998] font-black text-lg uppercase tracking-widest">
@@ -290,7 +245,7 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
             </button>
           </div>
 
-          {/* Cards */}
+          {/* Grade de carteirinhas */}
           {filteredStudents.length > 0 ? (
             <div
               id="carteirinha-print-area"
@@ -298,8 +253,9 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
               style={{
                 display: 'flex',
                 flexWrap: 'wrap',
-                gap: '16px',
+                gap: '12px',
                 justifyContent: 'flex-start',
+                alignItems: 'flex-start',
               }}
             >
               {filteredStudents.map((student) => (
@@ -308,7 +264,9 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
             </div>
           ) : (
             <div className="text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-100">
-              <p className="text-gray-400 font-bold uppercase tracking-widest text-sm">Nenhum aluno ativo encontrado para esta turma</p>
+              <p className="text-gray-400 font-bold uppercase tracking-widest text-sm">
+                Nenhum aluno ativo encontrado para esta turma
+              </p>
             </div>
           )}
         </div>
