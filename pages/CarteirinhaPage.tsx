@@ -39,129 +39,130 @@ const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
   const anoTop = Math.round(CARD_HEIGHT * 0.935);    // ~328px  — Ano letivo
 
   return (
-    <div
-      className="carteirinha-card"
-      style={{
-        position: 'relative',
-        width: `${CARD_WIDTH}px`,
-        height: `${CARD_HEIGHT}px`,
-        flexShrink: 0,
-        pageBreakInside: 'avoid',
-        breakInside: 'avoid',
-        margin: '8px',
-        backgroundImage: 'url(/Carteirinha.png)',
-        backgroundSize: '100% 100%',
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'center',
-        borderRadius: '18px',
-        overflow: 'hidden',
-        boxShadow: '0 6px 24px rgba(0,0,0,0.18)',
-        fontFamily: "'Arial Black', 'Segoe UI', Arial, sans-serif",
-      }}
-    >
-      {/* ── Foto circular do aluno ── */}
+    <div style={{ margin: '8px', flexShrink: 0, pageBreakInside: 'avoid', breakInside: 'avoid' }}>
       <div
+        className="carteirinha-card-inner"
         style={{
-          position: 'absolute',
-          top: `${photoTop}px`,
-          left: `${photoLeft}px`,
-          width: `${photoSize}px`,
-          height: `${photoSize}px`,
-          borderRadius: '50%',
+          position: 'relative',
+          width: `${CARD_WIDTH}px`,
+          height: `${CARD_HEIGHT}px`,
+          minWidth: `${CARD_WIDTH}px`,
+          minHeight: `${CARD_HEIGHT}px`,
+          backgroundImage: 'url(/Carteirinha.png)',
+          backgroundSize: '100% 100%',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center',
+          borderRadius: '18px',
           overflow: 'hidden',
+          boxShadow: '0 6px 24px rgba(0,0,0,0.18)',
+          fontFamily: "'Arial Black', 'Segoe UI', Arial, sans-serif",
+          backgroundColor: '#ffffff'
         }}
       >
-        <img
-          src={photoUrl}
-          alt={student.name}
+        {/* ── Foto circular do aluno ── */}
+        <div
           style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            objectPosition: 'center 20%',
-            display: 'block',
-            filter: hasImageRights ? 'none' : 'grayscale(100%) opacity(0.5)',
-          }}
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = DEFAULT_STUDENT_PHOTO_URL;
-          }}
-        />
-      </div>
-
-      {/* ── Nome do aluno ── */}
-      <div
-        style={{
-          position: 'absolute',
-          top: `${nameTop}px`,
-          left: '36px',
-          right: '36px',
-          textAlign: 'center',
-          padding: '0',
-        }}
-      >
-        <span
-          style={{
-            fontSize: '12px',
-            fontWeight: 900,
-            color: '#1a3a7a',
-            textTransform: 'uppercase',
-            lineHeight: 1.1,
-            display: 'block',
-            letterSpacing: '0.01em',
-            wordBreak: 'break-word',
+            position: 'absolute',
+            top: `${photoTop}px`,
+            left: `${photoLeft}px`,
+            width: `${photoSize}px`,
+            height: `${photoSize}px`,
+            borderRadius: '50%',
+            overflow: 'hidden',
           }}
         >
-          {student.name}
-        </span>
-      </div>
+          <img
+            src={photoUrl}
+            alt={student.name}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center 20%',
+              display: 'block',
+              filter: hasImageRights ? 'none' : 'grayscale(100%) opacity(0.5)',
+            }}
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = DEFAULT_STUDENT_PHOTO_URL;
+            }}
+          />
+        </div>
 
-      {/* ── Turma ── */}
-      <div
-        style={{
-          position: 'absolute',
-          top: `${gradeTop}px`,
-          left: '20px',
-          right: '20px',
-          textAlign: 'center',
-          padding: '0',
-        }}
-      >
-        <span
+        {/* ── Nome do aluno ── */}
+        <div
           style={{
-            fontSize: '13px',
-            fontWeight: 900,
-            color: '#1a3a7a',
-            display: 'block',
-            letterSpacing: '0.02em',
+            position: 'absolute',
+            top: `${nameTop}px`,
+            left: '36px',
+            right: '36px',
+            textAlign: 'center',
+            padding: '0',
           }}
         >
-          {student.grade}
-        </span>
-      </div>
+          <span
+            style={{
+              fontSize: '12px',
+              fontWeight: 900,
+              color: '#1a3a7a',
+              textTransform: 'uppercase',
+              lineHeight: 1.1,
+              display: 'block',
+              letterSpacing: '0.01em',
+              wordBreak: 'break-word',
+            }}
+          >
+            {student.name}
+          </span>
+        </div>
 
-      {/* ── Ano Letivo ── */}
-      <div
-        style={{
-          position: 'absolute',
-          top: `${anoTop}px`,
-          left: 0,
-          right: 0,
-          textAlign: 'center',
-          padding: '0 10px',
-        }}
-      >
-        <span
+        {/* ── Turma ── */}
+        <div
           style={{
-            fontSize: '13px',
-            fontWeight: 900,
-            color: '#FFFFFF',
-            display: 'block',
-            letterSpacing: '0.05em',
-            textShadow: '0px 1px 4px rgba(0,0,0,0.5)'
+            position: 'absolute',
+            top: `${gradeTop}px`,
+            left: '20px',
+            right: '20px',
+            textAlign: 'center',
+            padding: '0',
           }}
         >
-          {ANO_LETIVO}
-        </span>
+          <span
+            style={{
+              fontSize: '13px',
+              fontWeight: 900,
+              color: '#1a3a7a',
+              display: 'block',
+              letterSpacing: '0.02em',
+            }}
+          >
+            {student.grade}
+          </span>
+        </div>
+
+        {/* ── Ano Letivo ── */}
+        <div
+          style={{
+            position: 'absolute',
+            top: `${anoTop}px`,
+            left: 0,
+            right: 0,
+            textAlign: 'center',
+            padding: '0 10px',
+          }}
+        >
+          <span
+            style={{
+              fontSize: '13px',
+              fontWeight: 900,
+              color: '#FFFFFF',
+              display: 'block',
+              letterSpacing: '0.05em',
+              textShadow: '0px 1px 4px rgba(0,0,0,0.5)'
+            }}
+          >
+            {ANO_LETIVO}
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -191,7 +192,8 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
     setGenerating(true);
 
     try {
-      const cards = printRef.current.querySelectorAll<HTMLElement>('.carteirinha-card');
+      // Pega os cards internos (sem margem) para capturar o tamanho exato
+      const cards = printRef.current.querySelectorAll<HTMLElement>('.carteirinha-card-inner');
       if (cards.length === 0) return;
 
       // A4 em mm
@@ -222,12 +224,14 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
         const x = PAD_X_MM + col * (CARD_W_MM + GAP_X_MM);
         const y = PAD_Y_MM + row * (CARD_H_MM + GAP_Y_MM);
 
-        // Renderiza o card como imagem de alta resolução
+        // Renderiza o card como imagem
         const canvas = await html2canvas(cards[i], {
-          scale: 3,           // 3x para nitidez
-          useCORS: true,       // permite imagens de outros domínios
+          scale: 2,           // 2x é suficiente para nitidez em ~55mm, evita bugs de memória no iOS
+          width: CARD_WIDTH,  // Força as dimensões exatas para evitar distorções
+          height: CARD_HEIGHT,
+          useCORS: true,      // permite imagens de outros domínios
           allowTaint: true,
-          backgroundColor: null,
+          backgroundColor: '#ffffff', // Fundo branco evita os cantos pretos nas quinas arredondadas
           logging: false,
         });
 
