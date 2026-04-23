@@ -30,24 +30,22 @@ const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
   // Tamanho da foto circular — ~59% da largura do card
   const photoSize = Math.round(CARD_WIDTH * 0.59); // ~142px
   // Posição da foto: centrada horizontalmente
-  const photoTop = Math.round(CARD_HEIGHT * 0.225);   // Descendo para alinhar perfeitamente com o círculo branco do mosaico
+  const photoTop = Math.round(CARD_HEIGHT * 0.180);   // Voltando para a posição correta
   const photoLeft = Math.round((CARD_WIDTH - photoSize) / 2); // centralizado
 
   // Posições dos textos (em px a partir do topo)
-  const nameTop = Math.round(CARD_HEIGHT * 0.810);   // Descendo para não sobrepor DRE BT
-  const gradeTop = Math.round(CARD_HEIGHT * 0.885);  // Descendo para manter o espaçamento
-  const anoTop = Math.round(CARD_HEIGHT * 0.965);    // Descendo para ficar próximo da borda inferior
+  const nameTop = Math.round(CARD_HEIGHT * 0.765);   // Voltando para a posição correta
+  const gradeTop = Math.round(CARD_HEIGHT * 0.840);  // Voltando para a posição correta
+  const anoTop = Math.round(CARD_HEIGHT * 0.935);    // Voltando para a posição correta
 
   return (
-    <div style={{ margin: '8px', flexShrink: 0, pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+    <div className="carteirinha-wrapper" style={{ margin: '8px', flexShrink: 0, pageBreakInside: 'avoid', breakInside: 'avoid' }}>
       <div
-        className="carteirinha-card-inner"
+        className="carteirinha-card"
         style={{
           position: 'relative',
           width: `${CARD_WIDTH}px`,
           height: `${CARD_HEIGHT}px`,
-          minWidth: `${CARD_WIDTH}px`,
-          minHeight: `${CARD_HEIGHT}px`,
           backgroundImage: 'url(/Carteirinha.png)',
           backgroundSize: '100% 100%',
           backgroundRepeat: 'no-repeat',
@@ -192,8 +190,8 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
     setGenerating(true);
 
     try {
-      // Pega os cards internos (sem margem) para capturar o tamanho exato
-      const cards = printRef.current.querySelectorAll<HTMLElement>('.carteirinha-card-inner');
+      // Pega os cards para capturar o tamanho exato
+      const cards = printRef.current.querySelectorAll<HTMLElement>('.carteirinha-card');
       if (cards.length === 0) return;
 
       // A4 em mm
@@ -283,19 +281,26 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
             box-sizing: border-box !important;
           }
 
-          .carteirinha-card {
+          .carteirinha-wrapper {
             width: 55mm !important;
             height: 80.5mm !important;
             margin: 0 !important;
-            flex-shrink: 0 !important;
-            box-shadow: none !important;
-            border-radius: 3.5mm !important;
-            overflow: hidden !important;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
-            transform: scale(0.867) !important;
-            transform-origin: top left !important;
             position: relative !important;
+          }
+
+          .carteirinha-card {
+            width: 240px !important;
+            height: 351px !important;
+            transform: scale(0.866) !important;
+            transform-origin: top left !important;
+            box-shadow: none !important;
+            border-radius: 3.5mm !important;
+            margin: 0 !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
           }
 
           @page {
