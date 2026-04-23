@@ -27,12 +27,12 @@ const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
 
   // Tamanho da foto circular — ~59% da largura do card (maior)
   const photoSize = Math.round(CARD_WIDTH * 0.59); // ~142px
-  // Posição da foto: centrada horizontalmente, topo em ~35% da altura
-  const photoTop = Math.round(CARD_HEIGHT * 0.35);   // ~177px
+  // Posição da foto: centrada horizontalmente, topo em ~32% da altura (subido)
+  const photoTop = Math.round(CARD_HEIGHT * 0.32);   // ~162px
   const photoLeft = Math.round((CARD_WIDTH - photoSize) / 2); // centralizado
 
   // Posições dos textos (em px a partir do topo)
-  const nameTop = Math.round(CARD_HEIGHT * 0.720);   // ~364px  — nome (subido para dar espaço)
+  const nameTop = Math.round(CARD_HEIGHT * 0.745);   // ~377px  — nome (descido para distanciar do DO AMARAL)
   const gradeTop = Math.round(CARD_HEIGHT * 0.800);  // ~404px  — ANO/TURMA (posição mantida)
   const anoTop = Math.round(CARD_HEIGHT * 0.860);    // ~435px  — Ano letivo (posição mantida)
 
@@ -93,8 +93,8 @@ const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
         style={{
           position: 'absolute',
           top: `${nameTop}px`,
-          left: '26px',
-          right: '26px',
+          left: '36px',
+          right: '36px',
           textAlign: 'center',
           padding: '0',
         }}
