@@ -29,14 +29,14 @@ const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
 
   // Tamanho da foto circular — ~59% da largura do card
   const photoSize = Math.round(CARD_WIDTH * 0.59); // ~142px
-  // Posição da foto: centrada horizontalmente, nova posição calculada após recorte
-  const photoTop = Math.round(CARD_HEIGHT * 0.180);   // ~63px (subido)
+  // Posição da foto: centrada horizontalmente
+  const photoTop = Math.round(CARD_HEIGHT * 0.225);   // Descendo para alinhar perfeitamente com o círculo branco do mosaico
   const photoLeft = Math.round((CARD_WIDTH - photoSize) / 2); // centralizado
 
   // Posições dos textos (em px a partir do topo)
-  const nameTop = Math.round(CARD_HEIGHT * 0.765);   // ~268px  — nome (subido)
-  const gradeTop = Math.round(CARD_HEIGHT * 0.840);  // ~295px  — ANO/TURMA (subido)
-  const anoTop = Math.round(CARD_HEIGHT * 0.935);    // ~328px  — Ano letivo
+  const nameTop = Math.round(CARD_HEIGHT * 0.810);   // Descendo para não sobrepor DRE BT
+  const gradeTop = Math.round(CARD_HEIGHT * 0.885);  // Descendo para manter o espaçamento
+  const anoTop = Math.round(CARD_HEIGHT * 0.965);    // Descendo para ficar próximo da borda inferior
 
   return (
     <div style={{ margin: '8px', flexShrink: 0, pageBreakInside: 'avoid', breakInside: 'avoid' }}>
@@ -226,9 +226,7 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
 
         // Renderiza o card como imagem
         const canvas = await html2canvas(cards[i], {
-          scale: 2,           // 2x é suficiente para nitidez em ~55mm, evita bugs de memória no iOS
-          width: CARD_WIDTH,  // Força as dimensões exatas para evitar distorções
-          height: CARD_HEIGHT,
+          scale: 3,           // 3x para máxima nitidez (resolve o achatamento ao não forçar dimensões estritas)
           useCORS: true,      // permite imagens de outros domínios
           allowTaint: true,
           backgroundColor: '#ffffff', // Fundo branco evita os cantos pretos nas quinas arredondadas
