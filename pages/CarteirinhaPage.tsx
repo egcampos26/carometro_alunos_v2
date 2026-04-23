@@ -1,10 +1,12 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Student, AuthUser } from '../types';
-import { Printer } from 'lucide-react';
+import { Printer, Loader2 } from 'lucide-react';
 import { NO_IMAGE_RIGHTS_URL, DEFAULT_STUDENT_PHOTO_URL } from '../constants';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 interface CarteirinhaPageProps {
   students: Student[];
@@ -168,6 +170,7 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
   const { grade } = useParams<{ grade: string }>();
   const navigate = useNavigate();
   const printRef = useRef<HTMLDivElement>(null);
+  const [generating, setGenerating] = useState(false);
 
   const isAll = grade === 'Todos';
 
@@ -180,6 +183,66 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
     .sort((a, b) => a.name.localeCompare(b.name));
 
   const displayGrade = isAll ? 'TODAS AS TURMAS' : grade;
+
+  // Gera PDF com 3 colunas × 3 linhas de carteirinhas por página A4
+  const generatePDF = async () => {
+    if (!printRef.current) return;
+    setGenerating(true);
+
+    try {
+      const cards = printRef.current.querySelectorAll<HTMLElement>('.carteirinha-card');
+      if (cards.length === 0) return;
+
+      // A4 em mm
+      const PAGE_W_MM = 210;
+      const PAGE_H_MM = 297;
+      const CARD_W_MM = 55;
+      const CARD_H_MM = 85;
+      const COLS = 3;
+      const ROWS = 3;
+      const CARDS_PER_PAGE = COLS * ROWS;
+      const GAP_X_MM = 6;
+      const GAP_Y_MM = 5;
+      const PAD_X_MM = (PAGE_W_MM - COLS * CARD_W_MM - (COLS - 1) * GAP_X_MM) / 2; // centraliza
+      const PAD_Y_MM = 8;
+
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      let pageIndex = 0;
+
+      for (let i = 0; i < cards.length; i++) {
+        const posInPage = i % CARDS_PER_PAGE;
+        if (posInPage === 0 && i > 0) {
+          pdf.addPage();
+          pageIndex++;
+        }
+
+        const col = posInPage % COLS;
+        const row = Math.floor(posInPage / COLS);
+        const x = PAD_X_MM + col * (CARD_W_MM + GAP_X_MM);
+        const y = PAD_Y_MM + row * (CARD_H_MM + GAP_Y_MM);
+
+        // Renderiza o card como imagem de alta resolução
+        const canvas = await html2canvas(cards[i], {
+          scale: 3,           // 3x para nitidez
+          useCORS: true,       // permite imagens de outros domínios
+          allowTaint: true,
+          backgroundColor: null,
+          logging: false,
+        });
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.92);
+        pdf.addImage(imgData, 'JPEG', x, y, CARD_W_MM, CARD_H_MM);
+      }
+
+      const turmaLabel = isAll ? 'Todas_as_Turmas' : (grade || 'Turma').replace(/[°\s]/g, '');
+      pdf.save(`Carteirinhas_${turmaLabel}_${ANO_LETIVO}.pdf`);
+    } catch (err) {
+      console.error('Erro ao gerar PDF:', err);
+      alert('Erro ao gerar o PDF. Tente novamente.');
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   const headerTitle = (
     <div className="flex flex-col items-center leading-none px-1">
@@ -251,11 +314,25 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
               <p className="text-gray-400 text-sm font-medium">Carteirinhas — Ano Letivo {ANO_LETIVO}</p>
             </div>
             <button
-              onClick={() => window.print()}
-              className="flex items-center gap-3 bg-[#3b5998] text-white px-6 py-3 rounded-2xl font-black text-sm uppercase tracking-widest shadow-md hover:bg-blue-700 active:scale-95 transition-all border-b-4 border-blue-900"
+              onClick={generatePDF}
+              disabled={generating}
+              className={`flex items-center gap-3 text-white px-6 py-3 rounded-2xl font-black text-sm uppercase tracking-widest shadow-md transition-all border-b-4 ${
+                generating 
+                  ? 'bg-blue-400 border-blue-500 cursor-not-allowed' 
+                  : 'bg-[#3b5998] hover:bg-blue-700 active:scale-95 border-blue-900'
+              }`}
             >
-              <Printer size={20} />
-              Imprimir Carteirinhas
+              {generating ? (
+                <>
+                  <Loader2 size={20} className="animate-spin" />
+                  Gerando PDF...
+                </>
+              ) : (
+                <>
+                  <Printer size={20} />
+                  Imprimir Carteirinhas
+                </>
+              )}
             </button>
           </div>
 
