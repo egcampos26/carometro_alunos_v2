@@ -15,6 +15,8 @@ import OccurrenceEdit from './pages/OccurrenceEdit';
 import OccurrenceResolutionPage from './pages/OccurrenceResolution';
 import SystemLog from './pages/SystemLog';
 import StudentSync from './pages/StudentSync';
+import CarteirinhaClassSelection from './pages/CarteirinhaClassSelection';
+import CarteirinhaPage from './pages/CarteirinhaPage';
 import { Student, Occurrence, OccurrenceResolution, AuthUser, LogEntry } from './types';
 import { studentService } from './services/studentService';
 import { occurrenceService } from './services/occurrenceService';
@@ -23,6 +25,13 @@ import { logService } from './services/logService';
 import { supabase } from './services/supabase';
 import { detectStudentChanges, formatChangesForLog } from './utils/changeDetection';
 import TestModePanel from './components/TestModePanel';
+import { X, CheckCircle, AlertCircle, Info, Bell } from 'lucide-react';
+
+interface Notification {
+  id: string;
+  type: 'success' | 'error' | 'info';
+  message: string;
+}
 
 // Mapeia tipo_usuario do Portal para role interno do App
 const mapPortalRole = (tipoUsuario: string | undefined): AuthUser['role'] => {
@@ -55,6 +64,16 @@ const App: React.FC = () => {
   const [resolutions, setResolutions] = useState<OccurrenceResolution[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  const notify = (message: string, type: Notification['type'] = 'info') => {
+    const id = Date.now().toString();
+    setNotifications(prev => [...prev, { id, type, message }]);
+    setTimeout(() => {
+      setNotifications(prev => prev.filter(n => n.id !== id));
+    }, 5000);
+  };
+
 
   const [logs, setLogs] = useState<LogEntry[]>(() => {
     const saved = localStorage.getItem('carometro_logs');
@@ -254,8 +273,9 @@ const App: React.FC = () => {
       // Log action?
     } catch (error) {
       console.error('Error creating student:', error);
-      alert('Erro ao criar aluno. Verifique os dados.');
+      notify('Erro ao criar aluno. Verifique os dados.', 'error');
     }
+
   };
 
   const updateStudent = async (updatedStudent: Student) => {
@@ -282,8 +302,9 @@ const App: React.FC = () => {
       }
     } catch (err) {
       console.error('Erro ao atualizar aluno:', err);
-      alert('Erro ao salvar alterações no banco de dados.');
+      notify('Erro ao salvar alterações no banco de dados.', 'error');
     }
+
   };
 
   const handleCreateOccurrence = async (newOccurrence: Occurrence) => {
@@ -295,9 +316,25 @@ const App: React.FC = () => {
       addLog('Nova Ocorrência', `Ocorrência "${newOccurrence.title}" criada para o aluno ${studentName}.`);
     } catch (err) {
       console.error('Erro ao criar ocorrência:', err);
-      alert('Erro ao salvar ocorrência.');
+      notify('Erro ao salvar ocorrência.', 'error');
+    }
+
+  };
+
+  const handleCreateOccurrencesBatch = async (newOccurrences: Occurrence[]) => {
+    try {
+      await occurrenceService.createOccurrencesBatch(newOccurrences);
+      setOccurrences(prev => [...newOccurrences, ...prev]);
+      
+      const count = newOccurrences.length;
+      addLog('Novas Ocorrências (Lote)', `${count} ocorrências criadas simultaneamente via registro múltiplo.`);
+      notify(`${count} ocorrências registradas com sucesso!`, 'success');
+    } catch (err) {
+      console.error('Erro ao criar lote de ocorrências:', err);
+      notify('Erro ao salvar lote de ocorrências.', 'error');
     }
   };
+
 
   // ─── Handlers de Resoluções ───────────────────────────────────────────────
 
@@ -310,8 +347,10 @@ const App: React.FC = () => {
       addLog('Nova Resolução de Ocorrência', `Intervenção [${resolution.statusOcorrencia}] registrada para ${student?.name ?? 'aluno'} por ${resolution.nomeResponsavel}.`);
     } catch (err) {
       console.error('Erro ao criar resolução:', err);
+      notify('Erro ao salvar a intervenção.', 'error');
       throw err;
     }
+
   };
 
   const handleUpdateResolution = async (resolution: OccurrenceResolution) => {
@@ -368,6 +407,38 @@ const App: React.FC = () => {
     <HashRouter>
       <div className="min-h-screen bg-gray-50 flex flex-col w-full overflow-x-hidden">
         <div className="flex-1 flex flex-col w-full overflow-hidden relative">
+
+          {/* Toast Notifications */}
+          <div className="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none">
+            {notifications.map(n => (
+              <div
+                key={n.id}
+                className={`flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl border-2 animate-in slide-in-from-right-10 duration-300 pointer-events-auto min-w-[300px] max-w-md ${
+                  n.type === 'success' ? 'bg-green-50 border-green-100 text-green-800' :
+                  n.type === 'error' ? 'bg-red-50 border-red-100 text-red-800' :
+                  'bg-[#3b5998] border-blue-400 text-white'
+                }`}
+              >
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                  n.type === 'success' ? 'bg-green-500/10' :
+                  n.type === 'error' ? 'bg-red-500/10' :
+                  'bg-white/10'
+                }`}>
+                  {n.type === 'success' && <CheckCircle size={18} />}
+                  {n.type === 'error' && <AlertCircle size={18} />}
+                  {n.type === 'info' && <Bell size={18} />}
+                </div>
+                <p className="text-xs font-bold uppercase tracking-tight flex-1">{n.message}</p>
+                <button
+                  onClick={() => setNotifications(prev => prev.filter(x => x.id !== n.id))}
+                  className="p-1 hover:bg-black/5 rounded-lg transition-colors"
+                >
+                  <X size={14} className="opacity-50" />
+                </button>
+              </div>
+            ))}
+          </div>
+
 
           {/* Painel flutuante Modo Teste — visível apenas para Admin real */}
           {realUser.role === 'Admin' && (
@@ -429,6 +500,7 @@ const App: React.FC = () => {
                     onCreate={createStudent}
                     user={user}
                     onToggleRole={handleToggleRole}
+                    notify={notify}
                   />
                 )
               }
@@ -456,6 +528,7 @@ const App: React.FC = () => {
                     onUpdate={updateStudent}
                     user={user}
                     onToggleRole={handleToggleRole}
+                    notify={notify}
                   />
                 )
               }
@@ -482,6 +555,7 @@ const App: React.FC = () => {
                   onAddOccurrence={handleCreateOccurrence}
                   user={user}
                   onToggleRole={handleToggleRole}
+                  notify={notify}
                 />
               }
             />
@@ -491,12 +565,14 @@ const App: React.FC = () => {
               element={
                 <OccurrenceAddMulti
                   students={students}
-                  onAddOccurrence={handleCreateOccurrence}
+                  onAddOccurrences={handleCreateOccurrencesBatch}
                   user={user}
                   onToggleRole={handleToggleRole}
+                  notify={notify}
                 />
               }
             />
+
 
             <Route
               path="/occurrences/:id"
@@ -516,10 +592,11 @@ const App: React.FC = () => {
 
                       if (occToDelete) {
                         addLog('Exclusão de Ocorrência', `A ocorrência "${occToDelete.title}" do aluno ${studentName} foi excluída.`);
+                        notify('Ocorrência excluída com sucesso.', 'info');
                       }
                     } catch (err) {
                       console.error('Erro ao excluir ocorrência:', err);
-                      alert('Erro ao excluir ocorrência.');
+                      notify('Erro ao excluir ocorrência.', 'error');
                     }
                   }}
                 />
@@ -540,9 +617,10 @@ const App: React.FC = () => {
                       const studentName = student ? student.name : 'Aluno Desconhecido';
 
                       addLog('Edição de Ocorrência', `A ocorrência "${updated.title}" do aluno ${studentName} foi editada.`);
+                      notify('Ocorrência atualizada com sucesso.', 'success');
                     } catch (err) {
                       console.error('Erro ao atualizar ocorrência:', err);
-                      alert('Erro ao salvar alterações na ocorrência.');
+                      notify('Erro ao salvar alterações na ocorrência.', 'error');
                       throw err;
                     }
                   }}
@@ -557,15 +635,17 @@ const App: React.FC = () => {
 
                       if (occToDelete) {
                         addLog('Exclusão de Ocorrência (Edição)', `A ocorrência "${occToDelete.title}" do aluno ${studentName} foi removida.`);
+                        notify('Ocorrência excluída.', 'info');
                       }
                     } catch (err) {
                       console.error('Erro ao excluir ocorrência:', err);
-                      alert('Erro ao excluir ocorrência.');
+                      notify('Erro ao excluir ocorrência.', 'error');
                       throw err;
                     }
                   }}
                   user={user}
                   onToggleRole={handleToggleRole}
+                  notify={notify}
                 />
               }
             />
@@ -589,7 +669,7 @@ const App: React.FC = () => {
               path="/sync"
               element={
                 ['Admin', 'Manager'].includes(user.role) ? (
-                  <StudentSync user={user} onToggleRole={handleToggleRole} />
+                  <StudentSync user={user} onToggleRole={handleToggleRole} notify={notify} />
                 ) : (
                   <Navigate to="/" replace />
                 )
@@ -609,6 +689,7 @@ const App: React.FC = () => {
                     onCreateResolution={handleCreateResolution}
                     onUpdateResolution={handleUpdateResolution}
                     onDeleteResolution={handleDeleteResolution}
+                    notify={notify}
                   />
                 ) : (
                   <Navigate to="/" replace />
@@ -616,6 +697,28 @@ const App: React.FC = () => {
               }
             />
             <Route path="*" element={<Navigate to="/turnos" />} />
+
+            {/* Carteirinhas */}
+            <Route
+              path="/carteirinhas"
+              element={
+                <CarteirinhaClassSelection
+                  students={students}
+                  user={user}
+                  onToggleRole={handleToggleRole}
+                />
+              }
+            />
+            <Route
+              path="/carteirinhas/:grade"
+              element={
+                <CarteirinhaPage
+                  students={students}
+                  user={user}
+                  onToggleRole={handleToggleRole}
+                />
+              }
+            />
           </Routes>
         </div>
       </div>

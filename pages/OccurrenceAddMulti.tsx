@@ -7,12 +7,19 @@ import { supabase } from '../services/supabase';
 
 interface OccurrenceAddMultiProps {
   students: Student[];
-  onAddOccurrence: (occ: Occurrence) => void;
+  onAddOccurrences: (occ: Occurrence[]) => void;
   user: AuthUser;
   onToggleRole: () => void;
+  notify?: (message: string, type: 'success' | 'error' | 'info') => void;
 }
 
-const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAddOccurrence, user, onToggleRole }) => {
+const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ 
+  students, 
+  onAddOccurrences, 
+  user, 
+  onToggleRole,
+  notify 
+}) => {
   const navigate = useNavigate();
 
   const today = new Date().toISOString().split('T')[0];
@@ -37,13 +44,16 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
   const [novoTipo, setNovoTipo] = useState('');
 
   const [itemRelacionado, setItemRelacionado] = useState('');
-  const [customItems, setCustomItems] = useState<Record<string, string[]>>({
-    Comportamental: [], Pedagógica: [], Médica: [], Outros: []
-  });
+  const [dbItems, setDbItems] = useState<{categoria: string, item: string}[]>([]);
+  const [loadingItems, setLoadingItems] = useState(true);
+  
   const [showNovoItem, setShowNovoItem] = useState(false);
   const [novoItemText, setNovoItemText] = useState('');
+  const [savingItem, setSavingItem] = useState(false);
+  const [savingBatch, setSavingBatch] = useState(false);
 
   useEffect(() => {
+    // Carregar tipos de violência
     supabase
       .from('TIPOS_VIOLENCIAS')
       .select('descricao')
@@ -52,6 +62,21 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
       .then(({ data }) => {
         if (data) setTiposViolencia(data.map((r: any) => r.descricao));
       });
+
+    // Carregar itens de categorias do banco
+    const fetchItems = async () => {
+      setLoadingItems(true);
+      const { data, error } = await supabase
+        .from('CATEGORIAS_OCORRENCIAS')
+        .select('categoria, item')
+        .eq('ativo', true)
+        .order('item', { ascending: true });
+      
+      if (data) setDbItems(data);
+      if (error) console.error('Erro ao buscar itens:', error);
+      setLoadingItems(false);
+    };
+    fetchItems();
   }, []);
 
   const filteredStudents = studentSearch.trim() === ''
@@ -59,13 +84,12 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
     : students.filter(s =>
       s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
       s.registrationNumber.toLowerCase().includes(studentSearch.toLowerCase())
-    ).sort((a, b) => a.name.localeCompare(b.name)).slice(0, 5); // Limit suggestions to avoid clutter
+    ).sort((a, b) => a.name.localeCompare(b.name)).slice(0, 5); 
 
   const toggleStudent = (id: string) => {
     if (selectedIds.includes(id)) {
-      // Show alert instead of removing
       const student = getStudent(id);
-      alert(`⚠️ O aluno "${student?.name}" já foi incluído na lista!`);
+      notify?.(`O aluno "${student?.name}" já está na lista!`, 'info');
       setStudentSearch('');
       return;
     }
@@ -79,20 +103,23 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
 
   const getStudent = (id: string) => students.find(s => s.id === id);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedIds.length === 0 || !description || !date) return;
+    if (selectedIds.length === 0) {
+      notify?.('Selecione pelo menos um aluno.', 'info');
+      return;
+    }
+    if (!description || !date) {
+      notify?.('Preencha a descrição e a data.', 'info');
+      return;
+    }
 
-    // Gerar título dinamicamente com base na categoria e item relacionado
+    setSavingBatch(true);
     const finalTitle = itemRelacionado ? `${category} - ${itemRelacionado}` : category;
-
-    // Create a group ID to link these records
     const groupId = `group-${Date.now()}`;
 
-    // Create an occurrence for EACH selected student
-    selectedIds.forEach((studentId, index) => {
-      const newOcc: Occurrence = {
-        id: (Date.now() + index).toString(),
+    try {
+      const occurrences: Occurrence[] = selectedIds.map((studentId) => ({
         studentId,
         groupId,
         date: date,
@@ -108,12 +135,17 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
         tipoViolencia: tipoViolencia || null,
         itemRelacionado: itemRelacionado || null,
         priority
-      };
-      onAddOccurrence(newOcc);
-    });
+      }));
 
-    navigate('/occurrences', { replace: true });
+      await onAddOccurrences(occurrences);
+      navigate('/occurrences', { replace: true });
+    } catch (err) {
+      console.error('Batch error:', err);
+    } finally {
+      setSavingBatch(false);
+    }
   };
+
 
   const headerTitle = (
     <div className="flex flex-col items-center justify-center leading-tight">
@@ -267,7 +299,10 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
                 <button
                   key={cat}
                   type="button"
-                  onClick={() => setCategory(cat as any)}
+                  onClick={() => {
+                    setCategory(cat as any);
+                    setItemRelacionado('');
+                  }}
                   className={`py-3 px-2 rounded-xl text-xs font-black uppercase tracking-tight border-2 transition-all shadow-sm ${category === cat
                     ? 'bg-[#3b5998] border-[#3b5998] text-white'
                     : 'bg-white border-gray-100 text-gray-400 hover:border-gray-200'
@@ -279,71 +314,30 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
             </div>
           </div>
 
-          {/* Itens Relacionados */}
-          {(() => {
-            const ITENS_POR_CATEGORIA: Record<string, { label: string; itens: string[] }> = {
-              Comportamental: {
-                label: 'Convivência e normas da escola',
-                itens: [
-                  'Indisciplina em sala',
-                  'Conflito interpessoal',
-                  'Desrespeito a professor/funcionário',
-                  'Dano ao patrimônio',
-                  'Atraso / Saída antecipada',
-                  ...(customItems['Comportamental'] || []),
-                ],
-              },
-              'Pedagógica': {
-                label: 'Desempenho acadêmico e aprendizagem',
-                itens: [
-                  'Dificuldade de aprendizagem',
-                  'Falta de material',
-                  'Evolução positiva (Elogio)',
-                  'Não entrega de tarefas',
-                  'Abandono / Infrequência',
-                  ...(customItems['Pedagógica'] || []),
-                ],
-              },
-              'Médica': {
-                label: 'Saúde e bem-estar físico',
-                itens: [
-                  'Mal-estar súbito',
-                  'Primeiros socorros',
-                  'Administração de medicação',
-                  'Acompanhamento crônico',
-                  'Encaminhamento externo (hospital/pais)',
-                  ...(customItems['Médica'] || []),
-                ],
-              },
-              Outros: {
-                label: 'Outros motivos',
-                itens: [...(customItems['Outros'] || [])],
-              },
-            };
-
-            const grupo = ITENS_POR_CATEGORIA[category];
-            if (!grupo) return null;
-
-            return (
-              <div className="space-y-3">
-
-                <div className="flex flex-wrap gap-2">
-                  {grupo.itens.map((item) => (
+          <div className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              {loadingItems ? (
+                <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest p-2">
+                  <div className="w-4 h-4 border-2 border-[#3b5998] border-t-transparent rounded-full animate-spin" />
+                  Carregando itens...
+                </div>
+              ) : (
+                <>
+                  {dbItems.filter(i => i.categoria === category).map((item) => (
                     <button
-                      key={item}
+                      key={item.item}
                       type="button"
-                      onClick={() => setItemRelacionado(prev => prev === item ? '' : item)}
+                      onClick={() => setItemRelacionado(prev => prev === item.item ? '' : item.item)}
                       className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-tight border-2 transition-all active:scale-95 ${
-                        itemRelacionado === item
+                        itemRelacionado === item.item
                           ? 'bg-[#3b5998] border-[#3b5998] text-white shadow-md'
                           : 'bg-white border-gray-100 text-gray-500 hover:border-[#3b5998]/30 hover:text-[#3b5998]'
                       }`}
                     >
-                      {item}
+                      {item.item}
                     </button>
                   ))}
 
-                  {/* Botão Acrescentar */}
                   {!showNovoItem && (
                     <button
                       type="button"
@@ -353,51 +347,64 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
                       <Plus size={12} /> Acrescentar
                     </button>
                   )}
-                </div>
+                </>
+              )}
+            </div>
 
-                {/* Input novo item */}
-                {showNovoItem && (
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Nome do novo item..."
-                      value={novoItemText}
-                      onChange={(e) => setNovoItemText(e.target.value)}
-                      className="flex-1 px-4 py-3 bg-white border-2 border-[#3b5998]/30 rounded-2xl outline-none font-bold text-gray-700 focus:border-[#3b5998] transition-all text-sm"
-                      autoFocus
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const txt = novoItemText.trim();
-                        if (!txt) return;
-                        setCustomItems(prev => ({
-                          ...prev,
-                          [category]: [...(prev[category] || []), txt],
-                        }));
-                        setItemRelacionado(txt);
-                        setNovoItemText('');
-                        setShowNovoItem(false);
-                      }}
-                      className="px-5 py-2 bg-[#3b5998] text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-blue-700 active:scale-95 transition-all"
-                    >
-                      Salvar
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowNovoItem(false);
-                        setNovoItemText('');
-                      }}
-                      className="px-5 py-2 bg-gray-100 text-gray-500 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-gray-200 active:scale-95 transition-all"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                )}
+            {showNovoItem && (
+              <div className="flex gap-2 animate-in slide-in-from-top-2 duration-200">
+                <input
+                  type="text"
+                  placeholder="Nome do novo item..."
+                  value={novoItemText}
+                  onChange={(e) => setNovoItemText(e.target.value)}
+                  className="flex-1 px-4 py-3 bg-white border-2 border-[#3b5998]/30 rounded-2xl outline-none font-bold text-gray-700 focus:border-[#3b5998] transition-all text-sm"
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  disabled={savingItem || !novoItemText.trim()}
+                  onClick={async () => {
+                    const txt = novoItemText.trim();
+                    if (!txt) return;
+                    setSavingItem(true);
+                    try {
+                      const { error } = await supabase
+                        .from('CATEGORIAS_OCORRENCIAS')
+                        .insert({ categoria: category, item: txt });
+                      
+                      if (error) throw error;
+                      
+                      setDbItems(prev => [...prev, { categoria: category, item: txt }]);
+                      setItemRelacionado(txt);
+                      setNovoItemText('');
+                      setShowNovoItem(false);
+                      notify?.('Item adicionado com sucesso!', 'success');
+                    } catch (err) {
+                      console.error('Error saving item:', err);
+                      notify?.('Erro ao salvar item no banco.', 'error');
+                    } finally {
+                      setSavingItem(false);
+                    }
+                  }}
+                  className="px-5 py-2 bg-[#3b5998] text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-2"
+                >
+                  {savingItem ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Salvar'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowNovoItem(false);
+                    setNovoItemText('');
+                  }}
+                  className="px-5 py-2 bg-gray-100 text-gray-500 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-gray-200 active:scale-95 transition-all"
+                >
+                  Cancelar
+                </button>
               </div>
-            );
-          })()}
+            )}
+          </div>
+
 
           <div className="space-y-3">
             <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Prioridade</label>
@@ -527,13 +534,17 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
             </button>
             <button
               type="submit"
-              disabled={selectedIds.length === 0}
-              className={`flex-[2] py-4 sm:py-5 rounded-3xl font-black uppercase shadow-xl active:scale-95 transition-all text-sm sm:text-base tracking-widest border-b-4 px-2 ${selectedIds.length > 0
-                ? 'bg-[#3b5998] border-blue-900 text-white'
+              disabled={selectedIds.length === 0 || savingBatch}
+              className={`flex-[2] py-4 sm:py-5 rounded-3xl font-black uppercase shadow-xl active:scale-95 transition-all text-sm sm:text-base tracking-widest border-b-4 px-2 flex items-center justify-center gap-2 ${selectedIds.length > 0
+                ? 'bg-[#3b5998] border-blue-900 text-white shadow-blue-200'
                 : 'bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed'
                 }`}
             >
-              Confirmar Ocorrência ({selectedIds.length} {selectedIds.length === 1 ? 'ALUNO' : 'ALUNOS'})
+              {savingBatch ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>Confirmar para {selectedIds.length} {selectedIds.length === 1 ? 'ALUNO' : 'ALUNOS'}</>
+              )}
             </button>
           </div>
         </form>
@@ -543,3 +554,4 @@ const OccurrenceAddMulti: React.FC<OccurrenceAddMultiProps> = ({ students, onAdd
 };
 
 export default OccurrenceAddMulti;
+

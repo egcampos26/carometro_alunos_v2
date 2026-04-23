@@ -59,7 +59,9 @@ interface OccurrenceResolutionPageProps {
   onCreateResolution: (r: Omit<OccurrenceResolution, 'id' | 'createdAt'>) => Promise<void>;
   onUpdateResolution: (r: OccurrenceResolution) => Promise<void>;
   onDeleteResolution: (id: string) => Promise<void>;
+  notify?: (message: string, type: 'success' | 'error' | 'info') => void;
 }
+
 
 // ─── Formulário vazio ───────────────────────────────────────────────────────────
 
@@ -294,7 +296,9 @@ const OccurrenceResolutionPage: React.FC<OccurrenceResolutionPageProps> = ({
   onCreateResolution,
   onUpdateResolution,
   onDeleteResolution,
+  notify
 }) => {
+
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -371,9 +375,10 @@ const OccurrenceResolutionPage: React.FC<OccurrenceResolutionPageProps> = ({
 
   const handleSave = async () => {
     if (!form.nomeResponsavel || !form.statusOcorrencia || !form.dataAtendimento) {
-      alert('Preencha os campos obrigatórios: Responsável, Status e Data de Atendimento.');
+      notify?.('Preencha os campos obrigatórios: Responsável, Status e Data de Atendimento.', 'error');
       return;
     }
+
     try {
       setSaving(true);
       if (editingId) {
@@ -383,10 +388,12 @@ const OccurrenceResolutionPage: React.FC<OccurrenceResolutionPageProps> = ({
       }
       setShowForm(false);
       setEditingId(null);
+      notify?.('Resolução salva com sucesso!', 'success');
     } catch (err) {
       console.error(err);
-      alert('Erro ao salvar a resolução.');
+      notify?.('Erro ao salvar a resolução.', 'error');
     } finally {
+
       setSaving(false);
     }
   };
@@ -395,9 +402,11 @@ const OccurrenceResolutionPage: React.FC<OccurrenceResolutionPageProps> = ({
     try {
       await onDeleteResolution(resId);
       setShowDeleteModal(null);
+      notify?.('Registro excluído!', 'success');
     } catch {
-      alert('Erro ao excluir.');
+      notify?.('Erro ao excluir.', 'error');
     }
+
   };
 
   const toggleCheck = (field: 'tiposIntervencao' | 'encaminhamentoExterno', value: string) => {

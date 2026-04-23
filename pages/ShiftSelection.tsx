@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Shift, AuthUser } from '../types';
-import { ClipboardList, Activity, UserPlus } from 'lucide-react';
+import { ClipboardList, Activity, UserPlus, CreditCard } from 'lucide-react';
 
 interface ShiftSelectionProps {
   user: AuthUser;
@@ -92,6 +92,14 @@ const ShiftSelection: React.FC<ShiftSelectionProps> = ({ user, onToggleRole }) =
               Incluir Novo Aluno
             </button>
           )}
+
+          <button
+            onClick={() => navigate('/carteirinhas')}
+            className="w-full bg-emerald-600 text-white py-5 rounded-3xl font-black text-sm sm:text-base shadow-sm border-2 border-emerald-700 flex items-center justify-center gap-3 hover:bg-emerald-700 active:scale-95 transition-all uppercase tracking-widest border-b-4"
+          >
+            <CreditCard size={22} />
+            Criar Carteirinhas
+          </button>
 
           {['Admin', 'Manager'].includes(user.role) && (
             <button

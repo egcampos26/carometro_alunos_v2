@@ -13,9 +13,20 @@ interface OccurrenceEditProps {
   onAddOccurrence: (occ: Occurrence) => Promise<void>;
   onDeleteOccurrence: (id: string) => Promise<void>;
   user: AuthUser;
+  onToggleRole?: () => void;
+  notify?: (message: string, type: 'success' | 'error' | 'info') => void;
 }
 
-const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, onUpdateOccurrence, onAddOccurrence, onDeleteOccurrence, user }) => {
+const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ 
+  students, 
+  occurrences, 
+  onUpdateOccurrence, 
+  onAddOccurrence, 
+  onDeleteOccurrence, 
+  user,
+  notify 
+}) => {
+
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -36,12 +47,14 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
   const [showNovoTipo, setShowNovoTipo] = useState(false);
   const [novoTipo, setNovoTipo] = useState('');
   const [itemRelacionado, setItemRelacionado] = useState('');
-  const [customItems, setCustomItems] = useState<Record<string, string[]>>({
-    Comportamental: [], Pedágica: [], Médica: [], Outros: []
-  });
+  const [dbItems, setDbItems] = useState<{categoria: string, item: string}[]>([]);
+  const [loadingItems, setLoadingItems] = useState(true);
+  
   const [showNovoItem, setShowNovoItem] = useState(false);
   const [novoItemText, setNovoItemText] = useState('');
+  const [savingItem, setSavingItem] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
 
   // New state for adding students
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -91,7 +104,22 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
       .then(({ data }) => {
         if (data) setTiposViolencia(data.map((r: any) => r.descricao));
       });
+
+    const fetchItems = async () => {
+      setLoadingItems(true);
+      const { data, error } = await supabase
+        .from('CATEGORIAS_OCORRENCIAS')
+        .select('categoria, item')
+        .eq('ativo', true)
+        .order('item', { ascending: true });
+      
+      if (data) setDbItems(data);
+      if (error) console.error('Error fetching categories:', error);
+      setLoadingItems(false);
+    };
+    fetchItems();
   }, []);
+
 
   if (!occurrence || !student) {
     return (
@@ -439,71 +467,31 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
             </div>
           </div>
 
-          {/* Itens Relacionados */}
-          {(() => {
-            const ITENS_POR_CATEGORIA: Record<string, { label: string; itens: string[] }> = {
-              Comportamental: {
-                label: 'Convivência e normas da escola',
-                itens: [
-                  'Indisciplina em sala',
-                  'Conflito interpessoal',
-                  'Desrespeito a professor/funcionário',
-                  'Dano ao patrimônio',
-                  'Atraso / Saída antecipada',
-                  ...(customItems['Comportamental'] || []),
-                ],
-              },
-              'Pedagógica': {
-                label: 'Desempenho acadêmico e aprendizagem',
-                itens: [
-                  'Dificuldade de aprendizagem',
-                  'Falta de material',
-                  'Evolução positiva (Elogio)',
-                  'Não entrega de tarefas',
-                  'Abandono / Infrequência',
-                  ...(customItems['Pedagógica'] || []),
-                ],
-              },
-              'Médica': {
-                label: 'Saúde e bem-estar físico',
-                itens: [
-                  'Mal-estar súbito',
-                  'Primeiros socorros',
-                  'Administração de medicação',
-                  'Acompanhamento crônico',
-                  'Encaminhamento externo (hospital/pais)',
-                  ...(customItems['Médica'] || []),
-                ],
-              },
-              Outros: {
-                label: 'Outros motivos',
-                itens: [...(customItems['Outros'] || [])],
-              },
-            };
-
-            const grupo = ITENS_POR_CATEGORIA[category];
-            if (!grupo) return null;
-
-            return (
-              <div className="space-y-3">
-
-                <div className="flex flex-wrap gap-2">
-                  {grupo.itens.map((item) => (
+          {/* Itens Relacionados via DB */}
+          <div className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              {loadingItems ? (
+                <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest p-2">
+                  <div className="w-4 h-4 border-2 border-[#3b5998] border-t-transparent rounded-full animate-spin" />
+                  Carregando itens...
+                </div>
+              ) : (
+                <>
+                  {dbItems.filter(i => i.categoria === category).map((item) => (
                     <button
-                      key={item}
+                      key={item.item}
                       type="button"
-                      onClick={() => setItemRelacionado(prev => prev === item ? '' : item)}
+                      onClick={() => setItemRelacionado(prev => prev === item.item ? '' : item.item)}
                       className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-tight border-2 transition-all active:scale-95 ${
-                        itemRelacionado === item
+                        itemRelacionado === item.item
                           ? 'bg-[#3b5998] border-[#3b5998] text-white shadow-md'
                           : 'bg-white border-gray-100 text-gray-500 hover:border-[#3b5998]/30 hover:text-[#3b5998]'
                       }`}
                     >
-                      {item}
+                      {item.item}
                     </button>
                   ))}
 
-                  {/* Botão Acrescentar */}
                   {!showNovoItem && (
                     <button
                       type="button"
@@ -513,54 +501,68 @@ const OccurrenceEdit: React.FC<OccurrenceEditProps> = ({ students, occurrences, 
                       <Plus size={12} /> Acrescentar
                     </button>
                   )}
-                </div>
+                </>
+              )}
+            </div>
 
-                {/* Input novo item */}
-                {showNovoItem && (
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Nome do novo item..."
-                      value={novoItemText}
-                      onChange={(e) => setNovoItemText(e.target.value)}
-                      className="flex-1 px-4 py-3 bg-white border-2 border-[#3b5998]/30 rounded-2xl outline-none font-bold text-gray-700 focus:border-[#3b5998] transition-all text-sm"
-                      autoFocus
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const txt = novoItemText.trim();
-                        if (!txt) return;
-                        setCustomItems(prev => ({
-                          ...prev,
-                          [category]: [...(prev[category] || []), txt],
-                        }));
-                        setItemRelacionado(txt);
-                        setNovoItemText('');
-                        setShowNovoItem(false);
-                      }}
-                      className="px-5 py-2 bg-[#3b5998] text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-blue-700 active:scale-95 transition-all"
-                    >
-                      Ok
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { setShowNovoItem(false); setNovoItemText(''); }}
-                      className="px-4 py-2 bg-gray-100 text-gray-400 rounded-2xl font-black uppercase text-xs hover:bg-gray-200 active:scale-95 transition-all"
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
-                )}
-
-                {itemRelacionado && (
-                  <p className="text-[10px] text-[#3b5998] font-black ml-1">
-                    ✓ Selecionado: <span className="uppercase">{itemRelacionado}</span>
-                  </p>
-                )}
+            {showNovoItem && (
+              <div className="flex gap-2 animate-in slide-in-from-top-2 duration-200">
+                <input
+                  type="text"
+                  placeholder="Nome do novo item..."
+                  value={novoItemText}
+                  onChange={(e) => setNovoItemText(e.target.value)}
+                  className="flex-1 px-4 py-3 bg-white border-2 border-[#3b5998]/30 rounded-2xl outline-none font-bold text-gray-700 focus:border-[#3b5998] transition-all text-sm"
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  disabled={savingItem || !novoItemText.trim()}
+                  onClick={async () => {
+                    const txt = novoItemText.trim();
+                    if (!txt) return;
+                    setSavingItem(true);
+                    try {
+                      const { error } = await supabase
+                        .from('CATEGORIAS_OCORRENCIAS')
+                        .insert({ categoria: category, item: txt });
+                      
+                      if (error) throw error;
+                      
+                      setDbItems(prev => [...prev, { categoria: category, item: txt }]);
+                      setItemRelacionado(txt);
+                      setNovoItemText('');
+                      setShowNovoItem(false);
+                      notify?.('Item adicionado com sucesso!', 'success');
+                    } catch (err) {
+                      console.error('Error saving item:', err);
+                      notify?.('Erro ao salvar item no banco.', 'error');
+                    } finally {
+                      setSavingItem(false);
+                    }
+                  }}
+                  className="px-5 py-2 bg-[#3b5998] text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-2"
+                >
+                  {savingItem ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Salvar'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowNovoItem(false); setNovoItemText(''); }}
+                  className="px-5 py-2 bg-gray-100 text-gray-500 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-gray-200 active:scale-95 transition-all"
+                >
+                  Cancelar
+                </button>
               </div>
-            );
-          })()}
+            )}
+
+            {itemRelacionado && (
+              <p className="text-[10px] text-[#3b5998] font-black ml-1">
+                ✓ Selecionado: <span className="uppercase">{itemRelacionado}</span>
+              </p>
+            )}
+          </div>
+
+
 
           <div className="space-y-3">
             <label className="text-[#3b5998] text-xs sm:text-sm font-black uppercase tracking-widest ml-1">Prioridade</label>

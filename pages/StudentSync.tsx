@@ -9,7 +9,9 @@ import { UploadCloud, CheckCircle, AlertTriangle, XCircle, Info, RefreshCw } fro
 interface StudentSyncProps {
   user: AuthUser;
   onToggleRole: () => void;
+  notify?: (message: string, type: 'success' | 'error' | 'info') => void;
 }
+
 
 interface UpdateDetail {
   student: Student;
@@ -23,7 +25,8 @@ interface SyncSummary {
   unchanged: number;
 }
 
-const StudentSync: React.FC<StudentSyncProps> = ({ user, onToggleRole }) => {
+const StudentSync: React.FC<StudentSyncProps> = ({ user, onToggleRole, notify }) => {
+
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -185,8 +188,9 @@ const StudentSync: React.FC<StudentSyncProps> = ({ user, onToggleRole }) => {
     try {
       const result = await studentService.syncStudents(summary.inserts, allUpdates);
       if (result.success) {
-        setSuccessMsg("Sincronização concluída com sucesso!");
+        notify?.("Sincronização concluída com sucesso!", "success");
         setSummary(null);
+
         setFile(null);
         // Reload current state
         const newData = await studentService.fetchStudents();

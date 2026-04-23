@@ -72,39 +72,11 @@ export const studentService = {
     },
 
     async createStudent(student: Student): Promise<void> {
-
-        let idVal: number | undefined;
-        if (student.id) {
-            const parsed = parseInt(student.id);
-            if (!isNaN(parsed) && parsed !== 0) {
-                idVal = parsed;
-            }
-        }
-
-        if (idVal === undefined) {
-            // Se o ID não foi informado (ou se for 0, vindo do formulário genérico), 
-            // precisamos gerar o próximo ID para evitar a violação de 'not-null constraint' 
-            // caso o Supabase não esteja com a coluna id_aluno marcada como auto-increment(IDENTITY).
-            const { data, error: maxError } = await supabase
-                .from('ALUNOS')
-                .select('id_aluno')
-                .order('id_aluno', { ascending: false })
-                .limit(1);
-            
-            if (maxError) {
-                console.error("Erro ao buscar último ID:", maxError);
-                throw maxError;
-            }
-
-            const maxId = data && data.length > 0 ? Number(data[0].id_aluno) : 0;
-            idVal = maxId + 1;
-        }
-
         // Split grade
         const [serie, ...turmaParts] = student.grade.split(' ');
         const turma = turmaParts.join(' ');
 
-        // Insert into ALUNOS
+        // Insert into ALUNOS (id_aluno is now IDENTITY)
         const payload: any = {
             nome_aluno: student.name,
             ra_aluno: student.registrationNumber,
@@ -116,15 +88,16 @@ export const studentService = {
             serie_aluno: serie,
             turma_aluno: turma,
             foto_aluno: student.photoUrl,
-            data_nasc_aluno: student.birthDate || null, // Date or null
+            data_nasc_aluno: student.birthDate || null,
             como_vai_aluno: student.departureMethod,
             situacao_aluno: student.studentStatus,
             direito_imagem_assinado: student.imageRightsSigned === 'Sim',
             genero_aluno: student.generoAluno || null
         };
 
-        if (idVal !== undefined) {
-            payload.id_aluno = idVal;
+        // If an ID is explicitly provided (useful for specialized syncs), use it
+        if (student.id && parseInt(student.id) > 0) {
+            payload.id_aluno = parseInt(student.id);
         }
 
         const { data: insertedStudent, error: errorAlunos } = await supabase
@@ -158,7 +131,6 @@ export const studentService = {
 
         if (errorDados) {
             console.error('Error creating DADOS_ALUNOS:', errorDados);
-            // Optional: Try to delete the created student to rollback
             await supabase.from('ALUNOS').delete().eq('id_aluno', newId);
             throw errorDados;
         }
@@ -213,7 +185,6 @@ export const studentService = {
     },
 
     async deleteStudent(id: string): Promise<void> {
-        // Cascade delete handles DADOS_ALUNOS
         const numericId = parseInt(id);
         if (isNaN(numericId)) {
             throw new Error(`Invalid student ID: ${id}`);
@@ -222,28 +193,84 @@ export const studentService = {
         if (error) throw error;
     },
 
-    // Executa operações de inserção/atualização em lote a partir do CSV
     async syncStudents(inserts: Student[], updates: Student[]): Promise<{ success: boolean; errors: any[] }> {
         const errors: any[] = [];
         
-        // Chunk sizes for performance? Actually standard loop with await is fine for < 1000 records
-        for (const student of inserts) {
-            try {
-                // Remove ID if present to ensure a clean insert
-                const { id, ...studentPayload } = student;
-                await this.createStudent(studentPayload as Student);
-            } catch (err) {
-                console.error(`Erro ao inserir aluno ${student.name}:`, err);
-                errors.push({ type: 'INSERT', student: student.name, error: err });
-            }
-        }
-
+        // 1. Process Updates in Batch (Supabase supports upsert, but update by ID is safer for specific columns)
+        // Since Supabase doesn't have a direct "update multiple rows with different data" via standard REST, 
+        // we use sequential but optimized processing or a custom RPC. For now, we'll keep sequential for updates 
+        // but batch the inserts.
         for (const student of updates) {
             try {
                 await this.updateStudent(student);
             } catch (err) {
-                console.error(`Erro ao atualizar aluno ${student.name}:`, err);
                 errors.push({ type: 'UPDATE', student: student.name, error: err });
+            }
+        }
+
+        // 2. Process Inserts in Batch (MUCH faster)
+        if (inserts.length > 0) {
+            try {
+                // Prepare payloads (ALUNOS)
+                const alunosPayloads = inserts.map(s => {
+                    const [serie, ...turmaParts] = s.grade.split(' ');
+                    return {
+                        nome_aluno: s.name,
+                        ra_aluno: s.registrationNumber,
+                        rga_aluno: s.rga,
+                        rg_aluno: s.studentRG,
+                        cpf_aluno: s.studentCPF,
+                        n_sala_aluno: s.roomNumber,
+                        periodo_aluno: s.shift,
+                        serie_aluno: serie,
+                        turma_aluno: turmaParts.join(' '),
+                        foto_aluno: s.photoUrl,
+                        data_nasc_aluno: s.birthDate || null,
+                        como_vai_aluno: s.departureMethod,
+                        situacao_aluno: s.studentStatus,
+                        direito_imagem_assinado: s.imageRightsSigned === 'Sim',
+                        genero_aluno: s.generoAluno || null
+                    };
+                });
+
+                // Insert into ALUNOS and get inserted records with IDs
+                const { data: insertedRows, error: insError } = await supabase
+                    .from('ALUNOS')
+                    .insert(alunosPayloads)
+                    .select();
+
+                if (insError) throw insError;
+
+                // Prepare payloads (DADOS_ALUNOS) using the returned IDs
+                // Note: We need to match back to the original inserts array to get detail fields.
+                // Assuming the order is preserved (Supabase usually preserves it for batch inserts)
+                const dadosPayloads = insertedRows.map((row, idx) => {
+                    const original = inserts[idx];
+                    return {
+                        id_aluno: row.id_aluno,
+                        responsavel_1_aluno: original.filiacao1,
+                        obs_responsavel_1_aluno: original.obsFiliacao1,
+                        tel_responsavel_1_aluno: original.telefone1,
+                        rg_responsavel_1_aluno: original.resp1RG,
+                        cpf_resp_1_aluno: original.resp1CPF,
+                        responsavel_2_aluno: original.filiacao2,
+                        obs_responsavel_2_aluno: original.obsFiliacao2,
+                        tel_responsavel_2_aluno: original.telefone2,
+                        rg_responsavel_2_aluno: original.resp2RG,
+                        cpf_resp_2_aluno: original.resp2CPF,
+                        telefone_3_aluno: original.telefone3,
+                        obs_telefone_3_aluno: original.obsTelefone3,
+                        telefone_4_aluno: original.telefone4,
+                        obs_telefone_4_aluno: original.obsTelefone4
+                    };
+                });
+
+                const { error: dadosError } = await supabase.from('DADOS_ALUNOS').insert(dadosPayloads);
+                if (dadosError) throw dadosError;
+
+            } catch (err) {
+                console.error("Batch insert failed:", err);
+                errors.push({ type: 'BATCH_INSERT', error: err });
             }
         }
 
@@ -253,3 +280,4 @@ export const studentService = {
         };
     }
 };
+

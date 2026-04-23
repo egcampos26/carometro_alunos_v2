@@ -110,5 +110,32 @@ export const occurrenceService = {
 
         const { error } = await supabase.from('OCORRENCIAS_ALUNOS').delete().eq('id_ocorrencias', id);
         if (error) throw error;
+    },
+
+    async createOccurrencesBatch(occurrences: Occurrence[]): Promise<void> {
+        const payloads = occurrences.map(occ => ({
+            id_aluno: parseInt(occ.studentId),
+            date: occ.date,
+            title: occ.title,
+            description: occ.description,
+            category: occ.category,
+            nome_func: occ.nomeFunc,
+            id_func: occ.idFunc || null,
+            group_id: occ.groupId || null,
+            is_confidential: occ.isConfidential || false,
+            tipo_violencia: occ.tipoViolencia || null,
+            ocorr_prioridade_alunos: occ.priority || 'Média',
+            item_relacionado: occ.itemRelacionado || null,
+            hora_ocorrencia: occ.horaOcorrencia || null,
+            data_registro: occ.dataRegistro || null,
+            hora_registro: occ.horaRegistro || null,
+        }));
+
+        const { error } = await supabase.from('OCORRENCIAS_ALUNOS').insert(payloads);
+        if (error) {
+            console.error('Error in createOccurrencesBatch:', error);
+            throw error;
+        }
     }
 };
+
