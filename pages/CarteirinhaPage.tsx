@@ -16,10 +16,10 @@ interface CarteirinhaPageProps {
 
 const ANO_LETIVO = '2026';
 
-// A imagem Carteirinha.png tem proporção aproximada de 507x1070 (ratio ~0.474)
-// Usamos uma largura fixa de 240px → altura = 240 / 0.474 ≈ 506px
+// A imagem Carteirinha.png (após recorte do fundo) tem proporção de 720x1054 (ratio ~0.683)
+// Usamos uma largura fixa de 240px → altura = 240 / 0.683 ≈ 351px
 const CARD_WIDTH = 240;
-const CARD_HEIGHT = Math.round(CARD_WIDTH / 0.474); // ~506px
+const CARD_HEIGHT = Math.round(CARD_WIDTH / 0.683); // ~351px
 
 const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
   const hasImageRights = student.imageRightsSigned !== 'Não';
@@ -27,16 +27,16 @@ const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
     ? (student.photoUrl || DEFAULT_STUDENT_PHOTO_URL)
     : NO_IMAGE_RIGHTS_URL;
 
-  // Tamanho da foto circular — ~59% da largura do card (maior)
+  // Tamanho da foto circular — ~59% da largura do card
   const photoSize = Math.round(CARD_WIDTH * 0.59); // ~142px
-  // Posição da foto: centrada horizontalmente, topo em ~32% da altura (subido)
-  const photoTop = Math.round(CARD_HEIGHT * 0.32);   // ~162px
+  // Posição da foto: centrada horizontalmente, nova posição calculada após recorte
+  const photoTop = Math.round(CARD_HEIGHT * 0.215);   // ~75px
   const photoLeft = Math.round((CARD_WIDTH - photoSize) / 2); // centralizado
 
   // Posições dos textos (em px a partir do topo)
-  const nameTop = Math.round(CARD_HEIGHT * 0.745);   // ~377px  — nome
-  const gradeTop = Math.round(CARD_HEIGHT * 0.800);  // ~404px  — ANO/TURMA (posição mantida)
-  const anoTop = Math.round(CARD_HEIGHT * 0.860);    // ~435px  — Ano letivo (posição mantida)
+  const nameTop = Math.round(CARD_HEIGHT * 0.808);   // ~283px  — nome
+  const gradeTop = Math.round(CARD_HEIGHT * 0.886);  // ~311px  — ANO/TURMA
+  const anoTop = Math.round(CARD_HEIGHT * 0.955);    // ~335px  — Ano letivo
 
   return (
     <div
@@ -197,14 +197,13 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
       const PAGE_W_MM = 210;
       const PAGE_H_MM = 297;
       const CARD_W_MM = 55;
-      const CARD_H_MM = Math.round(CARD_W_MM / 0.474); // Preserva a proporção original do card ~116mm
+      const CARD_H_MM = Math.round(CARD_W_MM / 0.683); // Preserva a proporção original do card ~80.5mm
       const COLS = 3;
-      const ROWS = 2; // Ajustado para 2 linhas por página para caber na altura A4 com a nova proporção
+      const ROWS = 3; // Agora que o card é mais baixo, cabem 3 linhas por página A4
       const CARDS_PER_PAGE = COLS * ROWS;
       const GAP_X_MM = 6;
       const GAP_Y_MM = 5;
       const PAD_X_MM = (PAGE_W_MM - COLS * CARD_W_MM - (COLS - 1) * GAP_X_MM) / 2; // centraliza
-      // Ajuste do espaçamento vertical para caber 2 linhas sem cortar
       const PAD_Y_MM = (PAGE_H_MM - ROWS * CARD_H_MM - (ROWS - 1) * GAP_Y_MM) / 2;
 
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -283,7 +282,7 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
 
           .carteirinha-card {
             width: 55mm !important;
-            height: 116mm !important;
+            height: 80.5mm !important;
             margin: 0 !important;
             flex-shrink: 0 !important;
             box-shadow: none !important;
