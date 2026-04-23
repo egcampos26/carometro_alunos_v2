@@ -30,13 +30,13 @@ const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
   // Tamanho da foto circular — ~59% da largura do card
   const photoSize = Math.round(CARD_WIDTH * 0.59); // ~142px
   // Posição da foto: centrada horizontalmente
-  const photoTop = Math.round(CARD_HEIGHT * 0.180);   // Voltando para a posição correta
+  const photoTop = Math.round(CARD_HEIGHT * 0.170);   // Subindo um pouquinho
   const photoLeft = Math.round((CARD_WIDTH - photoSize) / 2); // centralizado
 
   // Posições dos textos (em px a partir do topo)
-  const nameTop = Math.round(CARD_HEIGHT * 0.765);   // Voltando para a posição correta
-  const gradeTop = Math.round(CARD_HEIGHT * 0.840);  // Voltando para a posição correta
-  const anoTop = Math.round(CARD_HEIGHT * 0.935);    // Voltando para a posição correta
+  const nameTop = Math.round(CARD_HEIGHT * 0.755);   // Subindo um pouquinho
+  const gradeTop = Math.round(CARD_HEIGHT * 0.830);  // Subindo um pouquinho
+  const anoTop = Math.round(CARD_HEIGHT * 0.925);    // Subindo um pouquinho
 
   return (
     <div className="carteirinha-wrapper" style={{ margin: '8px', flexShrink: 0, pageBreakInside: 'avoid', breakInside: 'avoid' }}>
@@ -184,7 +184,7 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
 
   const displayGrade = isAll ? 'TODAS AS TURMAS' : grade;
 
-  // Gera PDF com 3 colunas × 3 linhas de carteirinhas por página A4
+  // Gera imagens JPEG de alta resolução no formato A4 com 3x3 carteirinhas
   const generatePDF = async () => {
     if (!printRef.current) return;
     setGenerating(true);
@@ -194,57 +194,90 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
       const cards = printRef.current.querySelectorAll<HTMLElement>('.carteirinha-card');
       if (cards.length === 0) return;
 
-      // A4 em mm
-      const PAGE_W_MM = 210;
-      const PAGE_H_MM = 297;
-      const CARD_W_MM = 55;
-      const CARD_H_MM = Math.round(CARD_W_MM / 0.683); // Preserva a proporção original do card ~80.5mm
+      // Resolução de Impressão (300 DPI) para folha A4
+      const A4_W_PX = 2480; 
+      const A4_H_PX = 3508;
+      
+      // Tamanho do card na impressão em pixels (~55mm de largura)
+      const CARD_W_PX = 650; 
       const COLS = 3;
-      const ROWS = 3; // Agora que o card é mais baixo, cabem 3 linhas por página A4
+      const ROWS = 3; 
       const CARDS_PER_PAGE = COLS * ROWS;
-      const GAP_X_MM = 6;
-      const GAP_Y_MM = 5;
-      const PAD_X_MM = (PAGE_W_MM - COLS * CARD_W_MM - (COLS - 1) * GAP_X_MM) / 2; // centraliza
-      const PAD_Y_MM = (PAGE_H_MM - ROWS * CARD_H_MM - (ROWS - 1) * GAP_Y_MM) / 2;
+      
+      // Espaçamentos entre os cards (~6mm e ~5mm)
+      const GAP_X_PX = 71; 
+      const GAP_Y_PX = 59; 
+      
+      const PAD_X_PX = (A4_W_PX - COLS * CARD_W_PX - (COLS - 1) * GAP_X_PX) / 2; // centraliza
 
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      let pageIndex = 0;
+      const turmaLabel = isAll ? 'Todas_as_Turmas' : (grade || 'Turma').replace(/[°\s]/g, '');
+      let pageIndex = 1;
+      
+      let a4Canvas = document.createElement('canvas');
+      a4Canvas.width = A4_W_PX;
+      a4Canvas.height = A4_H_PX;
+      let ctx = a4Canvas.getContext('2d');
+      
+      if (ctx) {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, A4_W_PX, A4_H_PX);
+      }
+
+      const downloadPage = () => {
+        const link = document.createElement('a');
+        link.download = `Carteirinhas_${turmaLabel}_${ANO_LETIVO}_Pagina_${pageIndex}.jpg`;
+        link.href = a4Canvas.toDataURL('image/jpeg', 0.95);
+        link.click();
+      };
+
+      let PAD_Y_PX = 0;
+      let drawH = 0;
 
       for (let i = 0; i < cards.length; i++) {
         const posInPage = i % CARDS_PER_PAGE;
         if (posInPage === 0 && i > 0) {
-          pdf.addPage();
+          downloadPage();
           pageIndex++;
+          if (ctx) {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, A4_W_PX, A4_H_PX); // Limpa para a nova página
+          }
         }
 
         const col = posInPage % COLS;
         const row = Math.floor(posInPage / COLS);
-        const x = PAD_X_MM + col * (CARD_W_MM + GAP_X_MM);
-        const y = PAD_Y_MM + row * (CARD_H_MM + GAP_Y_MM);
+        const x = PAD_X_PX + col * (CARD_W_PX + GAP_X_PX);
 
-        // Renderiza o card como imagem
-        const canvas = await html2canvas(cards[i], {
-          scale: 3,           // 3x para máxima nitidez (resolve o achatamento ao não forçar dimensões estritas)
-          useCORS: true,      // permite imagens de outros domínios
+        // Renderiza o card individual com alta qualidade
+        const cardCanvas = await html2canvas(cards[i], {
+          scale: 3,           
+          useCORS: true,      
           allowTaint: true,
-          backgroundColor: '#ffffff', // Fundo branco evita os cantos pretos nas quinas arredondadas
+          backgroundColor: '#ffffff', 
           logging: false,
         });
 
-        // Use properties on canvas to determine width and height
-        const canvasRatio = canvas.height / canvas.width;
-        // Keep CARD_W_MM to 55mm, but calculate correct print height
-        const printHeight = CARD_W_MM * canvasRatio;
+        // Na primeira renderização, calcula a altura correta baseada na proporção real
+        if (drawH === 0) {
+          drawH = CARD_W_PX * (cardCanvas.height / cardCanvas.width);
+          PAD_Y_PX = (A4_H_PX - ROWS * drawH - (ROWS - 1) * GAP_Y_PX) / 2;
+        }
 
-        const imgData = canvas.toDataURL('image/jpeg', 0.92);
-        pdf.addImage(imgData, 'JPEG', x, y, CARD_W_MM, printHeight);
+        const y = PAD_Y_PX + row * (drawH + GAP_Y_PX);
+
+        if (ctx) {
+          ctx.drawImage(cardCanvas, x, y, CARD_W_PX, drawH);
+        }
       }
 
-      const turmaLabel = isAll ? 'Todas_as_Turmas' : (grade || 'Turma').replace(/[°\s]/g, '');
-      pdf.save(`Carteirinhas_${turmaLabel}_${ANO_LETIVO}.pdf`);
+      // Baixa a última página
+      if (cards.length > 0) {
+        downloadPage();
+      }
+
     } catch (err) {
-      console.error('Erro ao gerar PDF:', err);
-      alert('Erro ao gerar o PDF. Tente novamente.');
+      console.error('Erro ao gerar imagens:', err);
+      alert('Erro ao gerar os arquivos. Tente novamente.');
     } finally {
       setGenerating(false);
     }
@@ -338,12 +371,12 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
               {generating ? (
                 <>
                   <Loader2 size={20} className="animate-spin" />
-                  Gerando PDF...
+                  Gerando Imagens (JPEG)...
                 </>
               ) : (
                 <>
                   <Printer size={20} />
-                  Imprimir Carteirinhas
+                  Baixar Imagens (A4)
                 </>
               )}
             </button>
