@@ -25,16 +25,16 @@ const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
     ? (student.photoUrl || DEFAULT_STUDENT_PHOTO_URL)
     : NO_IMAGE_RIGHTS_URL;
 
-  // Tamanho da foto circular — ~52% da largura do card (maior)
-  const photoSize = Math.round(CARD_WIDTH * 0.52); // ~125px
-  // Posição da foto: centrada horizontalmente, topo em ~35% da altura (mais baixo)
+  // Tamanho da foto circular — ~59% da largura do card (maior)
+  const photoSize = Math.round(CARD_WIDTH * 0.59); // ~142px
+  // Posição da foto: centrada horizontalmente, topo em ~35% da altura
   const photoTop = Math.round(CARD_HEIGHT * 0.35);   // ~177px
   const photoLeft = Math.round((CARD_WIDTH - photoSize) / 2); // centralizado
 
   // Posições dos textos (em px a partir do topo)
-  const nameTop = Math.round(CARD_HEIGHT * 0.755);   // ~382px  — nome (descido)
-  const gradeTop = Math.round(CARD_HEIGHT * 0.800);  // ~404px  — "Turma: 4º Ano B" (subido)
-  const anoTop = Math.round(CARD_HEIGHT * 0.860);    // ~435px  — Ano letivo (subido)
+  const nameTop = Math.round(CARD_HEIGHT * 0.720);   // ~364px  — nome (subido para dar espaço)
+  const gradeTop = Math.round(CARD_HEIGHT * 0.800);  // ~404px  — ANO/TURMA (posição mantida)
+  const anoTop = Math.round(CARD_HEIGHT * 0.860);    // ~435px  — Ano letivo (posição mantida)
 
   return (
     <div
@@ -78,7 +78,7 @@ const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            objectPosition: 'center top',
+            objectPosition: 'center 20%',
             display: 'block',
             filter: hasImageRights ? 'none' : 'grayscale(100%) opacity(0.5)',
           }}
