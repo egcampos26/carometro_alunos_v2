@@ -197,14 +197,15 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
       const PAGE_W_MM = 210;
       const PAGE_H_MM = 297;
       const CARD_W_MM = 55;
-      const CARD_H_MM = 85;
+      const CARD_H_MM = Math.round(CARD_W_MM / 0.474); // Preserva a proporção original do card ~116mm
       const COLS = 3;
-      const ROWS = 3;
+      const ROWS = 2; // Ajustado para 2 linhas por página para caber na altura A4 com a nova proporção
       const CARDS_PER_PAGE = COLS * ROWS;
       const GAP_X_MM = 6;
       const GAP_Y_MM = 5;
       const PAD_X_MM = (PAGE_W_MM - COLS * CARD_W_MM - (COLS - 1) * GAP_X_MM) / 2; // centraliza
-      const PAD_Y_MM = 8;
+      // Ajuste do espaçamento vertical para caber 2 linhas sem cortar
+      const PAD_Y_MM = (PAGE_H_MM - ROWS * CARD_H_MM - (ROWS - 1) * GAP_Y_MM) / 2;
 
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
       let pageIndex = 0;
@@ -230,8 +231,13 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
           logging: false,
         });
 
+        // Use properties on canvas to determine width and height
+        const canvasRatio = canvas.height / canvas.width;
+        // Keep CARD_W_MM to 55mm, but calculate correct print height
+        const printHeight = CARD_W_MM * canvasRatio;
+
         const imgData = canvas.toDataURL('image/jpeg', 0.92);
-        pdf.addImage(imgData, 'JPEG', x, y, CARD_W_MM, CARD_H_MM);
+        pdf.addImage(imgData, 'JPEG', x, y, CARD_W_MM, printHeight);
       }
 
       const turmaLabel = isAll ? 'Todas_as_Turmas' : (grade || 'Turma').replace(/[°\s]/g, '');
@@ -277,7 +283,7 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
 
           .carteirinha-card {
             width: 55mm !important;
-            height: 85mm !important;
+            height: 116mm !important;
             margin: 0 !important;
             flex-shrink: 0 !important;
             box-shadow: none !important;
