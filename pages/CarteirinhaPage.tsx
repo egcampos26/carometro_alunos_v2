@@ -25,16 +25,16 @@ const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
     ? (student.photoUrl || DEFAULT_STUDENT_PHOTO_URL)
     : NO_IMAGE_RIGHTS_URL;
 
-  // Tamanho da foto circular — ~44% da largura do card
-  const photoSize = Math.round(CARD_WIDTH * 0.44); // ~106px
-  // Posição da foto: centrada horizontalmente, topo em ~28% da altura
-  const photoTop = Math.round(CARD_HEIGHT * 0.28);   // ~142px
+  // Tamanho da foto circular — ~52% da largura do card (maior)
+  const photoSize = Math.round(CARD_WIDTH * 0.52); // ~125px
+  // Posição da foto: centrada horizontalmente, topo em ~31% da altura (descida)
+  const photoTop = Math.round(CARD_HEIGHT * 0.31);   // ~157px
   const photoLeft = Math.round((CARD_WIDTH - photoSize) / 2); // centralizado
 
   // Posições dos textos (em px a partir do topo)
   const nameTop = Math.round(CARD_HEIGHT * 0.725);   // ~367px  — "ANA COSTA"
-  const gradeTop = Math.round(CARD_HEIGHT * 0.825);  // ~417px  — "Turma: 4º Ano B"
-  const anoTop = Math.round(CARD_HEIGHT * 0.895);    // ~453px  — Ano letivo
+  const gradeTop = Math.round(CARD_HEIGHT * 0.800);  // ~404px  — "Turma: 4º Ano B" (subido)
+  const anoTop = Math.round(CARD_HEIGHT * 0.860);    // ~435px  — Ano letivo (subido)
 
   return (
     <div
@@ -101,7 +101,7 @@ const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
       >
         <span
           style={{
-            fontSize: '15px',
+            fontSize: '12px',
             fontWeight: 900,
             color: '#1a3a7a',
             textTransform: 'uppercase',
