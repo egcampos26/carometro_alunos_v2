@@ -104,7 +104,10 @@ const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
               color: '#1a3a7a',
               textTransform: 'uppercase',
               lineHeight: 1.1,
-              display: 'block',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
               letterSpacing: '0.01em',
               wordBreak: 'break-word',
             }}
