@@ -30,13 +30,13 @@ const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
   // Tamanho da foto circular — ~59% da largura do card
   const photoSize = Math.round(CARD_WIDTH * 0.59); // ~142px
   // Posição da foto: centrada horizontalmente, nova posição calculada após recorte
-  const photoTop = Math.round(CARD_HEIGHT * 0.215);   // ~75px
+  const photoTop = Math.round(CARD_HEIGHT * 0.180);   // ~63px (subido)
   const photoLeft = Math.round((CARD_WIDTH - photoSize) / 2); // centralizado
 
   // Posições dos textos (em px a partir do topo)
-  const nameTop = Math.round(CARD_HEIGHT * 0.808);   // ~283px  — nome
-  const gradeTop = Math.round(CARD_HEIGHT * 0.886);  // ~311px  — ANO/TURMA
-  const anoTop = Math.round(CARD_HEIGHT * 0.955);    // ~335px  — Ano letivo
+  const nameTop = Math.round(CARD_HEIGHT * 0.765);   // ~268px  — nome (subido)
+  const gradeTop = Math.round(CARD_HEIGHT * 0.840);  // ~295px  — ANO/TURMA (subido)
+  const anoTop = Math.round(CARD_HEIGHT * 0.935);    // ~328px  — Ano letivo
 
   return (
     <div
@@ -129,7 +129,7 @@ const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
         <span
           style={{
             fontSize: '13px',
-            fontWeight: 700,
+            fontWeight: 900,
             color: '#1a3a7a',
             display: 'block',
             letterSpacing: '0.02em',
@@ -152,14 +152,15 @@ const CarteirinhaCard: React.FC<{ student: Student }> = ({ student }) => {
       >
         <span
           style={{
-            fontSize: '11px',
-            fontWeight: 600,
-            color: '#3b6ab5',
+            fontSize: '13px',
+            fontWeight: 900,
+            color: '#FFFFFF',
             display: 'block',
-            letterSpacing: '0.02em',
+            letterSpacing: '0.05em',
+            textShadow: '0px 1px 4px rgba(0,0,0,0.5)'
           }}
         >
-          Ano Letivo {ANO_LETIVO}
+          {ANO_LETIVO}
         </span>
       </div>
     </div>
