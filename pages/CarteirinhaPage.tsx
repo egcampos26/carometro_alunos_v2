@@ -196,27 +196,52 @@ const CarteirinhaPage: React.FC<CarteirinhaPageProps> = ({ students, user, onTog
 
   return (
     <>
-      {/* Estilos de impressão */}
+      {/* Estilos de impressão — A4, 3 colunas x 3 linhas, 5,5cm x 8,5cm por carteirinha */}
       <style>{`
         @media print {
           body * { visibility: hidden !important; }
           #carteirinha-print-area, #carteirinha-print-area * { visibility: visible !important; }
+
           #carteirinha-print-area {
             position: fixed !important;
-            inset: 0 !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 210mm !important;
+            min-height: 297mm !important;
+            padding: 8mm 9.5mm !important;
             background: white !important;
-            display: flex !important;
-            flex-wrap: wrap !important;
-            gap: 10px !important;
-            padding: 10mm !important;
-            align-content: flex-start !important;
-            justify-content: flex-start !important;
+            display: grid !important;
+            grid-template-columns: repeat(3, 55mm) !important;
+            gap: 5mm 6mm !important;
+            align-content: start !important;
+            justify-content: start !important;
+            box-sizing: border-box !important;
           }
+
           .carteirinha-card {
+            /* Tamanho real na folha: 5,5cm x 8,5cm */
+            width: 55mm !important;
+            height: 85mm !important;
+            margin: 0 !important;
+            flex-shrink: 0 !important;
+            box-shadow: none !important;
+            border-radius: 3.5mm !important;
+            overflow: hidden !important;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
+            /* O card em tela é 240px. 55mm a 96dpi ≈ 208px.
+               Fator de escala: 208/240 ≈ 0.867
+               Mas usamos transform + origin para escalar todos os
+               elementos internos (foto, textos) proporcionalmente. */
+            transform: scale(0.867) !important;
+            transform-origin: top left !important;
+            position: relative !important;
           }
-          @page { margin: 0; size: A4; }
+
+          @page {
+            size: A4 portrait;
+            margin: 0;
+          }
         }
       `}</style>
 
