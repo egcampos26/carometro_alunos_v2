@@ -43,6 +43,7 @@ export async function uploadStudentPhoto(
         .upload(filePath, blob, {
             contentType: 'image/webp',
             upsert: true, // Substitui se já existir
+            cacheControl: '31536000', // Cache no navegador por 1 ano
         });
 
     if (error) {

@@ -111,6 +111,7 @@ const CarometroGallery: React.FC<CarometroGalleryProps> = ({ students, user, onT
                     <img
                       src={displayPhoto}
                       alt={student.name}
+                      loading="lazy"
                       className={`w-full h-full object-cover transition-all ${!hasImageRights ? 'grayscale opacity-60' : ''}`}
                     />
                     {!hasImageRights && (
